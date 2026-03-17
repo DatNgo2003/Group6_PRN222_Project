@@ -1,50 +1,678 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Group6_PRN222_Project</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Group6_PRN222_Project.styles.css" asp-append-version="true" />
+    <title>@ViewData["Title"] — EventPro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    @await RenderSectionAsync("Styles", required: false)
+
+    <style>
+        /* =============================================
+                   DESIGN SYSTEM — GLOBAL TOKENS
+                ============================================= */
+        :root {
+            --c-ivory: #FAF8F4;
+            --c-cream: #F3EFE7;
+            --c-sand: #E8E0D0;
+            --c-taupe: #C8BC9E;
+            --c-ink: #1A1714;
+            --c-ink-60: rgba(26,23,20,.60);
+            --c-ink-30: rgba(26,23,20,.30);
+            --c-ink-10: rgba(26,23,20,.08);
+            --c-gold: #B8975A;
+            --c-gold-light: #D4B882;
+            --c-gold-pale: #F0E8D4;
+            --c-accent: #2C4A3E;
+            --c-accent-2: #8B3A2A;
+            --c-success: #3A6B4E;
+            --c-danger: #8B3A2A;
+            --c-info: #2C4A6E;
+            --ff-display: 'Cormorant Garamond', Georgia, serif;
+            --ff-body: 'DM Sans', sans-serif;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 32px;
+            --shadow-sm: 0 1px 4px rgba(26,23,20,.06);
+            --shadow-md: 0 4px 20px rgba(26,23,20,.10);
+            --shadow-lg: 0 12px 48px rgba(26,23,20,.14);
+            --nav-h: 68px;
+            --transition: .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--ff-body);
+            background: var(--c-ivory);
+            color: var(--c-ink);
+            font-size: 15px;
+            line-height: 1.65;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =============================================
+                   NAVBAR
+                ============================================= */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: var(--nav-h);
+            background: rgba(250,248,244,.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--c-sand);
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar__inner {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .navbar__logo {
+            font-family: var(--ff-display);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--c-ink);
+            text-decoration: none;
+            letter-spacing: -.3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .navbar__logo-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--c-gold);
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .navbar__nav {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: auto;
+            list-style: none;
+        }
+
+            .navbar__nav a {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--c-ink-60);
+                text-decoration: none;
+                padding: 8px 14px;
+                border-radius: var(--radius-sm);
+                transition: color var(--transition), background var(--transition);
+            }
+
+                .navbar__nav a:hover,
+                .navbar__nav a.active {
+                    color: var(--c-ink);
+                    background: var(--c-ink-10);
+                }
+
+        .navbar__actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        /* =============================================
+                   BUTTONS
+                ============================================= */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--ff-body);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--transition);
+            white-space: nowrap;
+            line-height: 1;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--c-ink);
+            color: var(--c-ivory);
+            border-color: var(--c-ink);
+        }
+
+            .btn-primary:hover {
+                background: var(--c-accent);
+                border-color: var(--c-accent);
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
+            }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--c-ink);
+            border-color: var(--c-sand);
+        }
+
+            .btn-ghost:hover {
+                background: var(--c-cream);
+                border-color: var(--c-taupe);
+            }
+
+        .btn-gold {
+            background: var(--c-gold);
+            color: #fff;
+            border-color: var(--c-gold);
+        }
+
+            .btn-gold:hover {
+                background: var(--c-gold-light);
+                border-color: var(--c-gold-light);
+                transform: translateY(-1px);
+                box-shadow: 0 6px 24px rgba(184,151,90,.32);
+            }
+
+        .btn-lg {
+            font-size: 16px;
+            padding: 14px 32px;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-sm {
+            font-size: 13px;
+            padding: 7px 16px;
+        }
+
+        /* =============================================
+                   MAIN
+                ============================================= */
+        main {
+            flex: 1;
+        }
+
+        /* =============================================
+                   FOOTER
+                ============================================= */
+        .footer {
+            background: var(--c-ink);
+            color: var(--c-ivory);
+            padding: 60px 0 32px;
+            margin-top: auto;
+        }
+
+        .footer__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .footer__grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid rgba(250,248,244,.10);
+        }
+
+        .footer__brand-name {
+            font-family: var(--ff-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--c-ivory);
+            margin-bottom: 12px;
+        }
+
+        .footer__brand-desc {
+            font-size: 14px;
+            color: rgba(250,248,244,.45);
+            line-height: 1.7;
+            max-width: 260px;
+        }
+
+        .footer__heading {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--c-gold);
+            margin-bottom: 16px;
+        }
+
+        .footer__links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+            .footer__links a {
+                font-size: 14px;
+                color: rgba(250,248,244,.55);
+                text-decoration: none;
+                transition: color var(--transition);
+            }
+
+                .footer__links a:hover {
+                    color: var(--c-ivory);
+                }
+
+        .footer__bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 28px;
+            font-size: 13px;
+            color: rgba(250,248,244,.3);
+        }
+
+        /* =============================================
+                   SHARED UTILITIES
+                ============================================= */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .section {
+            padding: 96px 0;
+        }
+
+        .section-sm {
+            padding: 64px 0;
+        }
+
+        .section__label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--c-gold);
+            margin-bottom: 16px;
+        }
+
+            .section__label::before {
+                content: '';
+                display: block;
+                width: 24px;
+                height: 1.5px;
+                background: var(--c-gold);
+            }
+
+        .section__title {
+            font-family: var(--ff-display);
+            font-size: clamp(32px, 4vw, 52px);
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: -.5px;
+        }
+
+        .section__subtitle {
+            font-size: 16px;
+            color: var(--c-ink-60);
+            margin-top: 16px;
+            max-width: 520px;
+            line-height: 1.7;
+        }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+        }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-lg);
+                border-color: var(--c-taupe);
+            }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            padding: 4px 10px;
+            border-radius: 100px;
+        }
+
+        .badge-gold {
+            background: var(--c-gold-pale);
+            color: #8B6020;
+        }
+
+        .badge-green {
+            background: #E8F2EC;
+            color: #2C6B40;
+        }
+
+        .badge-red {
+            background: #FAE8E4;
+            color: #7A2A1A;
+        }
+
+        .badge-blue {
+            background: #E4EDF8;
+            color: #1A3A6B;
+        }
+
+        .badge-gray {
+            background: var(--c-cream);
+            color: var(--c-ink-60);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            margin-bottom: 16px;
+            border-left: 3px solid;
+        }
+
+        .alert-success {
+            background: #E8F2EC;
+            color: var(--c-success);
+            border-color: var(--c-success);
+        }
+
+        .alert-danger {
+            background: #FAE8E4;
+            color: var(--c-danger);
+            border-color: var(--c-danger);
+        }
+
+        .alert-info {
+            background: #E4EDF8;
+            color: var(--c-info);
+            border-color: var(--c-info);
+        }
+
+        /* Form */
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--c-ink-60);
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 11px 16px;
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-size: 15px;
+            color: var(--c-ink);
+            background: #fff;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+        }
+
+            .form-input:focus {
+                border-color: var(--c-gold);
+                box-shadow: 0 0 0 3px rgba(184,151,90,.12);
+            }
+
+            .form-input::placeholder {
+                color: var(--c-ink-30);
+            }
+
+        /* Page hero (inner pages) */
+        .page-hero {
+            background: var(--c-cream);
+            border-bottom: 1px solid var(--c-sand);
+            padding: 52px 0;
+        }
+
+        .page-hero__title {
+            font-family: var(--ff-display);
+            font-size: clamp(28px, 3vw, 44px);
+            font-weight: 600;
+            letter-spacing: -.4px;
+        }
+
+        .page-hero__breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--c-ink-60);
+            margin-bottom: 12px;
+        }
+
+            .page-hero__breadcrumb a {
+                color: var(--c-gold);
+                text-decoration: none;
+            }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--c-sand);
+            margin: 40px 0;
+        }
+
+        /* Stat number */
+        .stat-number {
+            font-family: var(--ff-display);
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        /* Toast */
+        #toast-container {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @@media (max-width: 900px) {
+            .navbar__nav {
+                display: none;
+            }
+
+            .navbar__inner {
+                padding: 0 20px;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+
+            .footer__grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+            }
+
+            .footer__inner {
+                padding: 0 20px;
+            }
+
+            .section {
+                padding: 64px 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Group6_PRN222_Project</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
+
+    <!-- ===== NAVBAR ===== -->
+    <header class="navbar">
+        <div class="navbar__inner">
+            <a asp-page="/Index" class="navbar__logo">
+                EventPro<span class="navbar__logo-dot"></span>
+            </a>
+
+            <ul class="navbar__nav">
+                <li>
+                    <a asp-page="/Index"
+                       class="@(ViewData["ActivePage"]?.ToString() == "Home" ? "active" : "")">Trang chủ</a>
+                </li>
+                <li>
+                    <a asp-page="/Events/Index"
+                       class="@(ViewData["ActivePage"]?.ToString() == "Events" ? "active" : "")">Sự kiện</a>
+                </li>
+                <li><a href="/#about">Về chúng tôi</a></li>
+                <li><a href="/#contact">Liên hệ</a></li>
+            </ul>
+
+            <div class="navbar__actions">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <span style="font-size:13px;color:var(--c-ink-60)">Xin chào, <strong>@User.Identity.Name</strong></span>
+                    <a asp-page="/Dashboard/Index" class="btn btn-ghost btn-sm">Dashboard</a>
+                    <form asp-page="/Account/Logout" method="post" style="display:inline">
+                        <button type="submit" class="btn btn-primary btn-sm">Đăng xuất</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-page="/Account/Login" class="btn btn-ghost btn-sm">Đăng nhập</a>
+                    <a asp-page="/Account/Register" class="btn btn-primary btn-sm">Đăng ký</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== FLASH MESSAGES ===== -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="container" style="padding-top:16px">
+            <div class="alert alert-success">@TempData["Success"]</div>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="container" style="padding-top:16px">
+            <div class="alert alert-danger">@TempData["Error"]</div>
+        </div>
+    }
+
+    <!-- ===== CONTENT ===== -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer__inner">
+            <div class="footer__grid">
+                <div>
+                    <div class="footer__brand-name">EventPro</div>
+                    <p class="footer__brand-desc">
+                        Nền tảng quản lý sự kiện chuyên nghiệp — từ lên kế hoạch, vận hành đến theo dõi hiệu suất toàn diện.
+                    </p>
+                </div>
+                <div>
+                    <div class="footer__heading">Khám phá</div>
+                    <ul class="footer__links">
+                        <li><a asp-page="/Events/Index">Tất cả sự kiện</a></li>
+                        <li><a asp-page="/Index">Trang chủ</a></li>
+                        <li><a href="/#about">Về chúng tôi</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="footer__heading">Tài khoản</div>
+                    <ul class="footer__links">
+                        <li><a asp-page="/Account/Login">Đăng nhập</a></li>
+                        <li><a asp-page="/Account/Register">Đăng ký</a></li>
+                        <li><a asp-page="/Dashboard/Index">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="footer__heading">Hỗ trợ</div>
+                    <ul class="footer__links">
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="/#contact">Liên hệ</a></li>
+                        <li><a href="#">Chính sách</a></li>
                     </ul>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Group6_PRN222_Project - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            <div class="footer__bottom">
+                <span>&copy; @DateTime.Now.Year EventPro — PRN222 Project</span>
+                <span>Built with ASP.NET Razor Pages</span>
+            </div>
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <div id="toast-container"></div>
+
+    <script>
+        window.showToast = function(msg, type = 'info') {
+            const colors = {
+                success: { bg:'#E8F2EC', color:'#2C6B40', border:'#3A6B4E' },
+                error:   { bg:'#FAE8E4', color:'#7A2A1A', border:'#8B3A2A' },
+                info:    { bg:'#E4EDF8', color:'#1A3A6B', border:'#2C4A6E' },
+            };
+            const c = colors[type] || colors.info;
+            const el = document.createElement('div');
+            el.style.cssText = `background:${c.bg};color:${c.color};border-left:3px solid ${c.border};
+                padding:12px 18px;border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;
+                box-shadow:0 4px 20px rgba(0,0,0,.10);min-width:280px;max-width:360px;
+                animation:slideIn .25s ease;`;
+            el.textContent = msg;
+            document.getElementById('toast-container').appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        };
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
