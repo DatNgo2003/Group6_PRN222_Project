@@ -35,7 +35,7 @@ public partial class Event
 
     public virtual ICollection<SurveyResponse> SurveyResponses { get; set; } = new List<SurveyResponse>();
 
-    public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
+    public virtual ICollection<EventTask> Tasks { get; set; } = new List<EventTask>();
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

@@ -37,7 +37,7 @@ public partial class ProjectPrn222Context : DbContext
 
     public virtual DbSet<SystemAuditLog> SystemAuditLogs { get; set; }
 
-    public virtual DbSet<Task> Tasks { get; set; }
+    public virtual DbSet<EventTask> Tasks { get; set; }
 
     public virtual DbSet<Ticket> Tickets { get; set; }
 
@@ -221,8 +221,9 @@ public partial class ProjectPrn222Context : DbContext
                 .HasConstraintName("FK__SystemAud__UserI__412EB0B6");
         });
 
-        modelBuilder.Entity<Task>(entity =>
+        modelBuilder.Entity<EventTask>(entity =>
         {
+            entity.ToTable("Tasks");
             entity.HasKey(e => e.TaskId).HasName("PK__Tasks__7C6949D195A2B445");
 
             entity.Property(e => e.TaskId).HasColumnName("TaskID");

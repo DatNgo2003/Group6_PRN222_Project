@@ -1,0 +1,272 @@
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    var role     = Context.Session.GetString("Role")    ?? "";
+    var fullName = Context.Session.GetString("FullName") ?? "Admin";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — EMS Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    @await RenderSectionAsync("Styles", required: false)
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-w:  240px;
+            --accent:     #2563eb;
+            --accent-dim: #1d4ed8;
+            --bg:         #f1f5f9;
+            --card-bg:    #ffffff;
+            --sidebar-bg: #0f172a;
+            --sidebar-txt:#cbd5e1;
+            --sidebar-active: #2563eb;
+            --border:     #e2e8f0;
+            --border-light: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-muted:   #64748b;
+            --table-head:   #f8fafc;
+            --row-hover:    #f8fafc;
+            --bg-muted:     #f1f5f9;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        .sidebar-brand {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .brand-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -.01em;
+        }
+        .brand-sub {
+            font-size: .72rem;
+            color: #475569;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .nav-section {
+            padding: 16px 12px 8px;
+        }
+        .nav-label {
+            font-size: .67rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #334155;
+            padding: 0 8px;
+            margin-bottom: 6px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 7px;
+            color: var(--sidebar-txt);
+            text-decoration: none;
+            font-size: .875rem;
+            font-weight: 500;
+            transition: background .15s, color .15s;
+            margin-bottom: 2px;
+        }
+        .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .nav-item.active { background: var(--sidebar-active); color: #fff; }
+        .nav-icon { font-size: .9rem; width: 18px; text-align: center; opacity: .85; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,.06);
+        }
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 32px; height: 32px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .75rem; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { font-size: .82rem; font-weight: 600; color: #e2e8f0;
+                     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { font-size: .72rem; color: #475569; }
+        .logout-btn {
+            display: block;
+            margin-top: 10px;
+            padding: 7px 10px;
+            background: rgba(239,68,68,.12);
+            color: #fca5a5;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: .8rem;
+            font-weight: 500;
+            text-align: center;
+            transition: background .15s;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,.22); }
+
+        /* ── Main content ── */
+        .main-wrap {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .topbar {
+            height: 56px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .topbar-title {
+            font-size: .9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .topbar-title strong { color: var(--text-primary); }
+
+        .page-content { padding: 28px; flex: 1; }
+
+        /* ── Shared component styles ── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px; border-radius: 8px; font-size: .875rem;
+            font-weight: 600; cursor: pointer; text-decoration: none;
+            border: none; transition: background .15s, box-shadow .15s;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--accent); color: #fff;
+        }
+        .btn-primary:hover { background: var(--accent-dim); }
+        .btn-secondary {
+            background: var(--card-bg); color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover { background: var(--bg); }
+        .btn-ghost {
+            background: transparent; color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: var(--bg); }
+        .btn-icon { font-size: 1rem; line-height: 1; }
+
+        .form-control {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: .875rem;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--card-bg);
+            transition: border-color .15s, box-shadow .15s;
+            outline: none;
+        }
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+        }
+        select.form-control { cursor: pointer; }
+
+        .page-header { display: flex; justify-content: space-between;
+                       align-items: flex-start; margin-bottom: 24px; }
+        .page-title h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 4px; }
+        .subtitle { color: var(--text-muted); font-size: .875rem; margin: 0; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-name">EMS Dashboard</div>
+        <div class="brand-sub">Event Management</div>
+    </div>
+
+    <nav class="nav-section">
+        <div class="nav-label">Tổng quan</div>
+        <a asp-page="/Admin/Index" class="nav-item @(currentPage == "/Admin/Index" ? "active" : "")">
+            <span class="nav-icon">&#9632;</span> Dashboard
+        </a>
+    </nav>
+
+    <nav class="nav-section">
+        <div class="nav-label">Quản trị</div>
+        <a asp-page="/Admin/Users/Index" class="nav-item @(currentPage.StartsWith("/Admin/Users") ? "active" : "")">
+            <span class="nav-icon">&#9632;</span> Người dùng
+        </a>
+        <a asp-page="/Admin/AuditLogs/Index" class="nav-item @(currentPage.StartsWith("/Admin/AuditLogs") ? "active" : "")">
+            <span class="nav-icon">&#9632;</span> Audit Logs
+        </a>
+        <a asp-page="/Admin/Departments/Index" class="nav-item @(currentPage.StartsWith("/Admin/Departments") ? "active" : "")">
+            <span class="nav-icon">&#9632;</span> Phòng ban
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-chip">
+            <div class="user-avatar">@(fullName.Length > 0 ? fullName[0].ToString().ToUpper() : "A")</div>
+            <div class="user-info">
+                <div class="user-name">@fullName</div>
+                <div class="user-role">@role</div>
+            </div>
+        </div>
+        <a asp-page="/Auth/Logout" class="logout-btn">Đăng xuất</a>
+    </div>
+</aside>
+
+<div class="main-wrap">
+    <header class="topbar">
+        <span class="topbar-title">
+            EMS &rsaquo; <strong>@ViewData["Title"]</strong>
+        </span>
+    </header>
+
+    <main class="page-content">
+        @RenderBody()
+    </main>
+</div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
