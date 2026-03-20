@@ -33,5 +33,5 @@ public partial class User
 
     public virtual ICollection<SystemAuditLog> SystemAuditLogs { get; set; } = new List<SystemAuditLog>();
 
-    public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
+    public virtual ICollection<EventTask> Tasks { get; set; } = new List<EventTask>();
 }

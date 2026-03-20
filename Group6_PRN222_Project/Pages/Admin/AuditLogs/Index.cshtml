@@ -1,0 +1,232 @@
+@page
+@model Project_PRN222.Pages.Admin.AuditLogs.IndexModel
+@{
+    ViewData["Title"] = "Audit Logs";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Audit Logs</h1>
+        <p class="subtitle">Lịch sử thao tác của tất cả người dùng trong hệ thống</p>
+    </div>
+    <span class="total-badge">@Model.TotalCount bản ghi</span>
+</div>
+
+<div class="filter-card">
+    <form method="get" class="filter-form">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Người dùng</label>
+                <input type="text" name="SearchUser" value="@Model.SearchUser"
+                       class="form-control" placeholder="Username hoặc họ tên..." />
+            </div>
+            <div class="filter-group">
+                <label>Bảng dữ liệu</label>
+                <input type="text" name="SearchTable" value="@Model.SearchTable"
+                       class="form-control" placeholder="Users, Events, Budgets..." />
+            </div>
+            <div class="filter-group">
+                <label>Hành động</label>
+                <input type="text" name="SearchAction" value="@Model.SearchAction"
+                       class="form-control" placeholder="CREATE, UPDATE, DELETE..." />
+            </div>
+            <div class="filter-group">
+                <label>Từ ngày</label>
+                <input type="date" name="DateFrom"
+                       value="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                       class="form-control" />
+            </div>
+            <div class="filter-group">
+                <label>Đến ngày</label>
+                <input type="date" name="DateTo"
+                       value="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                       class="form-control" />
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">Lọc</button>
+                <a asp-page="Index" class="btn btn-ghost">Xoá lọc</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width:60px">ID</th>
+                    <th style="width:160px">Thời gian</th>
+                    <th style="width:160px">Người dùng</th>
+                    <th style="width:110px">Bảng</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Logs.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>Không có bản ghi nào</div>
+                        </td>
+                    </tr>
+                }
+                @foreach (var log in Model.Logs)
+                {
+                    <tr>
+                        <td class="id-cell">@log.LogId</td>
+                        <td class="date-cell">
+                            <span class="date-main">@log.ActionTime?.ToString("dd/MM/yyyy")</span>
+                            <span class="date-time">@log.ActionTime?.ToString("HH:mm:ss")</span>
+                        </td>
+                        <td>
+                            @if (log.User != null)
+                            {
+                                <div class="user-cell">
+                                    <span class="user-avatar-sm">@(log.User.Username[0].ToString().ToUpper())</span>
+                                    <div>
+                                        <div class="user-uname">@log.User.Username</div>
+                                        <div class="user-fname">@(log.User.FullName ?? "")</div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(log.TableName))
+                            {
+                                <span class="table-badge">@log.TableName</span>
+                            }
+                        </td>
+                        <td class="action-text">
+                            @{
+                                var action = log.Action ?? "";
+                                var actionClass = action.StartsWith("CREATE") ? "action-create"
+                                               : action.StartsWith("UPDATE") ? "action-update"
+                                               : action.StartsWith("DELETE") ? "action-delete"
+                                               : "action-other";
+                            }
+                            <span class="action-tag @actionClass">
+                                @(action.Length > 0 ? action.Split(' ')[0] : "—")
+                            </span>
+                            <span class="action-detail">@(action.Contains(' ') ? action.Substring(action.IndexOf(' ') + 1) : "")</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination">
+            @if (Model.PageIndex > 1)
+            {
+                <a asp-page="Index" asp-all-route-data="@(new Dictionary<string,string?>{
+                    ["SearchUser"]=Model.SearchUser, ["SearchTable"]=Model.SearchTable,
+                    ["SearchAction"]=Model.SearchAction,
+                    ["DateFrom"]=Model.DateFrom?.ToString("yyyy-MM-dd"),
+                    ["DateTo"]=Model.DateTo?.ToString("yyyy-MM-dd"),
+                    ["PageIndex"]=(Model.PageIndex-1).ToString()})"
+                   class="page-btn">← Trước</a>
+            }
+
+            @for (int i = Math.Max(1, Model.PageIndex - 2);
+                      i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+            {
+                <a asp-page="Index" asp-all-route-data="@(new Dictionary<string,string?>{
+                    ["SearchUser"]=Model.SearchUser, ["SearchTable"]=Model.SearchTable,
+                    ["SearchAction"]=Model.SearchAction,
+                    ["DateFrom"]=Model.DateFrom?.ToString("yyyy-MM-dd"),
+                    ["DateTo"]=Model.DateTo?.ToString("yyyy-MM-dd"),
+                    ["PageIndex"]=i.ToString()})"
+                   class="page-btn @(i == Model.PageIndex ? "active" : "")">@i</a>
+            }
+
+            @if (Model.PageIndex < Model.TotalPages)
+            {
+                <a asp-page="Index" asp-all-route-data="@(new Dictionary<string,string?>{
+                    ["SearchUser"]=Model.SearchUser, ["SearchTable"]=Model.SearchTable,
+                    ["SearchAction"]=Model.SearchAction,
+                    ["DateFrom"]=Model.DateFrom?.ToString("yyyy-MM-dd"),
+                    ["DateTo"]=Model.DateTo?.ToString("yyyy-MM-dd"),
+                    ["PageIndex"]=(Model.PageIndex+1).ToString()})"
+                   class="page-btn">Sau →</a>
+            }
+
+            <span class="page-info">
+                Trang @Model.PageIndex / @Model.TotalPages
+                (@Model.TotalCount bản ghi)
+            </span>
+        </div>
+    }
+</div>
+
+@section Styles {
+<style>
+.total-badge { background:var(--bg-muted); color:var(--text-muted); padding:6px 14px;
+               border-radius:20px; font-size:.82rem; font-weight:600;
+               border:1px solid var(--border); align-self:center; }
+
+.filter-card { background:var(--card-bg); border:1px solid var(--border);
+               border-radius:12px; padding:18px 20px; margin-bottom:16px; }
+.filter-row  { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+.filter-group { display:flex; flex-direction:column; gap:5px; min-width:160px; flex:1; }
+.filter-group label { font-size:.78rem; font-weight:600; color:var(--text-muted);
+                      text-transform:uppercase; letter-spacing:.04em; }
+.filter-actions { display:flex; gap:8px; align-items:flex-end; }
+
+.card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.table-wrapper { overflow-x:auto; }
+.data-table { width:100%; border-collapse:collapse; font-size:.875rem; }
+.data-table th { padding:11px 16px; text-align:left; font-size:.75rem; font-weight:600;
+                 letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted);
+                 background:var(--table-head); border-bottom:1px solid var(--border); }
+.data-table td { padding:12px 16px; border-bottom:1px solid var(--border-light); vertical-align:middle; }
+.data-table tbody tr:last-child td { border-bottom:none; }
+.data-table tbody tr:hover { background:var(--row-hover); }
+
+.id-cell   { color:var(--text-muted); font-size:.8rem; }
+.date-cell { white-space:nowrap; }
+.date-main { display:block; font-size:.85rem; font-weight:500; }
+.date-time { display:block; font-size:.75rem; color:var(--text-muted); font-family:'DM Mono',monospace; }
+
+.user-cell     { display:flex; align-items:center; gap:8px; }
+.user-avatar-sm { width:28px; height:28px; background:#2563eb; border-radius:50%;
+                  display:flex; align-items:center; justify-content:center;
+                  font-size:.7rem; font-weight:700; color:#fff; flex-shrink:0; }
+.user-uname { font-size:.84rem; font-weight:600; }
+.user-fname { font-size:.76rem; color:var(--text-muted); }
+
+.table-badge { background:#f1f5f9; color:#475569; padding:2px 8px;
+               border-radius:4px; font-size:.75rem; font-weight:600;
+               font-family:'DM Mono',monospace; border:1px solid var(--border); }
+
+.action-tag    { display:inline-block; padding:2px 8px; border-radius:4px;
+                 font-size:.72rem; font-weight:700; letter-spacing:.04em;
+                 text-transform:uppercase; margin-right:6px; }
+.action-create { background:#d1fae5; color:#065f46; }
+.action-update { background:#dbeafe; color:#1e40af; }
+.action-delete { background:#fee2e2; color:#991b1b; }
+.action-other  { background:#f3f4f6; color:#374151; }
+.action-detail { font-size:.82rem; color:var(--text-muted); }
+
+.pagination  { display:flex; align-items:center; gap:6px; padding:16px 20px;
+               border-top:1px solid var(--border); flex-wrap:wrap; }
+.page-btn    { padding:6px 12px; border-radius:6px; border:1px solid var(--border);
+               background:var(--card-bg); color:var(--text-primary); text-decoration:none;
+               font-size:.84rem; font-weight:500; transition:background .15s; }
+.page-btn:hover  { background:var(--bg-muted); }
+.page-btn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+.page-info   { margin-left:auto; font-size:.8rem; color:var(--text-muted); }
+
+.empty-state { text-align:center; padding:48px; color:var(--text-muted); }
+.empty-icon  { font-size:2rem; margin-bottom:8px; }
+.text-muted  { color:var(--text-muted); }
+</style>
+}

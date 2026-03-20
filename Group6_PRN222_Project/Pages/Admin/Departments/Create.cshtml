@@ -1,0 +1,52 @@
+@page
+@model Project_PRN222.Pages.Admin.Departments.CreateModel
+@{
+    ViewData["Title"] = "Thêm phòng ban";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Thêm phòng ban mới</h1>
+        <p class="subtitle"><a asp-page="Index" class="back-link">← Danh sách phòng ban</a></p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-section">
+            <div class="form-group">
+                <label asp-for="InputDept.DepartmentName">
+                    Tên phòng ban <span class="required">*</span>
+                </label>
+                <input asp-for="InputDept.DepartmentName" class="form-control"
+                       placeholder="vd: Ban tổ chức, Marketing, Vận hành..." style="max-width:400px" />
+                <span asp-validation-for="InputDept.DepartmentName" class="field-error"></span>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Tạo phòng ban</button>
+            <a asp-page="Index" class="btn btn-ghost">Huỷ</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section Styles {
+<style>
+.back-link { color:#2563eb; text-decoration:none; font-size:.9rem; }
+.back-link:hover { text-decoration:underline; }
+.form-card { background:var(--card-bg); border:1px solid var(--border);
+             border-radius:12px; overflow:hidden; max-width:560px; }
+.form-section { padding:28px 32px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group label { font-size:.85rem; font-weight:600; color:var(--text-primary); }
+.required { color:#e53e3e; }
+.field-error { color:#e53e3e; font-size:.8rem; }
+.form-actions { padding:20px 32px; border-top:1px solid var(--border); display:flex; gap:12px; }
+</style>
+}

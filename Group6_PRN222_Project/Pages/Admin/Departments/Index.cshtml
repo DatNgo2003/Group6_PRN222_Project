@@ -1,0 +1,115 @@
+@page
+@model Project_PRN222.Pages.Admin.Departments.IndexModel
+@{
+    ViewData["Title"] = "Phòng ban";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Phòng ban</h1>
+        <p class="subtitle">Quản lý các phòng ban trong hệ thống</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Thêm phòng ban
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="dept-grid">
+    @if (!Model.Departments.Any())
+    {
+        <div class="empty-card">
+            <div class="empty-icon">⊘</div>
+            <div>Chưa có phòng ban nào</div>
+            <a asp-page="Create" class="btn btn-primary" style="margin-top:12px">Thêm phòng ban đầu tiên</a>
+        </div>
+    }
+
+    @foreach (var item in Model.Departments)
+    {
+        <div class="dept-card">
+            <div class="dept-card-main">
+                <div class="dept-icon">
+                    @(item.Department.DepartmentName?.Length > 0
+                        ? item.Department.DepartmentName[0].ToString().ToUpper()
+                        : "D")
+                </div>
+                <div class="dept-info">
+                    <div class="dept-name">@item.Department.DepartmentName</div>
+                    <div class="dept-meta">
+                        <span class="user-count-badge">
+                            @item.UserCount người dùng
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="dept-actions">
+                <a asp-page="Edit" asp-route-id="@item.Department.DepartmentId"
+                   class="btn-action btn-edit">Sửa</a>
+                <form method="post" asp-page-handler="Delete"
+                      asp-route-id="@item.Department.DepartmentId"
+                      onsubmit="return confirm('Xác nhận xoá phòng ban \'@item.Department.DepartmentName\'?')"
+                      style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-action btn-delete"
+                            @(item.UserCount > 0 ? "disabled title=Không thể xoá — còn người dùng" : "")>
+                        Xoá
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
+@section Styles {
+<style>
+.dept-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
+
+.dept-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px;
+             padding:18px 20px; display:flex; align-items:center;
+             justify-content:space-between; gap:12px;
+             transition:box-shadow .15s, border-color .15s; }
+.dept-card:hover { border-color:#93c5fd; box-shadow:0 2px 12px rgba(37,99,235,.08); }
+
+.dept-card-main { display:flex; align-items:center; gap:14px; flex:1; min-width:0; }
+
+.dept-icon { width:44px; height:44px; background:#dbeafe; border-radius:10px;
+             display:flex; align-items:center; justify-content:center;
+             font-size:1.1rem; font-weight:700; color:#1d4ed8; flex-shrink:0; }
+
+.dept-name { font-weight:600; font-size:.95rem; color:var(--text-primary);
+             white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.dept-meta { margin-top:4px; }
+.user-count-badge { background:#f1f5f9; color:#64748b; padding:2px 8px;
+                    border-radius:20px; font-size:.75rem; font-weight:500;
+                    border:1px solid var(--border); }
+
+.dept-actions { display:flex; gap:6px; flex-shrink:0; }
+.btn-action   { display:inline-block; padding:5px 12px; border-radius:6px;
+                font-size:.8rem; font-weight:500; cursor:pointer; border:none;
+                text-decoration:none; transition:opacity .15s; }
+.btn-action:hover   { opacity:.8; }
+.btn-action:disabled { opacity:.35; cursor:not-allowed; }
+.btn-edit   { background:#e7f1ff; color:#1a56db; }
+.btn-delete { background:#fde8e8; color:#c81e1e; }
+
+.empty-card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px;
+              padding:64px; text-align:center; color:var(--text-muted);
+              grid-column:1/-1; display:flex; flex-direction:column; align-items:center; }
+.empty-icon { font-size:2.5rem; margin-bottom:10px; }
+
+.alert { padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:.9rem; }
+.alert-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+.alert-danger  { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+</style>
+}
