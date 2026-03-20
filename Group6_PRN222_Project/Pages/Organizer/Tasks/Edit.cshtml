@@ -1,0 +1,52 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Tasks.EditModel
+@{
+    ViewData["Title"] = "Update Task";
+}
+
+<h1>Update Task</h1>
+<h4>Task Assignment & Deadlines</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Task.TaskId" />
+            <div class="form-group mb-3">
+                <label asp-for="Task.TaskName" class="control-label">Task Name</label>
+                <input asp-for="Task.TaskName" class="form-control" required />
+                <span asp-validation-for="Task.TaskName" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Task.EventId" class="control-label">Event</label>
+                <select asp-for="Task.EventId" class="form-select" asp-items="ViewBag.EventId">
+                    <option value="">-- Select Event --</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Task.AssignedTo" class="control-label">Assign To</label>
+                <select asp-for="Task.AssignedTo" class="form-select" asp-items="ViewBag.AssignedTo">
+                    <option value="">-- Select Staff --</option>
+                </select>
+                <small class="form-text text-muted">Only staff with recognized roles are shown here.</small>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Task.Deadline" class="control-label">Deadline</label>
+                <input asp-for="Task.Deadline" class="form-control" type="datetime-local" />
+                <span asp-validation-for="Task.Deadline" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Task.Status" class="control-label">Status</label>
+                <select asp-for="Task.Status" class="form-select" asp-items="ViewBag.StatusList"></select>
+            </div>
+            <div class="form-group mt-4">
+                <input type="submit" value="Save Changes" class="btn btn-primary" />
+                <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
