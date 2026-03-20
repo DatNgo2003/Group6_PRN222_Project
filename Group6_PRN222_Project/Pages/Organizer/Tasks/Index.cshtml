@@ -1,0 +1,68 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Tasks.IndexModel
+@{
+    ViewData["Title"] = "Task Management";
+}
+
+<h1>Task Assignment & Deadlines</h1>
+<p>
+    <a asp-page="Create" class="btn btn-primary">Assign New Task</a>
+</p>
+<table class="table table-striped table-hover mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Task Name</th>
+            <th>Event</th>
+            <th>Assigned To</th>
+            <th>Deadline</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Tasks)
+        {
+            <tr>
+                <td><strong>@item.TaskName</strong></td>
+                <td>@item.Event?.EventName</td>
+                <td>@(item.AssignedToNavigation?.FullName ?? "Unassigned")</td>
+                <td>
+                    @if (item.Deadline.HasValue)
+                    {
+                        var isOverdue = item.Deadline.Value < System.DateTime.Now && item.Status != "Done" && item.Status != "Completed";
+                        if (isOverdue)
+                        {
+                            <span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> @item.Deadline.Value.ToString("g")</span>
+                        }
+                        else
+                        {
+                            @item.Deadline.Value.ToString("g")
+                        }
+                    }
+                </td>
+                <td>
+                    @{
+                        var badgeClass = item.Status switch
+                        {
+                            "To Do" => "bg-secondary",
+                            "In Progress" => "bg-info",
+                            "Done" => "bg-success",
+                            "Completed" => "bg-success",
+                            _ => "bg-primary"
+                        };
+                    }
+                    <span class="badge @badgeClass">@item.Status</span>
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.TaskId" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+            </tr>
+        }
+        @if (Model.Tasks.Count == 0)
+        {
+            <tr>
+                <td colspan="6" class="text-center">No tasks found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
