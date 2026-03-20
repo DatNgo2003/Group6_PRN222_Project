@@ -1,0 +1,58 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Staffs.IndexModel
+@{
+    ViewData["Title"] = "Staff Management";
+}
+
+<h1>Staff & Role Management</h1>
+<p>Manage Staff Roles (Security, Marketing, Logistics)</p>
+
+<table class="table table-striped table-hover mt-3">
+    <thead class="table-dark">
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Current Role</th>
+            <th>Department</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.StaffUsers != null && Model.StaffUsers.Count > 0)
+        {
+            @foreach (var user in Model.StaffUsers)
+            {
+                <tr>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Username</td>
+                    <td>
+                        @{
+                            var roleClass = user.Role?.RoleName switch
+                            {
+                                "Security" => "bg-danger",
+                                "MKT" => "bg-info",
+                                "Marketing" => "bg-info",
+                                "Logistics" => "bg-warning text-dark",
+                                "Organizer" => "bg-primary",
+                                _ => "bg-secondary"
+                            };
+                        }
+                        <span class="badge @roleClass">@(user.Role?.RoleName ?? "None")</span>
+                    </td>
+                    <td>@(user.Department?.DepartmentName ?? "N/A")</td>
+                    <td>
+                        <a asp-page="./EditRole" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-primary">Edit Role</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center">No users found.</td>
+            </tr>
+        }
+    </tbody>
+</table>
