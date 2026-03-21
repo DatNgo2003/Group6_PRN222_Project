@@ -1,0 +1,270 @@
+﻿@page "/Admin/AdminDashboard"
+@model Group6_PRN222_Project.Pages.Admin.AdminDashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .dashboard-hero {
+            background: var(--c-ink);
+            padding: 40px 0;
+            border-bottom: 1px solid rgba(250,248,244,.08);
+        }
+
+        .dashboard-hero__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .dashboard-hero__left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .dashboard-hero__avatar {
+            width: 52px;
+            height: 52px;
+            background: rgba(184,151,90,.2);
+            border: 1px solid rgba(184,151,90,.3);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .dashboard-hero__name {
+            font-family: var(--ff-display);
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--c-ivory);
+            line-height: 1.1;
+        }
+
+        .dashboard-hero__role {
+            font-size: 13px;
+            color: var(--c-gold);
+            font-weight: 500;
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dashboard-hero__time {
+            font-size: 13px;
+            color: rgba(250,248,244,.35);
+        }
+
+        /* Stat cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--shadow-md);
+            }
+
+        .stat-card__icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card__value {
+            font-family: var(--ff-display);
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .stat-card__label {
+            font-size: 13px;
+            color: var(--c-ink-60);
+        }
+
+        /* Table */
+        .data-table-wrap {
+            background: #fff;
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .data-table-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--c-sand);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .data-table-title {
+            font-family: var(--ff-display);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--c-ink-60);
+            background: var(--c-cream);
+            border-bottom: 1px solid var(--c-sand);
+        }
+
+        td {
+            padding: 14px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--c-sand);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--c-cream);
+        }
+
+        @@media (max-width: 900px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .dashboard-hero__inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<!-- Dashboard Hero -->
+<div class="dashboard-hero">
+    <div class="dashboard-hero__inner">
+        <div class="dashboard-hero__left">
+            <div class="dashboard-hero__avatar">👑</div>
+            <div>
+                <div class="dashboard-hero__name">@Model.FullName</div>
+                <div class="dashboard-hero__role">
+                    <span style="width:6px;height:6px;border-radius:50%;background:var(--c-gold);display:inline-block"></span>
+                    Quản trị viên hệ thống
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-hero__time">
+            @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+        </div>
+    </div>
+</div>
+
+<div class="section-sm">
+    <div class="container">
+
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card__icon" style="background:#E4EDF8">👥</div>
+                <div class="stat-card__value" style="color:var(--c-info)">@Model.TotalUsers</div>
+                <div class="stat-card__label">Tổng người dùng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon" style="background:var(--c-gold-pale)">📅</div>
+                <div class="stat-card__value" style="color:var(--c-gold)">@Model.TotalEvents</div>
+                <div class="stat-card__label">Tổng sự kiện</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon" style="background:#E8F2EC">🎟</div>
+                <div class="stat-card__value" style="color:var(--c-success)">@Model.TotalParticipants</div>
+                <div class="stat-card__label">Người tham dự</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon" style="background:#FAE8E4">✅</div>
+                <div class="stat-card__value" style="color:var(--c-accent-2)">@Model.TotalRevenue</div>
+                <div class="stat-card__label">Vé đã thanh toán</div>
+            </div>
+        </div>
+
+        <!-- Recent Audit Logs -->
+        <div class="data-table-wrap">
+            <div class="data-table-header">
+                <div class="data-table-title">Nhật ký hệ thống gần đây</div>
+                <span class="badge badge-blue">Audit Log</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Người dùng</th>
+                        <th>Hành động</th>
+                        <th>Bảng</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.RecentLogs)
+                    {
+                        <tr>
+                            <td><strong>@(log.User?.Username ?? "System")</strong></td>
+                            <td><code style="font-size:12px;background:var(--c-cream);padding:2px 8px;border-radius:4px">@log.Action</code></td>
+                            <td style="color:var(--c-ink-60)">@log.TableName</td>
+                            <td style="color:var(--c-ink-60)">@log.ActionTime?.ToString("dd/MM HH:mm")</td>
+                            <td><span class="badge badge-green">@(log.Status ?? "OK")</span></td>
+                        </tr>
+                    }
+                    @if (!Model.RecentLogs.Any())
+                    {
+                        <tr><td colspan="5" style="text-align:center;color:var(--c-ink-60);padding:32px">Chưa có dữ liệu</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
