@@ -1,0 +1,164 @@
+@page
+@model Project_PRN222.Pages.StaffLogistics.Tasks.IndexModel
+
+@{
+    ViewData["Title"] = "Staff (Logistics) — Tasks";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1 style="font-size:1.4rem;margin-bottom:6px;">Danh sách Tasks</h1>
+        <p class="subtitle">Cập nhật trạng thái theo tiến độ vận hành thực địa</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" role="alert">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+}
+
+@section Styles {
+<style>
+    .page-header { margin-bottom: 18px; }
+    .subtitle { color: var(--text-muted); font-weight: 700; font-size: .9rem; margin: 0; }
+
+    .alert {
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        margin-bottom: 14px;
+        font-weight: 800;
+        font-size: .9rem;
+    }
+    .alert-success { background: #e6ffed; border-color: #b7ebc6; color: #0f5132; }
+    .alert-danger  { background: #ffe8e8; border-color: #ffc3c3; color: #842029; }
+
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    thead th {
+        text-align: left;
+        padding: 12px 12px;
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--text-muted);
+        background: #f8fafc;
+        border-bottom: 1px solid var(--border);
+    }
+    tbody td { padding: 12px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .task-name { font-weight: 900; }
+    .form-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .select {
+        padding: 9px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        min-width: 200px;
+        font-weight: 800;
+        background: #fff;
+        color: var(--text-primary);
+    }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-weight: 900;
+        cursor: pointer;
+        background: #fff;
+        text-decoration: none;
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+    .btn-ghost { background: transparent; border-color: var(--border); }
+</style>
+}
+
+@if (!Model.Tasks.Any())
+{
+    <div style="padding: 20px 0; color: var(--text-muted); font-weight: 800;">
+        Không có task nào được gán cho bạn.
+    </div>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 280px;">Task</th>
+                <th>Sự kiện</th>
+                <th style="width: 180px;">Deadline</th>
+                <th style="width: 260px;">Cập nhật trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in Model.Tasks)
+            {
+                <tr>
+                    <td>
+                        <div class="task-name">@(t.TaskName ?? "—")</div>
+                        <div style="color:var(--text-muted);font-weight:700;font-size:.86rem;">
+                            @(t.Description ?? "")
+                        </div>
+                    </td>
+                    <td>@(t.Event?.EventName ?? "—")</td>
+                    <td>@(t.Deadline?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                    <td>
+                        <form method="post" asp-page-handler="UpdateStatus">
+                            <div class="form-row">
+                                <input type="hidden" name="taskId" value="@t.TaskId" />
+                                <select name="status" class="select">
+                                    @if (t.Status == "To Do")
+                                    {
+                                        <option value="To Do" selected>To Do</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="To Do">To Do</option>
+                                    }
+
+                                    @if (t.Status == "In Progress")
+                                    {
+                                        <option value="In Progress" selected>In Progress</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="In Progress">In Progress</option>
+                                    }
+
+                                    @if (t.Status == "Done")
+                                    {
+                                        <option value="Done" selected>Done</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="Done">Done</option>
+                                    }
+
+                                    @if (t.Status == "Completed")
+                                    {
+                                        <option value="Completed" selected>Completed</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="Completed">Completed</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
