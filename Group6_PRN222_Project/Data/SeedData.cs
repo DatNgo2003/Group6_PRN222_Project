@@ -249,9 +249,9 @@ namespace Group6_PRN222_Project.Data
             // =============================================
             // 8. TASKS
             // =============================================
-            var tasks = new List<Group6_PRN222_Project.Models.Task>
+            var tasks = new List<Group6_PRN222_Project.Models.EventTask>
             {
-                new Group6_PRN222_Project.Models.Task
+                new Group6_PRN222_Project.Models.EventTask
                 {
                     EventId     = ev1.EventId,
                     TaskName    = "Chuẩn bị danh sách VIP",
@@ -260,7 +260,7 @@ namespace Group6_PRN222_Project.Data
                     Status      = "In Progress",
                     AssignedTo  = userSecurity.UserId,
                 },
-                new Group6_PRN222_Project.Models.Task
+                new Group6_PRN222_Project.Models.EventTask
                 {
                     EventId     = ev1.EventId,
                     TaskName    = "Chạy quảng cáo Facebook",
@@ -269,7 +269,7 @@ namespace Group6_PRN222_Project.Data
                     Status      = "To Do",
                     AssignedTo  = userMkt.UserId,
                 },
-                new Group6_PRN222_Project.Models.Task
+                new Group6_PRN222_Project.Models.EventTask
                 {
                     EventId     = ev1.EventId,
                     TaskName    = "Kiểm tra thiết bị âm thanh",

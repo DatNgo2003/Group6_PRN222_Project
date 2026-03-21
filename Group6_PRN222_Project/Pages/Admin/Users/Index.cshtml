@@ -1,0 +1,154 @@
+@page
+@model Project_PRN222.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Quản lý người dùng</h1>
+        <p class="subtitle">Danh sách tài khoản trong hệ thống</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Thêm người dùng
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card">
+    <div class="card-toolbar">
+        <form method="get" class="search-form">
+            <div class="search-group">
+                <input type="text" name="SearchTerm" value="@Model.SearchTerm"
+                       placeholder="Tìm theo tên, email, username..." class="form-control search-input" />
+                <select name="FilterRoleId" class="form-control role-select">
+                    <option value="">-- Tất cả vai trò --</option>
+                    <option value="1" selected="@(Model.FilterRoleId == 1)">Admin</option>
+                    <option value="2" selected="@(Model.FilterRoleId == 2)">Organizer</option>
+                    <option value="3" selected="@(Model.FilterRoleId == 3)">Staff(Security)</option>
+                    <option value="4" selected="@(Model.FilterRoleId == 4)">Staff(MKT)</option>
+                    <option value="5" selected="@(Model.FilterRoleId == 5)">Staff(Logistics)</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Lọc</button>
+                <a asp-page="Index" class="btn btn-ghost">Xoá lọc</a>
+            </div>
+        </form>
+        <span class="record-count">@Model.Users.Count người dùng</span>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width:50px">ID</th>
+                    <th>Username</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Phòng ban</th>
+                    <th>Ngày tạo</th>
+                    <th style="width:140px">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Users.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>Không tìm thấy người dùng nào</div>
+                        </td>
+                    </tr>
+                }
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td class="id-cell">@user.UserId</td>
+                        <td><strong>@user.Username</strong></td>
+                        <td>@(user.FullName ?? "—")</td>
+                        <td class="email-cell">@(user.Email ?? "—")</td>
+                        <td>
+                            <span class="role-badge role-@(user.Role?.RoleName?.Replace("(","").Replace(")","").Replace(" ","").ToLower() ?? "default")">
+                                @(user.Role?.RoleName ?? "—")
+                            </span>
+                        </td>
+                        <td>@(user.Department?.DepartmentName ?? "—")</td>
+                        <td class="date-cell">@(user.CreatedAt?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        <td class="action-cell">
+                            <a asp-page="Edit" asp-route-id="@user.UserId" class="btn-action btn-edit" title="Sửa">Sửa</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@user.UserId"
+                                  onsubmit="return confirm('Xác nhận xoá người dùng @user.Username?')"
+                                  style="display:inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-action btn-delete" title="Xoá">Xoá</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Styles {
+<style>
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
+.page-title h1 { font-size:1.6rem; font-weight:700; margin:0 0 4px; color:var(--text-primary); }
+.subtitle { color:var(--text-muted); font-size:.9rem; margin:0; }
+
+.card { background:var(--card-bg); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.card-toolbar { display:flex; align-items:center; justify-content:space-between;
+                padding:16px 20px; border-bottom:1px solid var(--border); gap:12px; flex-wrap:wrap; }
+.search-form { flex:1; }
+.search-group { display:flex; gap:8px; flex-wrap:wrap; }
+.search-input { min-width:240px; flex:1; }
+.role-select { width:180px; }
+.record-count { color:var(--text-muted); font-size:.85rem; white-space:nowrap; }
+
+.table-wrapper { overflow-x:auto; }
+.data-table { width:100%; border-collapse:collapse; font-size:.88rem; }
+.data-table th { padding:12px 16px; text-align:left; font-size:.78rem; font-weight:600;
+                 letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted);
+                 background:var(--table-head); border-bottom:1px solid var(--border); }
+.data-table td { padding:13px 16px; border-bottom:1px solid var(--border-light); vertical-align:middle; }
+.data-table tbody tr:last-child td { border-bottom:none; }
+.data-table tbody tr:hover { background:var(--row-hover); }
+
+.id-cell { color:var(--text-muted); font-size:.82rem; }
+.email-cell { color:var(--text-muted); font-size:.85rem; }
+.date-cell { color:var(--text-muted); font-size:.82rem; white-space:nowrap; }
+
+.role-badge { display:inline-block; padding:3px 10px; border-radius:20px;
+              font-size:.75rem; font-weight:600; letter-spacing:.03em; }
+.role-admin          { background:#fef3cd; color:#856404; }
+.role-organizer      { background:#d1ecf1; color:#0c5460; }
+.role-staffsecurity  { background:#f8d7da; color:#721c24; }
+.role-staffmkt       { background:#d4edda; color:#155724; }
+.role-stafflogistics { background:#e2d9f3; color:#4a235a; }
+.role-default        { background:var(--bg-muted); color:var(--text-muted); }
+
+.action-cell { white-space:nowrap; }
+.btn-action { display:inline-block; padding:4px 12px; border-radius:6px;
+              font-size:.8rem; font-weight:500; cursor:pointer; border:none;
+              text-decoration:none; transition:opacity .15s; }
+.btn-action:hover { opacity:.8; }
+.btn-edit   { background:#e7f1ff; color:#1a56db; }
+.btn-delete { background:#fde8e8; color:#c81e1e; }
+
+.empty-state { text-align:center; padding:48px 0; color:var(--text-muted); }
+.empty-icon  { font-size:2rem; margin-bottom:8px; }
+
+.alert { padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:.9rem; }
+.alert-success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+.alert-danger  { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+</style>
+}
