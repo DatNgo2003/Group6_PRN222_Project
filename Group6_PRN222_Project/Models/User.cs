@@ -21,6 +21,8 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
     public virtual Department? Department { get; set; }

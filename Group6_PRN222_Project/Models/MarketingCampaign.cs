@@ -15,5 +15,7 @@ public partial class MarketingCampaign
 
     public decimal? EngagementRate { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Event? Event { get; set; }
 }

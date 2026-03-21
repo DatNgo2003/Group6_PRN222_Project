@@ -10,4 +10,6 @@ public partial class Equipment
     public string? EquipmentName { get; set; }
 
     public int? TotalStock { get; set; }
+
+    public string? Status { get; set; }
 }
