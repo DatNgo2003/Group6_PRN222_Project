@@ -17,6 +17,8 @@ public partial class Ticket
 
     public DateTime? CheckInTime { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Event? Event { get; set; }
 
     public virtual Participant? Participant { get; set; }

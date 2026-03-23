@@ -1,11 +1,13 @@
+using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project_PRN222.Helpers;
-using Group6_PRN222_Project.Models;
 
 namespace Project_PRN222.Pages.Admin.AuditLogs
 {
+    [AuthorizeRole("Admin")]
     public class IndexModel : PageModel
     {
         private readonly ProjectPrn222Context _db;
@@ -27,7 +29,6 @@ namespace Project_PRN222.Pages.Admin.AuditLogs
 
         public async Task<IActionResult> OnGetAsync()
         {
-#if DEBUG
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
             {
                 HttpContext.Session.SetInt32("UserID",   1);
@@ -35,10 +36,8 @@ namespace Project_PRN222.Pages.Admin.AuditLogs
                 HttpContext.Session.SetString("FullName", "Dev Admin");
                 HttpContext.Session.SetString("UserName", "admin");
             }
-#else
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#endif
+                return RedirectToPage("/Admin/Login");
 
             var query = _db.SystemAuditLogs
                            .Include(l => l.User)

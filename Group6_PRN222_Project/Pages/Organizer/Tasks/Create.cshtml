@@ -1,0 +1,63 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Tasks.CreateModel
+@{
+    ViewData["Title"] = "Assign Task";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Assign New Task</h1>
+        <p class="subtitle">Task Assignment & Deadlines</p>
+    </div>
+    <a asp-page="./Index" class="btn btn-ghost">
+        &larr; Back to List
+    </a>
+</div>
+
+<div class="card" style="max-width: 600px; padding: 24px;">
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="Task.TaskName" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Task Name</label>
+            <input asp-for="Task.TaskName" class="form-control" required />
+            <span asp-validation-for="Task.TaskName" style="color:#f87171; font-size:13px"></span>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="Task.EventId" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Event</label>
+            <select asp-for="Task.EventId" class="form-control" asp-items="ViewBag.EventId">
+                <option value="">-- Select Event --</option>
+            </select>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="Task.AssignedTo" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Assign To</label>
+            <select asp-for="Task.AssignedTo" class="form-control" asp-items="ViewBag.AssignedTo">
+                <option value="">-- Select Staff --</option>
+            </select>
+            <small style="color:var(--text-3); font-size:12px; display:block; margin-top:4px;">Only staff with recognized roles are shown here.</small>
+        </div>
+        
+        <div class="form-group mb-3">
+            <label asp-for="Task.Deadline" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Deadline</label>
+            <input asp-for="Task.Deadline" class="form-control" type="datetime-local" />
+            <span asp-validation-for="Task.Deadline" style="color:#f87171; font-size:13px"></span>
+        </div>
+        
+        <div class="form-group mb-4">
+            <label asp-for="Task.Status" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Status</label>
+            <select asp-for="Task.Status" class="form-control" asp-items="ViewBag.StatusList"></select>
+        </div>
+        
+        <div class="form-group mt-4 pt-4" style="border-top: 1px solid var(--card-bdr);">
+            <div style="display: flex; gap: 12px">
+                <input type="submit" value="Assign Task" class="btn btn-primary" style="flex: 1;" />
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

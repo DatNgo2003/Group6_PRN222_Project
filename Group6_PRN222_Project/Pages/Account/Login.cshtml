@@ -1,0 +1,313 @@
+﻿@page
+@model Group6_PRN222_Project.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .auth-page {
+            min-height: calc(100vh - 68px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--c-ivory);
+            position: relative;
+            padding: 40px 20px;
+        }
+
+            .auth-page::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: linear-gradient(var(--c-sand) 1px, transparent 1px), linear-gradient(90deg, var(--c-sand) 1px, transparent 1px);
+                background-size: 48px 48px;
+                opacity: .35;
+                pointer-events: none;
+            }
+
+        .auth-card {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 460px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .auth-card__header {
+            background: var(--c-accent);
+            padding: 36px 40px 32px;
+            text-align: center;
+        }
+
+        .auth-card__logo {
+            font-family: var(--ff-display);
+            font-size: 30px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .auth-card__logo-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--c-gold);
+            margin-bottom: 9px;
+        }
+
+        .auth-card__subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,.55);
+        }
+
+        .auth-card__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,.15);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 100px;
+            margin-top: 14px;
+        }
+
+        .auth-card__body {
+            padding: 36px 40px 40px;
+        }
+
+        .auth-card__title {
+            font-family: var(--ff-display);
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .auth-card__desc {
+            font-size: 14px;
+            color: var(--c-ink-60);
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--c-ink-30);
+            pointer-events: none;
+        }
+
+            .input-icon svg {
+                width: 15px;
+                height: 15px;
+                display: block;
+            }
+
+        .form-input.has-icon {
+            padding-left: 40px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: var(--c-ink-30);
+            transition: color var(--transition);
+        }
+
+            .password-toggle:hover {
+                color: var(--c-ink);
+            }
+
+            .password-toggle svg {
+                width: 15px;
+                height: 15px;
+                display: block;
+            }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            color: var(--c-ink-60);
+        }
+
+            .form-check input {
+                accent-color: var(--c-accent);
+            }
+
+        .form-options a {
+            color: var(--c-accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-submit {
+            width: 100%;
+            justify-content: center;
+            font-size: 15px;
+            padding: 13px;
+            border-radius: var(--radius-md);
+            background: var(--c-accent) !important;
+            border-color: var(--c-accent) !important;
+        }
+
+            .btn-submit:hover {
+                background: #1e3329 !important;
+                border-color: #1e3329 !important;
+            }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 22px 0;
+            font-size: 12px;
+            color: var(--c-ink-30);
+        }
+
+            .auth-divider::before, .auth-divider::after {
+                content: '';
+                flex: 1;
+                height: 1px;
+                background: var(--c-sand);
+            }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 14px;
+            color: var(--c-ink-60);
+            margin-top: 18px;
+        }
+
+            .auth-footer a {
+                color: var(--c-accent);
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+                .auth-footer a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card__header">
+            <div class="auth-card__logo">EventPro<span class="auth-card__logo-dot"></span></div>
+            <div class="auth-card__subtitle">Khám phá & tham gia sự kiện</div>
+            <div class="auth-card__badge">🎟 Dành cho người tham dự</div>
+        </div>
+
+        <div class="auth-card__body">
+            <div class="auth-card__title">Đăng nhập</div>
+            <div class="auth-card__desc">Chào mừng trở lại! Đăng nhập để xem và đăng ký sự kiện.</div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" style="margin-bottom:20px">@Model.ErrorMessage</div>
+            }
+
+            <form method="post">
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div class="form-group">
+                    <label class="form-label">Tên đăng nhập</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        </span>
+                        <input asp-for="Username" class="form-input has-icon"
+                               placeholder="Nhập username..." autocomplete="username" required autofocus />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mật khẩu</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        </span>
+                        <input asp-for="Password" id="pwInput" type="password"
+                               class="form-input has-icon" placeholder="••••••••"
+                               autocomplete="current-password" required />
+                        <button type="button" class="password-toggle" onclick="togglePw()">
+                            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="form-check">
+                        <input asp-for="RememberMe" type="checkbox" /> Ghi nhớ đăng nhập
+                    </label>
+                    <a href="#">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-submit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" x2="3" y1="12" y2="12" /></svg>
+                    Đăng nhập
+                </button>
+            </form>
+
+            <div class="auth-divider">hoặc</div>
+            <div class="auth-footer">
+                Chưa có tài khoản? <a asp-page="/Account/Register">Đăng ký ngay</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePw() {
+            const inp = document.getElementById('pwInput');
+            const ico = document.getElementById('eyeIcon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                ico.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                inp.type = 'password';
+                ico.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        }
+    </script>
+}

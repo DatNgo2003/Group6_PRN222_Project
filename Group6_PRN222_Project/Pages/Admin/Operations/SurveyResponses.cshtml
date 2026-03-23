@@ -1,0 +1,121 @@
+@* SurveyResponses.cshtml *@
+@page
+@model Project_PRN222.Pages.Admin.Operations.SurveyResponsesModel
+@{
+    ViewData["Title"] = "Đánh giá sự kiện";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var s = Model.Stats;
+}
+@section Styles {
+<style>
+.stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+.stat-card { background:var(--card-bg); border:1px solid var(--card-bdr); border-radius:var(--r-lg); padding:16px 20px; }
+.stat-label { font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+.stat-value { font-family:var(--ff-display); font-size:1.8rem; font-weight:700; color:var(--text-1); }
+.stat-value.gold { color:var(--c-gold); }
+.rating-bar-wrap { margin-top:16px; }
+.rating-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; font-size:.8rem; }
+.rating-row .lbl { width:16px; text-align:right; color:var(--text-3); font-family:var(--ff-mono); }
+.rating-track { flex:1; height:6px; background:rgba(250,248,244,.07); border-radius:3px; overflow:hidden; }
+.rating-fill  { height:100%; background:var(--c-gold); border-radius:3px; }
+.rating-count { width:24px; text-align:right; color:var(--text-3); font-family:var(--ff-mono); font-size:.75rem; }
+.stars { color:var(--c-gold); font-size:.9rem; letter-spacing:1px; }
+.filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; }
+.filter-group { display:flex; flex-direction:column; gap:5px; }
+.filter-group label { font-size:.75rem; font-weight:600; color:var(--text-3); }
+</style>
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Đánh giá sự kiện</h1>
+        <p class="subtitle">Tổng hợp phản hồi và rating từ người tham dự</p>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Tổng đánh giá</div>
+        <div class="stat-value">@s.TotalCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Rating trung bình</div>
+        <div class="stat-value gold">@s.AvgRating / 5</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Phân bố rating</div>
+        <div class="rating-bar-wrap">
+            @foreach (var (star, cnt) in new[] {(5,s.Rating5),(4,s.Rating4),(3,s.Rating3),(2,s.Rating2),(1,s.Rating1)})
+            {
+                var pct = s.TotalCount == 0 ? 0 : (double)cnt / s.TotalCount * 100;
+                <div class="rating-row">
+                    <span class="lbl">@star</span>
+                    <div class="rating-track"><div class="rating-fill" style="width:@pct.ToString("F0")%"></div></div>
+                    <span class="rating-count">@cnt</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<form method="get" class="filter-row">
+    <div class="filter-group">
+        <label>Sự kiện</label>
+        <select name="EventId" class="form-control" style="min-width:200px" onchange="this.form.submit()">
+            <option value="">Tất cả sự kiện</option>
+            @foreach (var ev in Model.Events)
+            {
+                <option value="@ev.EventId" selected="@(Model.EventId == ev.EventId)">@ev.EventName</option>
+            }
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Rating tối thiểu</label>
+        <select name="MinRating" class="form-control" onchange="this.form.submit()">
+            <option value="">Tất cả</option>
+            @for (int i = 5; i >= 1; i--)
+            {
+                <option value="@i" selected="@(Model.MinRating == i)">@i sao trở lên</option>
+            }
+        </select>
+    </div>
+    <a href="./SurveyResponses" class="btn btn-secondary">Reset</a>
+</form>
+
+<div class="card">
+    <div class="card-toolbar">
+        <span style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(184,151,90,.55)">Danh sách đánh giá</span>
+        <span class="record-count">@Model.Responses.Count bản ghi</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Sự kiện</th>
+                    <th>Người tham dự</th>
+                    <th style="text-align:center">Rating</th>
+                    <th>Nhận xét</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Responses)
+                {
+                    <tr>
+                        <td class="id-cell">@r.ResponseId</td>
+                        <td style="font-size:.84rem;color:var(--text-2)">@(r.Event?.EventName ?? "—")</td>
+                        <td style="font-size:.84rem;color:var(--text-2)">@(r.Participant?.FullName ?? "—")</td>
+                        <td style="text-align:center">
+                            <span class="stars">@string.Concat(Enumerable.Repeat("★", r.Rating ?? 0))@string.Concat(Enumerable.Repeat("☆", 5 - (r.Rating ?? 0)))</span>
+                        </td>
+                        <td style="font-size:.84rem;color:var(--text-2);max-width:300px">@r.Comments</td>
+                    </tr>
+                }
+                @if (!Model.Responses.Any())
+                {
+                    <tr><td colspan="5" style="text-align:center;padding:40px 0;color:var(--text-3)">Không có đánh giá nào</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -15,6 +15,8 @@ public partial class SurveyResponse
 
     public string? Comments { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Event? Event { get; set; }
 
     public virtual Participant? Participant { get; set; }

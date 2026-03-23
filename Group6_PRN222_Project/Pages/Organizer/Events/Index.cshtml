@@ -1,0 +1,71 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Events.IndexModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Event Planning & Concept</h1>
+        <p class="subtitle">Quản lý các sự kiện</p>
+    </div>
+    <a asp-page="./Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Create New Event
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-toolbar" style="border-bottom: 1px solid var(--card-bdr); padding: 16px 20px;">
+        <span class="record-count">@Model.Events.Count sự kiện</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Organizer</th>
+                    <th style="width:140px">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Events)
+                {
+                    <tr>
+                        <td><strong>@item.EventName</strong></td>
+                        <td style="color:var(--text-3)">@item.Location</td>
+                        <td class="date-cell">@item.StartDate?.ToString("d")</td>
+                        <td class="date-cell">@item.EndDate?.ToString("d")</td>
+                        <td>
+                            @{
+                                var bc = item.Status == "Ongoing" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :
+                                         item.Status == "Planning" ? "background:rgba(74,122,184,.12);color:#93c5fd" :
+                                         item.Status == "Completed" ? "background:rgba(184,151,90,.15);color:var(--c-gold)" :
+                                         item.Status == "Cancelled" ? "background:rgba(220,60,60,.10);color:#f87171" :
+                                         "background:rgba(250,248,244,.07);color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@bc">@item.Status</span>
+                        </td>
+                        <td style="color:var(--text-3)">@(item.Organizer?.FullName ?? "N/A")</td>
+                        <td class="action-cell">
+                            <a asp-page="./Timeline" asp-route-id="@item.EventId" class="btn-action btn-edit" title="View Timeline" style="margin-right: 4px">View</a>
+                            <a asp-page="./Edit" asp-route-id="@item.EventId" class="btn-action btn-edit" title="Edit">Edit</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Events.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>No events found.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

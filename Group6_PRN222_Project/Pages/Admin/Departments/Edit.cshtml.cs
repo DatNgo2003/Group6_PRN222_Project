@@ -21,7 +21,6 @@ namespace Project_PRN222.Pages.Admin.Departments
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-#if DEBUG
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
             {
                 HttpContext.Session.SetInt32("UserID",   1);
@@ -29,10 +28,8 @@ namespace Project_PRN222.Pages.Admin.Departments
                 HttpContext.Session.SetString("FullName", "Dev Admin");
                 HttpContext.Session.SetString("UserName", "admin");
             }
-#else
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#endif
+                return RedirectToPage("/Admin/Login");
 
             var dept = await _deptSvc.GetByIdAsync(id);
             if (dept == null) return NotFound();
@@ -43,13 +40,10 @@ namespace Project_PRN222.Pages.Admin.Departments
 
         public async Task<IActionResult> OnPostAsync()
         {
-#if DEBUG
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#else
+                return RedirectToPage("/Admin/Login");
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#endif
+                return RedirectToPage("/Admin/Login");
 
             if (await _deptSvc.NameExistsAsync(InputDept.DepartmentName ?? "", InputDept.DepartmentId))
                 ModelState.AddModelError("InputDept.DepartmentName", "Tên phòng ban đã tồn tại.");

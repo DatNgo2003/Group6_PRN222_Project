@@ -1,0 +1,332 @@
+@page
+@model Project_PRN222.Pages.Admin.KPIs.DepartmentKpiModel
+@{
+    ViewData["Title"] = "KPI Phòng ban";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var maxPaid = Model.Summary.Departments.Any()
+        ? Model.Summary.Departments.Max(d => d.PaidTickets)
+        : 1;
+    if (maxPaid == 0) maxPaid = 1;
+}
+
+@section Styles {
+<style>
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @@media (max-width: 700px) { .stat-grid { grid-template-columns: 1fr; } }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-bdr);
+        border-radius: var(--r-lg);
+        padding: 20px 22px;
+    }
+    .stat-label {
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 8px;
+    }
+    .stat-value {
+        font-family: var(--ff-display);
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--text-1);
+    }
+    .stat-value.gold  { color: var(--c-gold); }
+    .stat-value.green { color: #6ee7b7; }
+    .stat-value.blue  { color: #93c5fd; }
+
+    .filter-row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label {
+        font-size: .75rem;
+        font-weight: 600;
+        color: var(--text-3);
+    }
+    .filter-group input { width: 170px; }
+
+    /* KPI table */
+    .kpi-wrap {
+        background: var(--card-bg);
+        border: 1px solid var(--card-bdr);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    .kpi-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--card-bdr);
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: rgba(184,151,90,.55);
+        background: rgba(0,0,0,.12);
+    }
+    .kpi-table { width: 100%; border-collapse: collapse; font-size: .855rem; }
+    .kpi-table th {
+        padding: 11px 18px;
+        text-align: left;
+        font-size: .68rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--text-3);
+        background: var(--table-head);
+        border-bottom: 1px solid var(--card-bdr);
+    }
+    .kpi-table td {
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--row-bdr);
+        vertical-align: middle;
+    }
+    .kpi-table tbody tr:last-child td { border-bottom: none; }
+    .kpi-table tbody tr:hover { background: var(--row-hover); }
+
+    .kpi-table .mono { font-family: var(--ff-mono); font-size: .8rem; color: var(--text-3); }
+    .kpi-table .num-gold { font-family: var(--ff-mono); font-size: .82rem; color: var(--c-gold); font-weight: 600; }
+    .kpi-table .num-green { font-family: var(--ff-mono); font-size: .82rem; color: #6ee7b7; }
+
+    .conv-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 600;
+    }
+    .conv-high { background: rgba(74,154,122,.12); color: #6ee7b7; }
+    .conv-mid  { background: rgba(184,151,90,.12); color: var(--c-gold); }
+    .conv-low  { background: rgba(220,60,60,.09);  color: #f87171; }
+
+    .rev-bar-track {
+        height: 6px;
+        background: rgba(250,248,244,.06);
+        border-radius: 3px;
+        overflow: hidden;
+        min-width: 80px;
+    }
+    .rev-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, rgba(184,151,90,.5), rgba(184,151,90,.85));
+        border-radius: 3px;
+        transition: width .4s ease;
+    }
+
+    /* Chart section */
+    .chart-wrap {
+        background: var(--card-bg);
+        border: 1px solid var(--card-bdr);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+    }
+    .chart-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--card-bdr);
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: rgba(184,151,90,.55);
+        background: rgba(0,0,0,.12);
+    }
+    .chart-body { padding: 20px; }
+
+    .dept-name { font-weight: 600; color: var(--text-1); }
+    .empty-box {
+        text-align: center;
+        padding: 48px 0;
+        color: var(--text-3);
+        font-size: .875rem;
+    }
+</style>
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>KPI Phòng ban</h1>
+        <p class="subtitle">Hiệu suất tổ chức sự kiện theo từng phòng ban</p>
+    </div>
+</div>
+
+<form method="get" class="filter-row">
+    <div class="filter-group">
+        <label>Từ ngày (StartDate)</label>
+        <input type="date" name="DateFrom" class="form-control"
+               value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <div class="filter-group">
+        <label>Đến ngày</label>
+        <input type="date" name="DateTo" class="form-control"
+               value="@(Model.DateTo?.ToString("yyyy-MM-dd"))" />
+    </div>
+    <button type="submit" class="btn btn-primary">Lọc</button>
+    <a href="./DepartmentKpi" class="btn btn-secondary">Reset</a>
+</form>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Tổng nhân sự</div>
+        <div class="stat-value blue">@Model.Summary.TotalUsers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Tổng sự kiện</div>
+        <div class="stat-value gold">@Model.Summary.TotalEvents</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Tổng vé paid</div>
+        <div class="stat-value green">@Model.Summary.TotalRevenue</div>
+    </div>
+</div>
+
+<div class="kpi-wrap">
+    <div class="kpi-header">Chi tiết theo phòng ban</div>
+    <div style="overflow-x:auto">
+        <table class="kpi-table">
+            <thead>
+                <tr>
+                    <th>Phòng ban</th>
+                    <th style="text-align:center">Nhân sự</th>
+                    <th style="text-align:center">Sự kiện</th>
+                    <th style="text-align:center">Tổng vé</th>
+                    <th style="text-align:center">Vé paid</th>
+                    <th style="text-align:center">Tỷ lệ</th>
+                    <th style="min-width:140px">Revenue bar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dept in Model.Summary.Departments)
+                {
+                    var pct = (double)dept.PaidTickets / maxPaid * 100;
+                    var badgeClass = dept.ConversionRate >= 70 ? "conv-high"
+                                   : dept.ConversionRate >= 40 ? "conv-mid"
+                                   : "conv-low";
+                    <tr>
+                        <td><span class="dept-name">@dept.DepartmentName</span></td>
+                        <td style="text-align:center" class="mono">@dept.TotalUsers</td>
+                        <td style="text-align:center" class="mono">@dept.TotalEvents</td>
+                        <td style="text-align:center" class="mono">@dept.TotalTickets</td>
+                        <td style="text-align:center" class="num-green">@dept.PaidTickets</td>
+                        <td style="text-align:center">
+                            <span class="conv-badge @badgeClass">@dept.ConversionRate%</span>
+                        </td>
+                        <td>
+                            <div class="rev-bar-track">
+                                <div class="rev-bar-fill" style="width:@pct.ToString("F0")%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Summary.Departments.Any())
+                {
+                    <tr><td colspan="7" class="empty-box">Không có dữ liệu</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="chart-wrap">
+    <div class="chart-header">So sánh phòng ban</div>
+    <div class="chart-body">
+        @if (Model.Summary.Departments.Any())
+        {
+            <canvas id="kpiChart" height="220"></canvas>
+        }
+        else
+        {
+            <div class="empty-box">Không có dữ liệu</div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    var canvas = document.getElementById('kpiChart');
+    if (!canvas) return;
+    var labels = [@Html.Raw(string.Join(",", Model.Summary.Departments.Select(d => $"\"{d.DepartmentName}\"")))];
+    var paid   = [@string.Join(",", Model.Summary.Departments.Select(d => d.PaidTickets))];
+    var events = [@string.Join(",", Model.Summary.Departments.Select(d => d.TotalEvents))];
+    var users  = [@string.Join(",", Model.Summary.Departments.Select(d => d.TotalUsers))];
+
+    new Chart(canvas, {
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Vé paid',
+                    data: paid,
+                    backgroundColor: 'rgba(184,151,90,0.25)',
+                    borderColor: 'rgba(184,151,90,0.7)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    yAxisID: 'yLeft'
+                },
+                {
+                    type: 'line',
+                    label: 'Sự kiện',
+                    data: events,
+                    borderColor: '#93c5fd',
+                    backgroundColor: 'transparent',
+                    tension: 0.35,
+                    pointBackgroundColor: '#93c5fd',
+                    yAxisID: 'yRight'
+                },
+                {
+                    type: 'line',
+                    label: 'Nhân sự',
+                    data: users,
+                    borderColor: '#6ee7b7',
+                    backgroundColor: 'transparent',
+                    tension: 0.35,
+                    borderDash: [4, 4],
+                    pointBackgroundColor: '#6ee7b7',
+                    yAxisID: 'yRight'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { labels: { color: 'rgba(250,248,244,.5)', font: { size: 12 } } }
+            },
+            scales: {
+                yLeft: {
+                    type: 'linear', position: 'left', beginAtZero: true,
+                    ticks: { color: 'rgba(250,248,244,.38)', font: { size: 11 } },
+                    grid:  { color: 'rgba(250,248,244,.05)' },
+                    title: { display: true, text: 'Vé paid', color: 'rgba(184,151,90,.6)', font: { size: 11 } }
+                },
+                yRight: {
+                    type: 'linear', position: 'right', beginAtZero: true,
+                    ticks: { color: 'rgba(250,248,244,.38)', font: { size: 11 } },
+                    grid:  { drawOnChartArea: false },
+                    title: { display: true, text: 'Số lượng', color: 'rgba(250,248,244,.3)', font: { size: 11 } }
+                },
+                x: {
+                    ticks: { color: 'rgba(250,248,244,.38)', font: { size: 11 } },
+                    grid:  { color: 'rgba(250,248,244,.04)' }
+                }
+            }
+        }
+    });
+})();
+</script>
+}

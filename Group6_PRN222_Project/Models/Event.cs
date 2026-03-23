@@ -19,13 +19,21 @@ public partial class Event
 
     public DateTime? EndDate { get; set; }
 
+    public TimeOnly? EventTime { get; set; }
+
+    public string? Images { get; set; }
+
     public string? Status { get; set; }
 
     public int? OrganizerId { get; set; }
 
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
+    public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+
     public virtual ICollection<DiscountPolicy> DiscountPolicies { get; set; } = new List<DiscountPolicy>();
+
+    public virtual ICollection<EventEquipment> EventEquipments { get; set; } = new List<EventEquipment>();
 
     public virtual ICollection<FieldReport> FieldReports { get; set; } = new List<FieldReport>();
 
@@ -35,7 +43,7 @@ public partial class Event
 
     public virtual ICollection<SurveyResponse> SurveyResponses { get; set; } = new List<SurveyResponse>();
 
-    public virtual ICollection<EventTask> Tasks { get; set; } = new List<EventTask>();
+    public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
 }

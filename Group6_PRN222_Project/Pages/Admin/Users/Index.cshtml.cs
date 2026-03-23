@@ -2,11 +2,11 @@ using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project_PRN222.Helpers;
-using Group6_PRN222_Project.Models;
 using Project_PRN222.Services;
-
+using Group6_PRN222_Project.Auth;
 namespace Project_PRN222.Pages.Admin.Users
 {
+    [AuthorizeRole("Admin")]
     public class IndexModel : PageModel
     {
         private readonly IUserService _userSvc;
@@ -31,7 +31,6 @@ namespace Project_PRN222.Pages.Admin.Users
 
         public async Task<IActionResult> OnGetAsync()
         {
-#if DEBUG
             // Tự động login Admin khi chạy debug — xoá khi build Release
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
             {
@@ -40,10 +39,9 @@ namespace Project_PRN222.Pages.Admin.Users
                 HttpContext.Session.SetString("FullName", "Dev Admin");
                 HttpContext.Session.SetString("UserName", "admin");
             }
-#else
+
             if (!SessionHelper.IsAdmin(HttpContext.Session))
                 return RedirectToPage("/Auth/Login");
-#endif
 
             var all = await _userSvc.GetAllAsync();
 
@@ -63,13 +61,10 @@ namespace Project_PRN222.Pages.Admin.Users
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-#if DEBUG
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToPage("/Auth/Login");
-#else
             if (!SessionHelper.IsAdmin(HttpContext.Session))
                 return RedirectToPage("/Auth/Login");
-#endif
 
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
 

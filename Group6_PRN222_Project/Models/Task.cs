@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Group6_PRN222_Project.Models;
 
-public partial class EventTask
+public partial class Task
 {
     public int TaskId { get; set; }
 

@@ -1,0 +1,291 @@
+@page "{id:int}"
+@model Project_PRN222.Pages.Admin.Budgets.DetailModel
+@{
+    ViewData["Title"] = "Chi tiết ngân sách";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var b = Model.Budget;
+    var spentPct = b.TotalAllocated == 0 ? 0
+        : Math.Min(100, (double)b.SpentAmount / (double)b.TotalAllocated * 100);
+    var statusClass = b.ApprovalStatus switch {
+        "Approved" => "status-approved",
+        "Rejected" => "status-rejected",
+        _          => "status-pending"
+    };
+}
+
+@section Styles {
+<style>
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 20px;
+        align-items: start;
+    }
+    @@media (max-width: 1000px) { .detail-grid { grid-template-columns: 1fr; } }
+
+    .info-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-bdr);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+    }
+    .info-header {
+        padding: 14px 22px;
+        border-bottom: 1px solid var(--card-bdr);
+        font-size: .72rem;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: rgba(184,151,90,.55);
+        background: rgba(0,0,0,.12);
+    }
+    .info-body { padding: 22px; }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--row-bdr);
+        gap: 16px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-key {
+        font-size: .78rem;
+        font-weight: 600;
+        color: var(--text-3);
+        white-space: nowrap;
+    }
+    .info-val {
+        font-size: .875rem;
+        color: var(--text-1);
+        text-align: right;
+    }
+
+    .money-big {
+        font-family: var(--ff-display);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-1);
+    }
+    .money-big.gold  { color: var(--c-gold); }
+    .money-big.green { color: #6ee7b7; }
+    .money-big.red   { color: #f87171; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+    .status-pending  { background: rgba(184,151,90,.12); color: var(--c-gold); }
+    .status-approved { background: rgba(74,154,122,.12);  color: #6ee7b7; }
+    .status-rejected { background: rgba(220,60,60,.09);   color: #f87171; }
+
+    .progress-track {
+        height: 8px;
+        background: rgba(250,248,244,.06);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0 4px;
+    }
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width .5s ease;
+    }
+    .progress-label {
+        font-family: var(--ff-mono);
+        font-size: .75rem;
+        color: var(--text-3);
+    }
+
+    .action-box {
+        padding: 22px;
+        border-top: 1px solid var(--card-bdr);
+        background: rgba(0,0,0,.10);
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .btn-approve {
+        padding: 9px 22px;
+        border-radius: var(--r-sm);
+        font-size: .845rem;
+        font-weight: 600;
+        border: 1px solid rgba(74,154,122,.25);
+        background: rgba(74,154,122,.12);
+        color: #6ee7b7;
+        cursor: pointer;
+        font-family: var(--ff-body);
+        transition: opacity var(--tr);
+    }
+    .btn-approve:hover { opacity: .75; }
+    .btn-reject {
+        padding: 9px 22px;
+        border-radius: var(--r-sm);
+        font-size: .845rem;
+        font-weight: 600;
+        border: 1px solid rgba(220,60,60,.18);
+        background: rgba(220,60,60,.09);
+        color: #f87171;
+        cursor: pointer;
+        font-family: var(--ff-body);
+        transition: opacity var(--tr);
+    }
+    .btn-reject:hover { opacity: .75; }
+
+    /* Event budgets list */
+    .ev-budget-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--row-bdr);
+        gap: 12px;
+    }
+    .ev-budget-row:last-child { border-bottom: none; }
+    .ev-budget-row.current { background: var(--c-gold-pale2); margin: 0 -22px; padding: 10px 22px; }
+    .mono { font-family: var(--ff-mono); font-size: .8rem; color: var(--text-3); }
+</style>
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Chi tiết ngân sách #@b.BudgetId</h1>
+        <p class="subtitle">
+            <a asp-page="./Index" class="back-link">← Danh sách ngân sách</a>
+        </p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="detail-grid">
+    {{!-- ── Left: Budget info ── --}}
+    <div class="info-card">
+        <div class="info-header">Thông tin ngân sách</div>
+        <div class="info-body">
+            <div class="info-row">
+                <span class="info-key">Sự kiện</span>
+                <span class="info-val" style="font-weight:600">@b.EventName</span>
+            </div>
+            @if (b.OrganizerName != null)
+            {
+                <div class="info-row">
+                    <span class="info-key">Organizer</span>
+                    <span class="info-val">@b.OrganizerName</span>
+                </div>
+            }
+            @if (b.EventStartDate.HasValue)
+            {
+                <div class="info-row">
+                    <span class="info-key">Ngày diễn ra</span>
+                    <span class="info-val mono">@b.EventStartDate.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                </div>
+            }
+            <div class="info-row">
+                <span class="info-key">Trạng thái</span>
+                <span class="info-val">
+                    <span class="status-badge @statusClass">@b.ApprovalStatus</span>
+                </span>
+            </div>
+            @if (b.ApprovedByName != null)
+            {
+                <div class="info-row">
+                    <span class="info-key">Duyệt bởi</span>
+                    <span class="info-val">@b.ApprovedByName</span>
+                </div>
+            }
+
+            <div style="margin-top:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center">
+                <div>
+                    <div style="font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px">Tổng NS</div>
+                    <div class="money-big gold">@b.TotalAllocated.ToString("N0")</div>
+                </div>
+                <div>
+                    <div style="font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px">Đã chi</div>
+                    <div class="money-big @(spentPct >= 90 ? "red" : "")">@b.SpentAmount.ToString("N0")</div>
+                </div>
+                <div>
+                    <div style="font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px">Còn lại</div>
+                    <div class="money-big @(b.Remaining < 0 ? "red" : "green")">@b.Remaining.ToString("N0")</div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px">
+                <div class="progress-label">Chi tiêu: @spentPct.ToString("F1")% ngân sách</div>
+                <div class="progress-track">
+                    <div class="progress-fill"
+                         style="width:@spentPct.ToString("F0")%;
+                                background:@(spentPct >= 90 ? "#f87171" : spentPct >= 60 ? "#fbbf24" : "#6ee7b7")">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (b.ApprovalStatus == "Pending")
+        {
+            <div class="action-box">
+                <form method="post" asp-page-handler="Approve"
+                      onsubmit="return confirm('Duyệt ngân sách này?')">
+                    <input type="hidden" name="id" value="@b.BudgetId" />
+                    <button type="submit" class="btn-approve">✓ Duyệt ngân sách</button>
+                </form>
+                <form method="post" asp-page-handler="Reject"
+                      onsubmit="return confirm('Từ chối ngân sách này?')">
+                    <input type="hidden" name="id" value="@b.BudgetId" />
+                    <button type="submit" class="btn-reject">✕ Từ chối</button>
+                </form>
+            </div>
+        }
+    </div>
+
+    <div class="info-card">
+        <div class="info-header">Ngân sách cùng sự kiện</div>
+        <div class="info-body">
+            @if (!Model.EventBudgets.Any())
+            {
+                <div style="color:var(--text-3);font-size:.875rem;text-align:center;padding:20px 0">
+                    Chưa có ngân sách nào khác
+                </div>
+            }
+            @foreach (var eb in Model.EventBudgets)
+            {
+                var ebStatus = eb.ApprovalStatus switch {
+                    "Approved" => "status-approved",
+                    "Rejected" => "status-rejected",
+                    _          => "status-pending"
+                };
+                <div class="ev-budget-row @(eb.BudgetId == b.BudgetId ? "current" : "")">
+                    <div>
+                        <div style="font-size:.84rem;font-weight:@(eb.BudgetId == b.BudgetId ? "700" : "500");color:var(--text-@(eb.BudgetId == b.BudgetId ? "1" : "2"))">
+                            #@eb.BudgetId
+                            @if (eb.BudgetId == b.BudgetId)
+                            {
+                                <span style="font-size:.7rem;color:var(--c-gold);margin-left:4px">(đang xem)</span>
+                            }
+                        </div>
+                        <div class="mono" style="margin-top:2px">@eb.TotalAllocated.ToString("N0")</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <span class="status-badge @ebStatus" style="font-size:.68rem;padding:2px 8px">@eb.ApprovalStatus</span>
+                        @if (eb.BudgetId != b.BudgetId)
+                        {
+                            <a asp-page="./Detail" asp-route-id="@eb.BudgetId"
+                               style="font-size:.75rem;color:var(--c-gold);text-decoration:none">Xem →</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,397 @@
+﻿@page
+@model Group6_PRN222_Project.Pages.Admin.LoginModel
+@{
+    ViewData["Title"] = "Đăng nhập Nội bộ";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .auth-page {
+            min-height: calc(100vh - 68px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--c-ink);
+            position: relative;
+            padding: 40px 20px;
+            overflow: hidden;
+        }
+            /* Subtle pattern trên nền đen */
+            .auth-page::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: linear-gradient(rgba(250,248,244,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(250,248,244,.04) 1px, transparent 1px);
+                background-size: 48px 48px;
+                pointer-events: none;
+            }
+            /* Gold glow blob */
+            .auth-page::after {
+                content: '';
+                position: absolute;
+                bottom: -200px;
+                right: -200px;
+                width: 600px;
+                height: 600px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(184,151,90,.08) 0%, transparent 70%);
+                pointer-events: none;
+            }
+
+        .auth-card {
+            position: relative;
+            z-index: 1;
+            background: rgba(250,248,244,.04);
+            border: 1px solid rgba(250,248,244,.10);
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 24px 80px rgba(0,0,0,.4);
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        .auth-card__header {
+            padding: 36px 40px 28px;
+            border-bottom: 1px solid rgba(250,248,244,.08);
+            text-align: center;
+        }
+
+        .auth-card__logo {
+            font-family: var(--ff-display);
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--c-ivory);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .auth-card__logo-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--c-gold);
+            margin-bottom: 9px;
+        }
+
+        .auth-card__subtitle {
+            font-size: 13px;
+            color: rgba(250,248,244,.4);
+        }
+
+        .auth-card__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(184,151,90,.15);
+            border: 1px solid rgba(184,151,90,.3);
+            color: var(--c-gold-light);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 14px;
+            border-radius: 100px;
+            margin-top: 14px;
+        }
+
+        .auth-card__body {
+            padding: 36px 40px 40px;
+        }
+
+        .auth-card__title {
+            font-family: var(--ff-display);
+            font-size: 26px;
+            font-weight: 600;
+            color: var(--c-ivory);
+            margin-bottom: 4px;
+        }
+
+        .auth-card__desc {
+            font-size: 14px;
+            color: rgba(250,248,244,.45);
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label-dark {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(250,248,244,.55);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(250,248,244,.25);
+            pointer-events: none;
+        }
+
+            .input-icon svg {
+                width: 15px;
+                height: 15px;
+                display: block;
+            }
+
+        .form-input-dark {
+            width: 100%;
+            padding: 11px 16px 11px 40px;
+            background: rgba(250,248,244,.06);
+            border: 1.5px solid rgba(250,248,244,.12);
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-size: 15px;
+            color: var(--c-ivory);
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+            .form-input-dark::placeholder {
+                color: rgba(250,248,244,.2);
+            }
+
+            .form-input-dark:focus {
+                border-color: rgba(184,151,90,.5);
+                box-shadow: 0 0 0 3px rgba(184,151,90,.1);
+                background: rgba(250,248,244,.08);
+            }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: rgba(250,248,244,.25);
+            transition: color var(--transition);
+        }
+
+            .password-toggle:hover {
+                color: rgba(250,248,244,.6);
+            }
+
+            .password-toggle svg {
+                width: 15px;
+                height: 15px;
+                display: block;
+            }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        .form-check-dark {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            color: rgba(250,248,244,.45);
+        }
+
+            .form-check-dark input {
+                accent-color: var(--c-gold);
+            }
+
+        .form-options a {
+            color: var(--c-gold);
+            text-decoration: none;
+            font-weight: 500;
+            opacity: .8;
+        }
+
+            .form-options a:hover {
+                opacity: 1;
+            }
+
+        .btn-submit-dark {
+            width: 100%;
+            justify-content: center;
+            font-size: 15px;
+            padding: 13px;
+            border-radius: var(--radius-md);
+            background: var(--c-gold) !important;
+            border-color: var(--c-gold) !important;
+            color: var(--c-ink) !important;
+            font-weight: 600;
+        }
+
+            .btn-submit-dark:hover {
+                background: var(--c-gold-light) !important;
+                border-color: var(--c-gold-light) !important;
+                box-shadow: 0 6px 24px rgba(184,151,90,.3);
+            }
+
+        /* Role pills */
+        .role-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .role-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            background: rgba(250,248,244,.06);
+            border: 1px solid rgba(250,248,244,.10);
+            color: rgba(250,248,244,.5);
+        }
+
+        /* Alert dark */
+        .alert-dark-danger {
+            padding: 12px 16px;
+            background: rgba(139,58,42,.2);
+            border: 1px solid rgba(139,58,42,.4);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            color: #F0A090;
+            margin-bottom: 20px;
+        }
+
+        /* Back to public link */
+        .back-link {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: rgba(250,248,244,.35);
+        }
+
+            .back-link a {
+                color: rgba(250,248,244,.5);
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                transition: color var(--transition);
+            }
+
+                .back-link a:hover {
+                    color: var(--c-ivory);
+                }
+    </style>
+}
+
+<div class="auth-page">
+    <div class="auth-card">
+        <!-- Header tối + gold accent -->
+        <div class="auth-card__header">
+            <div class="auth-card__logo">EventPro<span class="auth-card__logo-dot"></span></div>
+            <div class="auth-card__subtitle">Hệ thống quản lý nội bộ</div>
+            <div class="auth-card__badge">🔐 Dành cho nhân viên & ban tổ chức</div>
+        </div>
+
+        <div class="auth-card__body">
+            <div class="auth-card__title">Đăng nhập nội bộ</div>
+            <div class="auth-card__desc">Trang này chỉ dành cho nhân viên được cấp quyền truy cập hệ thống.</div>
+
+            <!-- Hiển thị các role được phép -->
+            <div class="role-pills">
+                <span class="role-pill">👑 Admin</span>
+                <span class="role-pill">🎯 Organizer</span>
+                <span class="role-pill">🛡 Staff (Security)</span>
+                <span class="role-pill">📢 Staff (MKT)</span>
+                <span class="role-pill">📦 Staff (Logistics)</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert-dark-danger">@Model.ErrorMessage</div>
+            }
+
+            <form method="post">
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div class="form-group">
+                    <label class="form-label-dark">Tên đăng nhập</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        </span>
+                        <input asp-for="Username" class="form-input-dark"
+                               placeholder="Nhập username nội bộ..." autocomplete="username"
+                               required autofocus />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label-dark">Mật khẩu</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                        </span>
+                        <input asp-for="Password" id="pwInput" type="password"
+                               class="form-input-dark" placeholder="••••••••"
+                               autocomplete="current-password" required />
+                        <button type="button" class="password-toggle" onclick="togglePw()">
+                            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="form-check-dark">
+                        <input asp-for="RememberMe" type="checkbox" /> Ghi nhớ đăng nhập
+                    </label>
+                    <a href="#">Quên mật khẩu?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-submit-dark">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                    Đăng nhập hệ thống
+                </button>
+            </form>
+
+            <!-- Quay lại trang login thường -->
+            <div class="back-link">
+                <a asp-page="/Account/Login">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+                    Quay lại trang đăng nhập thường
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePw() {
+            const inp = document.getElementById('pwInput');
+            const ico = document.getElementById('eyeIcon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                ico.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                inp.type = 'password';
+                ico.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        }
+    </script>
+}

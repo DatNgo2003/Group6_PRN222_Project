@@ -1,0 +1,48 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.DiscountPolicies.IndexModel
+@{
+    ViewData["Title"] = "Discount Policies";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Discount Policies</h1>
+        <p class="subtitle">Quản lý khuyến mãi</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Create New Policy
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Policy Name</th>
+                    <th>Event</th>
+                    <th>Discount Percent</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Policies)
+                {
+                    <tr>
+                        <td><strong>@item.PolicyName</strong></td>
+                        <td style="color:var(--text-3)">@item.Event?.EventName</td>
+                        <td style="color:var(--c-gold); font-weight:600">@item.DiscountPercent?.ToString("0.##")%</td>
+                    </tr>
+                }
+                @if (Model.Policies.Count == 0)
+                {
+                    <tr>
+                        <td colspan="3" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>No discount policies found.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Budgets.IndexModel
+@{
+    ViewData["Title"] = "Event Proposals & Timelines";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Event Proposals & Timelines</h1>
+        <p class="subtitle">Duyệt và theo dõi ngân sách sự kiện</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Create New Proposal
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Proposed Budget</th>
+                    <th>Timeline</th>
+                    <th>Status</th>
+                    <th>Approved By</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Budgets)
+                {
+                    <tr>
+                        <td><strong>@item.Event?.EventName</strong></td>
+                        <td style="color:var(--text-3)">@item.TotalAllocated?.ToString("C0")</td>
+                        <td class="date-cell">
+                            @(item.Event?.StartDate?.ToString("MMM dd, yyyy") ?? "N/A") - 
+                            @(item.Event?.EndDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                        </td>
+                        <td>
+                            @{
+                                var bc = item.ApprovalStatus == "Approved" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :
+                                         item.ApprovalStatus == "Rejected" ? "background:rgba(220,60,60,.10);color:#f87171" :
+                                         item.ApprovalStatus == "Pending" ? "background:rgba(184,151,90,.15);color:var(--c-gold)" :
+                                         "background:rgba(250,248,244,.07);color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@bc">@item.ApprovalStatus</span>
+                        </td>
+                        <td style="color:var(--text-3)">@(item.ApprovedByNavigation?.FullName ?? "N/A")</td>
+                    </tr>
+                }
+                @if (Model.Budgets.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>No event proposals found.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

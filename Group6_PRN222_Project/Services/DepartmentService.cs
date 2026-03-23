@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Group6_PRN222_Project.Models;
+using Task = System.Threading.Tasks.Task;
+
 namespace Project_PRN222.Services
 {
     // ─── Interface ────────────────────────────────────────────────
