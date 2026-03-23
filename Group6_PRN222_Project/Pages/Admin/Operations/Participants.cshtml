@@ -1,0 +1,128 @@
+@page
+@model Project_PRN222.Pages.Admin.Operations.ParticipantsModel
+@{
+    ViewData["Title"] = "Quản lý Participants";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+@section Styles {
+<style>
+.filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; }
+.filter-group { display:flex; flex-direction:column; gap:5px; }
+.filter-group label { font-size:.75rem; font-weight:600; color:var(--text-3); }
+.stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+.stat-card { background:var(--card-bg); border:1px solid var(--card-bdr); border-radius:var(--r-lg); padding:16px 20px; }
+.stat-label { font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); margin-bottom:6px; }
+.stat-value { font-family:var(--ff-display); font-size:1.8rem; font-weight:700; color:var(--text-1); }
+.stat-value.gold { color:var(--c-gold); } .stat-value.red { color:#f87171; }
+.pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:.7rem; font-weight:600; }
+.pill-vip  { background:rgba(184,151,90,.15); color:var(--c-gold); }
+.pill-bl   { background:rgba(220,60,60,.10);  color:#f87171; }
+.pill-norm { background:rgba(250,248,244,.07); color:var(--text-3); }
+.toggle-vip { padding:4px 10px; border-radius:var(--r-sm); font-size:.75rem; font-weight:600; border:1px solid rgba(184,151,90,.22); background:rgba(184,151,90,.08); color:var(--c-gold); cursor:pointer; font-family:var(--ff-body); transition:opacity var(--tr); }
+.toggle-vip:hover { opacity:.75; }
+.toggle-bl  { padding:4px 10px; border-radius:var(--r-sm); font-size:.75rem; font-weight:600; border:1px solid rgba(220,60,60,.18); background:rgba(220,60,60,.08); color:#f87171; cursor:pointer; font-family:var(--ff-body); transition:opacity var(--tr); }
+.toggle-bl:hover { opacity:.75; }
+</style>
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Quản lý Participants</h1>
+        <p class="subtitle">Quản lý danh sách người tham dự, VIP và Blacklist</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Tổng participants</div>
+        <div class="stat-value">@Model.Total</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">VIP</div>
+        <div class="stat-value gold">@Model.VipCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Blacklist</div>
+        <div class="stat-value red">@Model.BlacklistCount</div>
+    </div>
+</div>
+
+<form method="get" class="filter-row">
+    <div class="filter-group">
+        <label>Tìm kiếm</label>
+        <input type="text" name="Search" class="form-control" value="@Model.Search" placeholder="Tên / Email / SĐT" style="min-width:220px" />
+    </div>
+    <div class="filter-group">
+        <label>Loại</label>
+        <select name="FilterType" class="form-control" style="min-width:140px">
+            <option value=""            selected="@(Model.FilterType == "")">Tất cả</option>
+            <option value="vip"         selected="@(Model.FilterType == "vip")">VIP</option>
+            <option value="blacklist"   selected="@(Model.FilterType == "blacklist")">Blacklist</option>
+            <option value="normal"      selected="@(Model.FilterType == "normal")">Thường</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Lọc</button>
+    <a href="./Participants" class="btn btn-secondary">Reset</a>
+</form>
+
+<div class="card">
+    <div class="card-toolbar">
+        <span style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(184,151,90,.55)">Danh sách</span>
+        <span class="record-count">@Model.Participants.Count bản ghi</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>SĐT</th>
+                    <th>Loại</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Participants)
+                {
+                    var isVip = p.IsVip ?? false;
+                    var isBl  = p.IsBlacklisted ?? false;
+                    <tr>
+                        <td class="id-cell">@p.ParticipantId</td>
+                        <td style="font-weight:600;color:var(--text-1)">@p.FullName</td>
+                        <td class="email-cell">@p.Email</td>
+                        <td class="mono" style="font-size:.8rem;color:var(--text-3)">@p.Phone</td>
+                        <td>
+                            @if (isBl)  { <span class="pill pill-bl">Blacklist</span> }
+                            else if (isVip) { <span class="pill pill-vip">VIP</span> }
+                            else { <span class="pill pill-norm">Thường</span> }
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <form method="post" asp-page-handler="ToggleVip" style="display:inline">
+                                    <input type="hidden" name="id" value="@p.ParticipantId" />
+                                    <button type="submit" class="toggle-vip">
+                                        @(isVip ? "Bỏ VIP" : "Đặt VIP")
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="ToggleBlacklist" style="display:inline"
+                                      onsubmit="return confirm('@(isBl ? "Bỏ khỏi Blacklist?" : "Thêm vào Blacklist?")')">
+                                    <input type="hidden" name="id" value="@p.ParticipantId" />
+                                    <button type="submit" class="toggle-bl">
+                                        @(isBl ? "Bỏ BL" : "+ Blacklist")
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Participants.Any())
+                {
+                    <tr><td colspan="6" style="text-align:center;padding:40px 0;color:var(--text-3)">Không có dữ liệu</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

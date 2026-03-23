@@ -1,0 +1,94 @@
+@page
+@model Project_PRN222.Pages.Admin.Operations.FieldReportsModel
+@{
+    ViewData["Title"] = "Báo cáo hiện trường";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+@section Styles {
+<style>
+.filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; }
+.filter-group { display:flex; flex-direction:column; gap:5px; }
+.filter-group label { font-size:.75rem; font-weight:600; color:var(--text-3); }
+.type-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:600; }
+.t-security  { background:rgba(220,60,60,.09);  color:#f87171; }
+.t-logistics { background:rgba(74,122,184,.12); color:#93c5fd; }
+.t-mkt       { background:rgba(74,154,122,.12); color:#6ee7b7; }
+.t-other     { background:rgba(250,248,244,.07);color:var(--text-3); }
+.content-cell { font-size:.84rem; color:var(--text-2); max-width:350px; }
+</style>
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Báo cáo hiện trường</h1>
+        <p class="subtitle">Theo dõi báo cáo từ staff tại các sự kiện</p>
+    </div>
+</div>
+
+<form method="get" class="filter-row">
+    <div class="filter-group">
+        <label>Sự kiện</label>
+        <select name="EventId" class="form-control" style="min-width:200px" onchange="this.form.submit()">
+            <option value="">Tất cả sự kiện</option>
+            @foreach (var ev in Model.Events)
+            {
+                <option value="@ev.EventId" selected="@(Model.EventId == ev.EventId)">@ev.EventName</option>
+            }
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Loại báo cáo</label>
+        <select name="ReportType" class="form-control" onchange="this.form.submit()">
+            <option value="All" selected="@(Model.ReportType == "All")">Tất cả</option>
+            @foreach (var t in Model.ReportTypes)
+            {
+                <option value="@t" selected="@(Model.ReportType == t)">@t</option>
+            }
+        </select>
+    </div>
+    <a href="./FieldReports" class="btn btn-secondary">Reset</a>
+</form>
+
+<div class="card">
+    <div class="card-toolbar">
+        <span style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(184,151,90,.55)">Danh sách báo cáo</span>
+        <span class="record-count">@Model.Reports.Count bản ghi</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Sự kiện</th>
+                    <th>Staff</th>
+                    <th>Loại</th>
+                    <th>Nội dung</th>
+                    <th>Thời gian</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Reports)
+                {
+                    var tc = r.ReportType switch {
+                        "Security"  => "t-security",
+                        "Logistics" => "t-logistics",
+                        "Marketing" => "t-mkt",
+                        _           => "t-other"
+                    };
+                    <tr>
+                        <td class="id-cell">@r.ReportId</td>
+                        <td style="font-size:.84rem;color:var(--text-2)">@(r.Event?.EventName ?? "—")</td>
+                        <td style="font-size:.84rem;color:var(--text-2)">@(r.Staff?.FullName ?? "—")</td>
+                        <td><span class="type-badge @tc">@r.ReportType</span></td>
+                        <td class="content-cell">@r.Content</td>
+                        <td class="date-cell">@r.ReportTime?.ToString("dd/MM/yy HH:mm")</td>
+                    </tr>
+                }
+                @if (!Model.Reports.Any())
+                {
+                    <tr><td colspan="6" style="text-align:center;padding:40px 0;color:var(--text-3)">Không có báo cáo nào</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
