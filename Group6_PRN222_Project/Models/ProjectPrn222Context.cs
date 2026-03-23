@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -99,6 +99,9 @@ public partial class ProjectPrn222Context : DbContext
 
             entity.Property(e => e.EquipmentId).HasColumnName("EquipmentID");
             entity.Property(e => e.EquipmentName).HasMaxLength(200);
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Available");
         });
 
         modelBuilder.Entity<Event>(entity =>
@@ -134,6 +137,9 @@ public partial class ProjectPrn222Context : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.ReportType).HasMaxLength(50);
             entity.Property(e => e.StaffId).HasColumnName("StaffID");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Submitted");
 
             entity.HasOne(d => d.Event).WithMany(p => p.FieldReports)
                 .HasForeignKey(d => d.EventId)

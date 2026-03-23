@@ -43,7 +43,8 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
 
             ReportType = string.IsNullOrWhiteSpace(reportType) ? "Logistics" : reportType.Trim();
             if (!string.Equals(ReportType, "Logistics", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(ReportType, "Equipment", StringComparison.OrdinalIgnoreCase))
+                !string.Equals(ReportType, "Equipment", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(ReportType, "Issue", StringComparison.OrdinalIgnoreCase))
                 ReportType = "Logistics";
 
             await LoadEventsForActorAsync();
@@ -81,6 +82,8 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
             // Normalize ReportType for DB consistency
             if (string.Equals(ReportType, "Equipment", StringComparison.OrdinalIgnoreCase))
                 ReportType = "Equipment";
+            else if (string.Equals(ReportType, "Issue", StringComparison.OrdinalIgnoreCase))
+                ReportType = "Issue";
             else
                 ReportType = "Logistics";
 
@@ -89,7 +92,8 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
                 EventId = EventId,
                 StaffId = actorId,
                 ReportType = ReportType,
-                Content = ReportContent
+                Content = ReportContent,
+                Status = "Submitted"
             };
 
             _db.FieldReports.Add(report);

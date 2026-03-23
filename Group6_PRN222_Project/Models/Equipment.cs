@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Group6_PRN222_Project.Models;
@@ -10,4 +10,6 @@ public partial class Equipment
     public string? EquipmentName { get; set; }
 
     public int? TotalStock { get; set; }
+
+    public string? Status { get; set; }
 }

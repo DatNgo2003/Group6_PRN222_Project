@@ -67,7 +67,7 @@
 <div class="page-header" style="margin-bottom: 16px;">
     <div>
         <h1 style="font-size:1.4rem;margin-bottom:6px;">Tạo báo cáo</h1>
-        <p style="margin:0;" class="help">Loại: Logistics / Equipment — nội dung mô tả tình hình thực địa</p>
+        <p style="margin:0;" class="help">Loại: Logistics / Equipment / Issue — nội dung mô tả tình hình thực địa</p>
     </div>
 </div>
 
@@ -110,6 +110,15 @@
                     else
                     {
                         <option value="Equipment">Equipment</option>
+                    }
+
+                    @if (string.Equals(Model.ReportType, "Issue", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="Issue" selected>Issue</option>
+                    }
+                    else
+                    {
+                        <option value="Issue">Issue</option>
                     }
                 </select>
             </div>

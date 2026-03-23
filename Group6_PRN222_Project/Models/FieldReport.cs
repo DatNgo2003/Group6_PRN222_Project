@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Group6_PRN222_Project.Models;
@@ -16,6 +16,8 @@ public partial class FieldReport
     public string? Content { get; set; }
 
     public DateTime? ReportTime { get; set; }
+
+    public string? Status { get; set; }
 
     public virtual Event? Event { get; set; }
 

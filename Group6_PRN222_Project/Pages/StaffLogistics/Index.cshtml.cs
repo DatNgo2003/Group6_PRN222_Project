@@ -18,6 +18,7 @@ namespace Project_PRN222.Pages.StaffLogistics
 
         public int LogisticsReportsCount { get; set; }
         public int EquipmentReportsCount { get; set; }
+        public int IssueReportsCount { get; set; }
 
         public List<EventTask> RecentTasks { get; set; } = new();
 
@@ -74,6 +75,10 @@ namespace Project_PRN222.Pages.StaffLogistics
             EquipmentReportsCount = await _db.FieldReports
                 .AsNoTracking()
                 .CountAsync(r => r.StaffId == actorId && r.ReportType == "Equipment");
+
+            IssueReportsCount = await _db.FieldReports
+                .AsNoTracking()
+                .CountAsync(r => r.StaffId == actorId && r.ReportType == "Issue");
 
             return Page();
         }

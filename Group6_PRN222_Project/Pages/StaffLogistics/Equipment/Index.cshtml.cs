@@ -13,6 +13,7 @@ namespace Project_PRN222.Pages.StaffLogistics.Equipment
         public IndexModel(ProjectPrn222Context db) => _db = db;
 
         public List<Group6_PRN222_Project.Models.Equipment> Equipments { get; set; } = new();
+        [BindProperty(SupportsGet = true)] public string? FilterStatus { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -31,8 +32,15 @@ namespace Project_PRN222.Pages.StaffLogistics.Equipment
                 return RedirectToPage("/Auth/Login");
 #endif
 
-            Equipments = await _db.Equipments
-                .AsNoTracking()
+            var query = _db.Equipments.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(FilterStatus) &&
+                !string.Equals(FilterStatus, "All", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(e => e.Status == FilterStatus);
+            }
+
+            Equipments = await query
                 .OrderBy(e => e.EquipmentId)
                 .ToListAsync();
 

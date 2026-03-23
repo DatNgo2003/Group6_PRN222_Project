@@ -17,6 +17,7 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
 
         [BindProperty(SupportsGet = true)] public int? FilterEventId { get; set; }
         [BindProperty(SupportsGet = true)] public string? FilterReportType { get; set; }
+        [BindProperty(SupportsGet = true)] public string? FilterStatus { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -52,6 +53,9 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
 
             if (!string.IsNullOrWhiteSpace(FilterReportType) && !string.Equals(FilterReportType, "All", StringComparison.OrdinalIgnoreCase))
                 query = query.Where(r => r.ReportType == FilterReportType);
+
+            if (!string.IsNullOrWhiteSpace(FilterStatus) && !string.Equals(FilterStatus, "All", StringComparison.OrdinalIgnoreCase))
+                query = query.Where(r => r.Status == FilterStatus);
 
             Reports = await query
                 .OrderByDescending(r => r.ReportTime)
