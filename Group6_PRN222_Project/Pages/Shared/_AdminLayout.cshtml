@@ -1,0 +1,994 @@
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+    var role = Context.Session.GetString("Role") ?? "";
+    var fullName = Context.Session.GetString("FullName") ?? "Admin";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — EventPro Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    @await RenderSectionAsync("Styles", required: false)
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --c-gold: #B8975A;
+            --c-gold-dim: #9A7A40;
+            --c-gold-pale: rgba(184,151,90,.13);
+            --c-gold-pale2: rgba(184,151,90,.06);
+            --c-ink: #1A1714;
+            --sidebar-bg: #0F0D0B;
+            --sidebar-bdr: rgba(184,151,90,.11);
+            --sidebar-hover: rgba(184,151,90,.07);
+            --sidebar-active: rgba(184,151,90,.14);
+            --page-bg: #141210;
+            --card-bg: #1D1A16;
+            --card-bdr: rgba(184,151,90,.10);
+            --table-head: #181510;
+            --row-hover: rgba(184,151,90,.04);
+            --row-bdr: rgba(250,248,244,.055);
+            --text-1: #FAF8F4;
+            --text-2: rgba(250,248,244,.62);
+            --text-3: rgba(250,248,244,.36);
+            --sidebar-w: 250px;
+            --topbar-h: 56px;
+            --ff-display: 'Cormorant Garamond', Georgia, serif;
+            --ff-body: 'DM Sans', sans-serif;
+            --ff-mono: 'DM Mono', monospace;
+            --tr: .17s ease;
+            --r-sm: 6px;
+            --r-md: 10px;
+            --r-lg: 14px;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: var(--ff-body);
+            background: var(--page-bg);
+            color: var(--text-1);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ══ SIDEBAR ══════════════════════════════════ */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-bdr);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid var(--sidebar-bdr);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-gem {
+            width: 34px;
+            height: 34px;
+            background: var(--c-gold-pale);
+            border: 1px solid rgba(184,151,90,.22);
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-gem-inner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--c-gold);
+            border-radius: 2px;
+            transform: rotate(45deg);
+        }
+
+        .brand-name {
+            font-family: var(--ff-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-1);
+            line-height: 1;
+        }
+
+        .brand-sub {
+            font-size: .62rem;
+            color: var(--text-3);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .nav-section {
+            padding: 16px 10px 4px;
+        }
+
+        .nav-label {
+            font-size: .62rem;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: rgba(184,151,90,.40);
+            padding: 0 10px;
+            margin-bottom: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: var(--r-sm);
+            color: var(--text-3);
+            text-decoration: none;
+            font-size: .845rem;
+            font-weight: 500;
+            transition: background var(--tr), color var(--tr);
+            margin-bottom: 2px;
+            position: relative;
+        }
+
+            .nav-item:hover {
+                background: var(--sidebar-hover);
+                color: rgba(250,248,244,.75);
+            }
+
+            .nav-item.active {
+                background: var(--sidebar-active);
+                color: var(--c-gold);
+            }
+
+                .nav-item.active::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 7px;
+                    bottom: 7px;
+                    width: 2px;
+                    background: var(--c-gold);
+                    border-radius: 2px;
+                }
+
+        .nav-icon {
+            width: 15px;
+            height: 15px;
+            opacity: .6;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item.active .nav-icon {
+            opacity: 1;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: var(--sidebar-bdr);
+            margin: 8px 10px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 12px;
+            border-top: 1px solid var(--sidebar-bdr);
+        }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: var(--r-md);
+            background: var(--c-gold-pale2);
+            border: 1px solid var(--sidebar-bdr);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--c-gold-dim), var(--c-gold));
+            border-radius: var(--r-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .8rem;
+            font-weight: 700;
+            color: var(--c-ink);
+            flex-shrink: 0;
+            font-family: var(--ff-display);
+        }
+
+        .user-name {
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--text-1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            font-size: .68rem;
+            color: var(--c-gold);
+            margin-top: 1px;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(184,151,90,.05);
+            color: var(--text-3);
+            border-radius: var(--r-sm);
+            text-decoration: none;
+            font-size: .8rem;
+            font-weight: 500;
+            border: 1px solid var(--sidebar-bdr);
+            transition: background var(--tr), color var(--tr), border-color var(--tr);
+        }
+
+            .logout-btn:hover {
+                background: rgba(220,60,60,.10);
+                color: #f87171;
+                border-color: rgba(220,60,60,.20);
+            }
+
+        /* ══ MAIN ═════════════════════════════════════ */
+        .main-wrap {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            height: var(--topbar-h);
+            background: #181510;
+            border-bottom: 1px solid var(--sidebar-bdr);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .82rem;
+        }
+
+        .breadcrumb-sep {
+            color: var(--text-3);
+            font-size: .7rem;
+        }
+
+        .breadcrumb-root {
+            color: var(--text-3);
+        }
+
+        .breadcrumb-current {
+            color: var(--text-1);
+            font-weight: 600;
+        }
+
+        .topbar-clock {
+            font-family: var(--ff-mono);
+            font-size: .73rem;
+            color: var(--text-3);
+            padding: 4px 10px;
+            background: rgba(184,151,90,.05);
+            border: 1px solid var(--sidebar-bdr);
+            border-radius: 4px;
+        }
+
+        .page-content {
+            padding: 28px 32px;
+            flex: 1;
+        }
+
+        /* ══ SHARED COMPONENTS ════════════════════════ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 18px;
+            border-radius: var(--r-sm);
+            font-size: .845rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: background var(--tr), opacity var(--tr);
+            font-family: var(--ff-body);
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--c-gold);
+            color: var(--c-ink);
+        }
+
+            .btn-primary:hover {
+                background: var(--c-gold-dim);
+            }
+
+        .btn-secondary {
+            background: rgba(250,248,244,.07);
+            color: var(--text-2);
+            border: 1px solid var(--card-bdr);
+        }
+
+            .btn-secondary:hover {
+                background: rgba(250,248,244,.11);
+            }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-3);
+            border: 1px solid rgba(250,248,244,.09);
+        }
+
+            .btn-ghost:hover {
+                background: rgba(250,248,244,.05);
+                color: var(--text-2);
+            }
+
+        .btn-icon {
+            font-size: .9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 9px 13px;
+            background: rgba(250,248,244,.05);
+            border: 1px solid rgba(250,248,244,.11);
+            border-radius: var(--r-sm);
+            font-size: .875rem;
+            font-family: var(--ff-body);
+            color: var(--text-1);
+            outline: none;
+            transition: border-color var(--tr), box-shadow var(--tr);
+        }
+
+            .form-control::placeholder {
+                color: var(--text-3);
+            }
+
+            .form-control:focus {
+                border-color: rgba(184,151,90,.45);
+                box-shadow: 0 0 0 3px rgba(184,151,90,.09);
+            }
+
+        select.form-control option {
+            background: #1D1A16;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-bdr);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+        }
+
+        .card-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--card-bdr);
+            gap: 12px;
+            flex-wrap: wrap;
+            background: rgba(0,0,0,.12);
+        }
+
+        .search-form {
+            flex: 1;
+        }
+
+        .search-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            min-width: 220px;
+            flex: 1;
+        }
+
+        .record-count {
+            color: var(--text-3);
+            font-size: .79rem;
+            font-family: var(--ff-mono);
+            white-space: nowrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .855rem;
+        }
+
+            .data-table th {
+                padding: 11px 18px;
+                text-align: left;
+                font-size: .71rem;
+                font-weight: 600;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                color: var(--text-3);
+                background: var(--table-head);
+                border-bottom: 1px solid var(--card-bdr);
+            }
+
+            .data-table td {
+                padding: 12px 18px;
+                border-bottom: 1px solid var(--row-bdr);
+                vertical-align: middle;
+            }
+
+            .data-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .data-table tbody tr:hover {
+                background: var(--row-hover);
+            }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .page-title h1 {
+            font-family: var(--ff-display);
+            font-size: 1.85rem;
+            font-weight: 700;
+            margin: 0 0 4px;
+            color: var(--text-1);
+            letter-spacing: -.02em;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            color: var(--text-3);
+            font-size: .845rem;
+            margin: 0;
+        }
+
+        .back-link {
+            color: var(--c-gold);
+            text-decoration: none;
+            font-size: .845rem;
+        }
+
+            .back-link:hover {
+                opacity: .75;
+            }
+
+        .alert {
+            padding: 11px 16px;
+            border-radius: var(--r-sm);
+            margin-bottom: 16px;
+            font-size: .875rem;
+        }
+
+        .alert-success {
+            background: rgba(74,154,122,.10);
+            color: #6ee7b7;
+            border: 1px solid rgba(74,154,122,.22);
+        }
+
+        .alert-danger {
+            background: rgba(220,60,60,.09);
+            color: #f87171;
+            border: 1px solid rgba(220,60,60,.18);
+        }
+
+        .btn-action {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: var(--r-sm);
+            font-size: .775rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            transition: opacity var(--tr);
+        }
+
+            .btn-action:hover {
+                opacity: .75;
+            }
+
+            .btn-action:disabled {
+                opacity: .28;
+                cursor: not-allowed;
+            }
+
+        .btn-edit {
+            background: rgba(184,151,90,.11);
+            color: var(--c-gold);
+            border-color: rgba(184,151,90,.18);
+        }
+
+        .btn-delete {
+            background: rgba(220,60,60,.09);
+            color: #f87171;
+            border-color: rgba(220,60,60,.16);
+        }
+
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-bdr);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            max-width: 900px;
+        }
+
+        .form-section {
+            padding: 28px 32px;
+            border-bottom: 1px solid var(--card-bdr);
+        }
+
+            .form-section:last-of-type {
+                border-bottom: none;
+            }
+
+        .section-title {
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: rgba(184,151,90,.55);
+            margin: 0 0 18px;
+        }
+
+        .section-hint {
+            font-size: .79rem;
+            color: var(--text-3);
+            margin: -12px 0 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        @@media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+            .form-group label {
+                font-size: .79rem;
+                font-weight: 600;
+                color: var(--text-2);
+            }
+
+        .required {
+            color: #f87171;
+        }
+
+        .field-error {
+            color: #f87171;
+            font-size: .77rem;
+        }
+
+        .form-actions {
+            padding: 18px 32px;
+            border-top: 1px solid var(--card-bdr);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,.14);
+        }
+
+        .password-input-wrap {
+            display: flex;
+        }
+
+            .password-input-wrap .form-control {
+                border-radius: var(--r-sm) 0 0 var(--r-sm);
+                flex: 1;
+            }
+
+        .toggle-pwd {
+            padding: 0 13px;
+            background: rgba(250,248,244,.05);
+            border: 1px solid rgba(250,248,244,.11);
+            border-left: none;
+            border-radius: 0 var(--r-sm) var(--r-sm) 0;
+            cursor: pointer;
+            font-size: .77rem;
+            color: var(--text-3);
+            font-family: var(--ff-body);
+            transition: background var(--tr);
+        }
+
+            .toggle-pwd:hover {
+                background: rgba(250,248,244,.09);
+                color: var(--text-2);
+            }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 13px 20px;
+            border-top: 1px solid var(--card-bdr);
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 5px 11px;
+            border-radius: var(--r-sm);
+            border: 1px solid rgba(250,248,244,.09);
+            background: rgba(250,248,244,.04);
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: .79rem;
+            font-weight: 500;
+            transition: background var(--tr);
+        }
+
+            .page-btn:hover {
+                background: rgba(250,248,244,.08);
+            }
+
+            .page-btn.active {
+                background: var(--c-gold-pale);
+                color: var(--c-gold);
+                border-color: rgba(184,151,90,.28);
+            }
+
+        .page-info {
+            margin-left: auto;
+            font-size: .77rem;
+            color: var(--text-3);
+            font-family: var(--ff-mono);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 52px 0;
+            color: var(--text-3);
+        }
+
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            opacity: .4;
+        }
+
+        /* Role badges */
+        .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .role-admin {
+            background: rgba(184,151,90,.15);
+            color: var(--c-gold);
+        }
+
+        .role-organizer {
+            background: rgba(74,154,122,.12);
+            color: #6ee7b7;
+        }
+
+        .role-staffsecurity {
+            background: rgba(220,60,60,.10);
+            color: #f87171;
+        }
+
+        .role-staffmkt {
+            background: rgba(74,122,184,.12);
+            color: #93c5fd;
+        }
+
+        .role-stafflogistics {
+            background: rgba(130,74,184,.12);
+            color: #c4b5fd;
+        }
+
+        .role-default {
+            background: rgba(250,248,244,.07);
+            color: var(--text-3);
+        }
+
+        .id-cell {
+            color: var(--text-3);
+            font-size: .8rem;
+            font-family: var(--ff-mono);
+        }
+
+        .date-cell {
+            color: var(--text-3);
+            font-size: .8rem;
+            white-space: nowrap;
+            font-family: var(--ff-mono);
+        }
+
+        .email-cell {
+            color: var(--text-3);
+            font-size: .84rem;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(184,151,90,.18);
+            border-radius: 10px;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(184,151,90,.32);
+            }
+    </style>
+</head>
+<body>
+
+    <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-gem"><div class="brand-gem-inner"></div></div>
+            <div>
+                <div class="brand-name">EventPro</div>
+                <div class="brand-sub">Admin Panel</div>
+            </div>
+        </div>
+
+        <nav class="nav-section">
+            <div class="nav-label">Tổng quan</div>
+            <a asp-page="/Admin/DashBoard/AdminDashboard"
+               class="nav-item @(currentPage == "/Admin/DashBoard/AdminDashboard" ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                </svg>
+                Dashboard
+            </a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-label">Quản trị</div>
+            <a asp-page="/Admin/Users/Index"
+               class="nav-item @(currentPage.StartsWith("/Admin/Users") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Người dùng
+            </a>
+            <a asp-page="/Admin/Departments/Index"
+               class="nav-item @(currentPage.StartsWith("/Admin/Departments") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                Phòng ban
+            </a>
+            <a asp-page="/Admin/AuditLogs/Index"
+               class="nav-item @(currentPage.StartsWith("/Admin/AuditLogs") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                Audit Logs
+            </a>
+        </nav>
+
+
+        <nav class="nav-section">
+            <div class="nav-label">Báo cáo &amp; Phân tích</div>
+            <a asp-page="/Admin/Reports/RevenueReport"
+               class="nav-item @(currentPage.StartsWith("/Admin/Reports") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10" />
+                    <line x1="12" y1="20" x2="12" y2="4" />
+                    <line x1="6" y1="20" x2="6" y2="14" />
+                    <line x1="2" y1="20" x2="22" y2="20" />
+                </svg>
+                Doanh thu
+            </a>
+            <a asp-page="/Admin/KPIs/DepartmentKpi"
+               class="nav-item @(currentPage.StartsWith("/Admin/KPIs") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                KPI Phòng ban
+            </a>
+            <a asp-page="/Admin/Budgets/Index"
+               class="nav-item @(currentPage.StartsWith("/Admin/Budgets") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+                Duyệt ngân sách
+            </a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-label">Cấu hình hệ thống</div>
+            <a asp-page="/Admin/Config/Roles"
+               class="nav-item @(currentPage.StartsWith("/Admin/Config/Roles") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                Roles
+            </a>
+            <a asp-page="/Admin/Config/DiscountPolicies"
+               class="nav-item @(currentPage.StartsWith("/Admin/Config/DiscountPolicies") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" />
+                </svg>
+                Discount Policies
+            </a>
+            <a asp-page="/Admin/Config/Equipment"
+               class="nav-item @(currentPage.StartsWith("/Admin/Config/Equipment") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                </svg>
+                Thiết bị
+            </a>
+        </nav>
+
+        <nav class="nav-section">
+            <div class="nav-label">Giám sát vận hành</div>
+            <a asp-page="/Admin/Operations/Participants"
+               class="nav-item @(currentPage.StartsWith("/Admin/Operations/Participants") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Participants
+            </a>
+            <a asp-page="/Admin/Operations/SurveyResponses"
+               class="nav-item @(currentPage.StartsWith("/Admin/Operations/Survey") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                Đánh giá
+            </a>
+            <a asp-page="/Admin/Operations/FieldReports"
+               class="nav-item @(currentPage.StartsWith("/Admin/Operations/Field") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                Báo cáo hiện trường
+            </a>
+        </nav>
+
+        <div class="nav-divider"></div>
+
+        <nav class="nav-section">
+            <div class="nav-label">Điều hướng</div>
+            <a asp-page="/Index" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                </svg>
+                Về trang chủ
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-chip">
+                <div class="user-avatar">
+                    @(fullName.Length > 0 ? fullName[0].ToString().ToUpper() : "A")
+                </div>
+                <div style="flex:1;min-width:0">
+                    <div class="user-name">@fullName</div>
+                    <div class="user-role">@role</div>
+                </div>
+            </div>
+            <a asp-page="/Account/Logout" class="logout-btn">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Đăng xuất
+            </a>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN ══════════════════════════════════════════════ -->
+    <div class="main-wrap">
+        <header class="topbar">
+            <nav class="breadcrumb">
+                <span class="breadcrumb-root">EventPro</span>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-root">Admin</span>
+                <span class="breadcrumb-sep">›</span>
+                <span class="breadcrumb-current">@ViewData["Title"]</span>
+            </nav>
+            <div class="topbar-clock" id="adminClock">--:--:--</div>
+        </header>
+
+        <main class="page-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function tick() {
+            document.getElementById('adminClock').textContent =
+                new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            setTimeout(tick, 1000);
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

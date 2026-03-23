@@ -3,7 +3,7 @@ using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace Group6_PRN222_Project.Pages.Admin
+namespace Group6_PRN222_Project.Pages.Admin.DashBoard
 {
     [AuthorizeRole("Admin")]
     public class AdminDashboardModel : PageModel

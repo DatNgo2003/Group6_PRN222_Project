@@ -1,10 +1,11 @@
-﻿using System.Text;
-using Group6_PRN222_Project.Auth;
+﻿using Group6_PRN222_Project.Auth;
 using Group6_PRN222_Project.Data;
 using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Project_PRN222.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,7 +82,20 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();   
+builder.Services.AddScoped<IUserService, UserService>();      
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 
+builder.Services.AddScoped<IRevenueReportService, RevenueReportService>();
+builder.Services.AddScoped<IDepartmentKpiService, DepartmentKpiService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IDiscountPolicyService, DiscountPolicyService>();
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+builder.Services.AddScoped<IParticipantService, ParticipantService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<IFieldReportService, FieldReportService>();
+// ================================================================
 var app = builder.Build();
 
 // ── Middleware pipeline ────────────────────────────────────────────────
@@ -97,7 +111,6 @@ app.UseRouting();
 app.UseSession();           // ← Session trước Authentication
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapRazorPages();
 
 // ── Seed data khi khởi động (chỉ chạy nếu DB trống) ──────────────────

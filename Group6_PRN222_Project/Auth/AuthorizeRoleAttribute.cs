@@ -10,7 +10,7 @@ namespace Group6_PRN222_Project.Auth
     /// Dùng: [AuthorizeRole("Admin")] hoặc [AuthorizeRole("Admin","Organizer")]
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
-    public class AuthorizeRoleAttribute : Attribute, IPageFilter
+    public class AuthorizeRoleAttribute : Attribute, IPageFilter, IFilterMetadata
     {
         private readonly string[] _roles;
 
