@@ -40,12 +40,7 @@
                 <input asp-for="Event.DeploymentMapUrl" class="form-control" />
                 <span asp-validation-for="Event.DeploymentMapUrl" class="text-danger"></span>
             </div>
-            <div class="form-group mb-3">
-                <label asp-for="Event.OrganizerId" class="control-label">Organizer</label>
-                <select asp-for="Event.OrganizerId" class="form-select" asp-items="ViewBag.OrganizerId">
-                    <option value="">-- Select Organizer --</option>
-                </select>
-            </div>
+
             <div class="form-group mt-4">
                 <input type="submit" value="Create" class="btn btn-primary" />
                 <a asp-page="Index" class="btn btn-secondary">Back to List</a>

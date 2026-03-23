@@ -23,6 +23,7 @@ namespace Project_PRN222.Helpers
         public static string? GetRole(ISession session)     => session.GetString(KeyRole);
 
         public static bool IsLoggedIn(ISession session)  => session.GetInt32(KeyUserID).HasValue;
-        public static bool IsAdmin(ISession session)     => GetRole(session) == RoleConstants.Admin;
+        public static bool IsAdmin(ISession session)     => GetRole(session) == "Admin";
+        public static bool IsOrganizer(ISession session) => GetRole(session) == "Organizer" || GetRole(session) == "Event Manager";
     }
 }

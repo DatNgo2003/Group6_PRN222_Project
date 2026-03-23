@@ -1,0 +1,63 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.EventEquipments.CreateModel
+
+@{
+    ViewData["Title"] = "Create Requirement";
+}
+
+<h1>Create Requirement (Event Equipment)</h1>
+
+<h4>Requirement</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="EventEquipment.EventId" class="control-label">Event</label>
+                <select asp-for="EventEquipment.EventId" class="form-control" asp-items="ViewBag.EventId"></select>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="EventEquipment.EquipmentId" class="control-label">Equipment</label>
+                <select asp-for="EventEquipment.EquipmentId" class="form-control" asp-items="ViewBag.EquipmentId"></select>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="EventEquipment.Quantity" class="control-label">Required Quantity</label>
+                <input asp-for="EventEquipment.Quantity" class="form-control" type="number" min="1" />
+                <span asp-validation-for="EventEquipment.Quantity" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="EventEquipment.Note" class="control-label"></label>
+                <input asp-for="EventEquipment.Note" class="form-control" />
+                <span asp-validation-for="EventEquipment.Note" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="EventEquipment.Status" class="control-label"></label>
+                <select asp-for="EventEquipment.Status" class="form-control">
+                    <option value="Requested">Requested</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Fulfilled">Fulfilled</option>
+                </select>
+                <span asp-validation-for="EventEquipment.Status" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

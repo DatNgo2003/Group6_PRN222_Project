@@ -13,6 +13,7 @@ builder.Services.AddDbContext<ProjectPrn222Context>(options =>
 
 // 2. Razor Pages
 builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
 
 // 3. Session
 builder.Services.AddDistributedMemoryCache();

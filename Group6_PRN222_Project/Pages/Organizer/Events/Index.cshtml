@@ -43,6 +43,7 @@
                 </td>
                 <td>@(item.Organizer?.FullName ?? "N/A")</td>
                 <td>
+                    <a asp-page="./Timeline" asp-route-id="@item.EventId" class="btn btn-sm btn-outline-info">View</a>
                     <a asp-page="./Edit" asp-route-id="@item.EventId" class="btn btn-sm btn-outline-primary">Edit</a>
                 </td>
             </tr>

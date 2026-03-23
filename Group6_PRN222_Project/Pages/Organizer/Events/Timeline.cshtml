@@ -1,0 +1,192 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Events.TimelineModel
+@{
+    ViewData["Title"] = "Event Timeline";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 pt-3">
+    <div>
+        <h2 class="fw-bold mb-1">Event Timeline</h2>
+        <p class="text-muted">Manage the progress and concept stages of <strong>@Model.Event.EventName</strong></p>
+    </div>
+    <a asp-page="./Index" class="btn btn-outline-secondary">Back to Events</a>
+</div>
+
+<div class="row">
+    <!-- Left Column: Timeline Configuration -->
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Dynamic Steps</h5>
+                <p class="text-muted small">Add activities and set individual milestone times.</p>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="UpdateConcept" asp-route-id="@Model.Event.EventId" id="conceptForm">
+                    <div id="stepsContainer" class="mb-3">
+                        @for(int i = 0; i < Model.StepNames.Count; i++)
+                        {
+                            <div class="input-group mb-2 step-row shadow-sm rounded-3">
+                                <span class="input-group-text bg-white"><i class="bi bi-clock"></i></span>
+                                <input type="datetime-local" name="StepTimes" class="form-control focus-ring focus-ring-primary" value="@Model.StepTimes[i]" style="max-width: 170px;" />
+                                <input type="text" name="StepNames" class="form-control focus-ring focus-ring-primary" value="@Model.StepNames[i]" placeholder="E.g. Kêu gọi nhà đầu tư" required />
+                                <button type="button" class="btn btn-outline-danger remove-step" title="Remove Step"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        }
+                    </div>
+                    
+                    <button type="button" class="btn btn-light text-primary border-primary w-100 mb-3 fw-medium" id="addStepBtn">
+                        <i class="bi bi-plus-lg"></i> Add New Step
+                    </button>
+
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill shadow-sm">Save Timeline Activities</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Visual Timeline -->
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold"><i class="bi bi-diagram-3 text-success me-2"></i>Interactive Timeline</h5>
+                <p class="text-muted small">Click the check icon on any step to update the current event status.</p>
+            </div>
+            <div class="card-body p-4">
+                @{
+                    var conceptString = Model.Event.Concept ?? "";
+                    
+                    // Parse into tuples of (Time, Name)
+                    var stepsList = new List<(string Time, string Name)>();
+                    if(!string.IsNullOrWhiteSpace(conceptString))
+                    {
+                        if(conceptString.Contains("::") || conceptString.Contains("|"))
+                        {
+                            var items = conceptString.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                            foreach(var item in items)
+                            {
+                                var parts = item.Split("::", 2);
+                                if(parts.Length == 2) stepsList.Add((parts[0], parts[1]));
+                                else stepsList.Add(("", item));
+                            }
+                        }
+                        else
+                        {
+                            var items = conceptString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                            foreach(var item in items) stepsList.Add(("", item.Trim()));
+                        }
+                    }
+
+                    var currentStatus = Model.Event.Status ?? "";
+                    var currentIndex = stepsList.FindIndex(s => s.Name == currentStatus);
+                }
+
+                @if(stepsList.Count == 0)
+                {
+                    <div class="alert alert-info">No concept steps defined. Please enter steps on the left.</div>
+                }
+                else
+                {
+                    <div class="position-relative mt-2 ps-2">
+                        <!-- Connecting Line -->
+                        <div class="position-absolute" style="left: 32px; top: 0; bottom: 0; width: 3px; background-color: #e2e8f0; z-index: 1;"></div>
+                        
+                        @for (int i = 0; i < stepsList.Count; i++)
+                        {
+                            var stepTime = stepsList[i].Time;
+                            var stepName = stepsList[i].Name;
+                            var isCompleted = i <= currentIndex;
+                            var isCurrent = i == currentIndex;
+                            
+                            var iconClass = isCompleted ? "bi-check-circle-fill text-success" : "bi-circle text-muted";
+                            var textClass = isCompleted ? "fw-bold text-dark" : "text-muted";
+                            var bgClass = isCurrent ? "bg-light rounded-4 shadow-sm border-start border-4 border-success" : "";
+
+                            <!-- Step Item -->
+                            <div class="mb-4 position-relative @bgClass p-3" style="z-index: 2;">
+                                
+                                @if(!string.IsNullOrWhiteSpace(stepTime))
+                                {
+                                    <div class="d-flex align-items-start mb-2">
+                                        <div style="width: 50px; height: 1px;" class="me-3"></div> <!-- Placeholder to align right of line -->
+                                        <div>
+                                            <label class="small text-secondary fw-bold mb-1" style="font-size: 0.75rem;">Milestone Time</label>
+                                            <div class="input-group input-group-sm shadow-sm" style="max-width: 250px; border-radius: 6px; overflow: hidden;">
+                                                @{
+                                                    DateTime parsedDate;
+                                                    var displayDate = DateTime.TryParse(stepTime, out parsedDate) 
+                                                        ? parsedDate.ToString("dd-MMM-yyyy hh:mm tt") 
+                                                        : stepTime;
+                                                }
+                                                <input type="text" class="form-control bg-white form-control-sm text-secondary border-end-0 fw-medium" value="@displayDate" disabled />
+                                                <span class="input-group-text bg-white border-start-0"><i class="bi bi-calendar4-week text-secondary"></i></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="d-flex align-items-center">
+                                    <!-- Step Circle/Icon -->
+                                    <div class="bg-white rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm border" style="width: 50px; height: 50px; border-color: #e2e8f0 !important; z-index: 3;">
+                                        <i class="bi @iconClass fs-4"></i>
+                                    </div>
+                                    
+                                    <!-- Step Details -->
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-0 @textClass">@stepName</h5>
+                                        @if(isCurrent){
+                                            <small class="text-success fw-bold"><i class="bi bi-lightning-charge-fill"></i> Current Stage</small>
+                                        }
+                                    </div>
+                                    
+                                    <!-- Action Button -->
+                                    <div>
+                                        @if(!isCurrent)
+                                        {
+                                            <form method="post" asp-page-handler="ChangeStatus" asp-route-id="@Model.Event.EventId">
+                                                <input type="hidden" name="stepName" value="@stepName" />
+                                                <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-medium shadow-sm" type="submit" title="Mark as Current Status">
+                                                    <i class="bi bi-check2"></i> Set Active
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('addStepBtn').addEventListener('click', function() {
+                var container = document.getElementById('stepsContainer');
+                var row = document.createElement('div');
+                row.className = 'input-group mb-2 step-row shadow-sm rounded-3';
+                row.innerHTML = `
+                    <span class="input-group-text bg-white"><i class="bi bi-clock"></i></span>
+                    <input type="datetime-local" name="StepTimes" class="form-control focus-ring focus-ring-primary" style="max-width: 170px;" />
+                    <input type="text" name="StepNames" class="form-control focus-ring focus-ring-primary" placeholder="E.g. Kêu gọi nhà đầu tư" required />
+                    <button type="button" class="btn btn-outline-danger remove-step" title="Remove Step"><i class="bi bi-x-lg"></i></button>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('stepsContainer').addEventListener('click', function(e) {
+                var btn = e.target.closest('.remove-step');
+                if(btn) {
+                    var row = btn.closest('.step-row');
+                    if(document.querySelectorAll('.step-row').length > 1) {
+                        row.remove();
+                    } else {
+                        alert('You must have at least one step in the timeline.');
+                    }
+                }
+            });
+        });
+    </script>
+}

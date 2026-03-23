@@ -17,6 +17,8 @@ public partial class Participant
 
     public bool? IsBlacklisted { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual ICollection<SurveyResponse> SurveyResponses { get; set; } = new List<SurveyResponse>();
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

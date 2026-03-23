@@ -1,0 +1,47 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.EventEquipments.IndexModel
+@{
+    ViewData["Title"] = "Requirements Management";
+}
+
+<h1>Requirements Management</h1>
+
+<p>
+    <a asp-page="Create" class="btn btn-primary">Create New Requirement</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Requirement / Equipment</th>
+            <th>Required Quantity</th>
+            <th>Warehouse Stock</th>
+            <th>Status</th>
+            <th>Note</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.EventEquipments)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Equipment.EquipmentName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                <td>
+                    @{ 
+                        var totalStock = item.Equipment.TotalStock ?? 0;
+                        var isSufficient = totalStock >= item.Quantity;
+                        var colorClass = isSufficient ? "text-success" : "text-danger";
+                    }
+                    <span class="@colorClass">@totalStock</span>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+                <td>@Html.DisplayFor(modelItem => item.Note)</td>
+                <td>
+                    <a asp-page="./Edit" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn btn-sm btn-warning">Edit</a> |
+                    <a asp-page="./Delete" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

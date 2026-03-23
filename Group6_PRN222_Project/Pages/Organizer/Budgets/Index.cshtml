@@ -1,19 +1,19 @@
 @page
 @model Group6_PRN222_Project.Pages.Organizer.Budgets.IndexModel
 @{
-    ViewData["Title"] = "Budget Allocation";
+    ViewData["Title"] = "Event Proposals & Timelines";
 }
 
-<h1>Budget Allocation & Requests</h1>
+<h1>Event Proposals & Timelines (For Admin)</h1>
 <p>
-    <a asp-page="Create" class="btn btn-primary">Allocate New Budget</a>
+    <a asp-page="Create" class="btn btn-primary">Create New Proposal</a>
 </p>
 <table class="table table-striped table-hover mt-3">
     <thead class="table-dark">
         <tr>
             <th>Event</th>
-            <th>Total Allocated</th>
-            <th>Spent Amount</th>
+            <th>Proposed Budget</th>
+            <th>Timeline</th>
             <th>Status</th>
             <th>Approved By</th>
         </tr>
@@ -24,7 +24,10 @@
             <tr>
                 <td><strong>@item.Event?.EventName</strong></td>
                 <td>@item.TotalAllocated?.ToString("C0")</td>
-                <td>@item.SpentAmount?.ToString("C0")</td>
+                <td>
+                    @(item.Event?.StartDate?.ToString("MMM dd, yyyy") ?? "N/A") - 
+                    @(item.Event?.EndDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                </td>
                 <td>
                     @{
                         var badgeClass = item.ApprovalStatus switch
@@ -43,7 +46,7 @@
         @if (Model.Budgets.Count == 0)
         {
             <tr>
-                <td colspan="5" class="text-center">No budgets found.</td>
+                <td colspan="5" class="text-center">No event proposals found.</td>
             </tr>
         }
     </tbody>

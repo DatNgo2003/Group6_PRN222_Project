@@ -21,6 +21,8 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
     public virtual Department? Department { get; set; }
@@ -33,5 +35,5 @@ public partial class User
 
     public virtual ICollection<SystemAuditLog> SystemAuditLogs { get; set; } = new List<SystemAuditLog>();
 
-    public virtual ICollection<EventTask> Tasks { get; set; } = new List<EventTask>();
+    public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 }

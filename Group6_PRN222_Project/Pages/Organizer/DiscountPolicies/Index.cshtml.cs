@@ -2,7 +2,9 @@ using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Group6_PRN222_Project.Pages.Organizer.DiscountPolicies
 {
@@ -19,9 +21,15 @@ namespace Group6_PRN222_Project.Pages.Organizer.DiscountPolicies
 
         public async System.Threading.Tasks.Task OnGetAsync()
         {
-            Policies = await _context.DiscountPolicies
+            var selectedId = HttpContext.Session.GetInt32("SelectedEventId");
+            var query = _context.DiscountPolicies
                 .Include(d => d.Event)
-                .ToListAsync();
+                .AsQueryable();
+            if (selectedId.HasValue)
+            {
+                query = query.Where(d => d.EventId == selectedId);
+            }
+            Policies = await query.ToListAsync();
         }
     }
 }

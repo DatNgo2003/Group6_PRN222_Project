@@ -13,5 +13,7 @@ public partial class DiscountPolicy
 
     public decimal? DiscountPercent { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Event? Event { get; set; }
 }

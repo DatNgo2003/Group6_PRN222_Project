@@ -1,60 +1,134 @@
 @page
 @model Group6_PRN222_Project.Pages.Organizer.DashboardModel
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Dashboard Overview";
 }
 
-<div class="row mb-4 pt-3">
-    <div class="col-12">
-        <h1 class="display-6">Organizer Dashboard</h1>
-        <p class="text-muted">Overview of Event Performance, Real-time Progress, and Resource Allocation.</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Metrics & Analytics</h2>
+        <p class="text-muted mb-0">Track performance metrics, active tasks, and event proposals across your events.</p>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <!-- Event Card -->
+    <div class="col-md-4 mb-4 mb-md-0">
+        <div class="card border-0 shadow-sm h-100 rounded-4" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);">
+            <div class="card-body p-4 text-white">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark opacity-75">Event Performance</h5>
+                    <i class="bi bi-calendar-event fs-3 text-dark opacity-50"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-dark mb-0">@Model.OngoingEvents <span class="fs-4 fw-normal opacity-75">/ @Model.TotalEvents</span></h2>
+                <p class="text-dark opacity-75 mt-1 mb-0 fw-medium">Active / Total Events</p>
+                
+                <a asp-page="/Organizer/Events/Index" class="btn btn-light bg-white text-primary rounded-pill mt-4 shadow-sm w-100 fw-bold">Manage Events</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Card -->
+    <div class="col-md-4 mb-4 mb-md-0">
+        <div class="card border-0 shadow-sm h-100 rounded-4" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);">
+            <div class="card-body p-4 text-white">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark opacity-75">Task Progression</h5>
+                    <i class="bi bi-list-check fs-3 text-dark opacity-50"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-dark mb-0">@Model.CompletedTasks <span class="fs-4 fw-normal opacity-75">/ @Model.TotalTasks</span></h2>
+                @{
+                    var percent = Model.TotalTasks > 0 ? (Model.CompletedTasks * 100 / Model.TotalTasks) : 0;
+                }
+                
+                <div class="d-flex justify-content-between align-items-center mt-2 mb-1">
+                    <span class="text-dark opacity-75 fw-medium small">Completion Rate</span>
+                    <span class="text-dark fw-bold small">@percent%</span>
+                </div>
+                <div class="progress rounded-pill shadow-sm" style="height: 10px; background-color: rgba(255,255,255,0.4);">
+                    <div class="progress-bar bg-white rounded-pill" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+
+                <a asp-page="/Organizer/Tasks/Index" class="btn btn-light bg-white text-danger rounded-pill mt-3 shadow-sm w-100 fw-bold">Monitor Tasks</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Card -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 rounded-4" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+            <div class="card-body p-4 text-white">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark opacity-75">Event Proposals</h5>
+                    <i class="bi bi-file-earmark-diff fs-3 text-dark opacity-50"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-dark mb-0">@Model.TotalBudgetSpent.ToString("C0")</h2>
+                <div class="d-flex justify-content-between align-items-center border-top border-dark border-opacity-10 pt-2 mt-2">
+                    <span class="text-dark opacity-75 fw-medium">Allocated Total</span>
+                    <span class="text-dark fw-bold">@Model.TotalBudgetAllocated.ToString("C0")</span>
+                </div>
+                
+                <a asp-page="/Organizer/Budgets/Index" class="btn btn-light bg-white text-purple rounded-pill mt-3 shadow-sm w-100 fw-bold" style="color: #a18cd1;">Manage Proposals</a>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row">
-    <!-- Event Performance Statistics -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100 border-primary">
-            <div class="card-header bg-primary text-white">Event Performance</div>
-            <div class="card-body text-center">
-                <h3 class="card-title text-primary display-4">@Model.OngoingEvents <small class="text-muted fs-6">/ @Model.TotalEvents</small></h3>
-                <p class="text-muted">Active Events</p>
-                <p class="card-text border-top pt-2 mt-2">Total tracked events going on right now in the system.</p>
-                <a asp-page="/Organizer/Events/Index" class="btn btn-outline-primary w-100 mt-2">Manage Events</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Real-time Progress Monitoring -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100 border-success">
-            <div class="card-header bg-success text-white">Progress Monitoring</div>
-            <div class="card-body text-center">
-                <h3 class="card-title text-success display-4">@Model.CompletedTasks <small class="text-muted fs-6">/ @Model.TotalTasks</small></h3>
-                <p class="text-muted">Tasks Done</p>
-                @{
-                    var percent = Model.TotalTasks > 0 ? (Model.CompletedTasks * 100 / Model.TotalTasks) : 0;
-                }
-                <div class="progress mb-2" style="height: 20px;">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: @percent%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100">@percent%</div>
-                </div>
-                <p class="card-text border-top pt-2">Real-time task completion rate across all active events.</p>
-                <a asp-page="/Organizer/Tasks/Index" class="btn btn-outline-success w-100 mt-2">Manage Tasks</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Resource Allocation Summaries -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100 border-warning">
-            <div class="card-header bg-warning text-dark">Resource Allocations</div>
-            <div class="card-body text-center">
-                <h3 class="card-title text-warning display-4">@Model.TotalBudgetSpent.ToString("C0")</h3>
-                <p class="text-muted">Total Spent</p>
-                <h5 class="text-dark">Allocated: @Model.TotalBudgetAllocated.ToString("C0")</h5>
-                <p class="card-text border-top pt-2 mt-2">Budget overview across all events and departments.</p>
-                <a asp-page="/Organizer/Budgets/Index" class="btn btn-outline-warning text-dark w-100 mt-2">Manage Budget</a>
+    <!-- Bar Chart -->
+    <div class="col-md-12 mb-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-bold mb-4 text-dark"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Top 5 Event Proposals</h5>
+                <canvas id="budgetBarChart" style="max-height: 350px;"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var budgetLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BudgetEventNames));
+        var budgetAllocated = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BudgetAllocatedData));
+        var budgetSpent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BudgetSpentData));
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Bar Chart Configuration
+            const barCtx = document.getElementById('budgetBarChart')?.getContext('2d');
+            if (barCtx) {
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: budgetLabels,
+                        datasets: [
+                            {
+                                label: 'Allocated Budget',
+                                data: budgetAllocated,
+                                backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Spent Amount',
+                                data: budgetSpent,
+                                backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top', labels: { usePointStyle: true } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

@@ -1,11 +1,11 @@
 @page
 @model Group6_PRN222_Project.Pages.Organizer.Budgets.CreateModel
 @{
-    ViewData["Title"] = "Allocate Budget";
+    ViewData["Title"] = "Create Event Proposal";
 }
 
-<h1>Allocate Budget</h1>
-<h4>Budget Allocation & Requests</h4>
+<h1>Create Event Proposal</h1>
+<h4>Event Proposals & Timeline</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -19,12 +19,12 @@
                 <span asp-validation-for="Budget.EventId" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="Budget.TotalAllocated" class="control-label">Total Allocated</label>
+                <label asp-for="Budget.TotalAllocated" class="control-label">Proposed Budget</label>
                 <input asp-for="Budget.TotalAllocated" class="form-control" type="number" step="0.01" required />
                 <span asp-validation-for="Budget.TotalAllocated" class="text-danger"></span>
             </div>
             <div class="form-group mt-4">
-                <input type="submit" value="Request Allocation" class="btn btn-primary" />
+                <input type="submit" value="Submit Proposal" class="btn btn-primary" />
                 <a asp-page="Index" class="btn btn-secondary">Back to List</a>
             </div>
         </form>

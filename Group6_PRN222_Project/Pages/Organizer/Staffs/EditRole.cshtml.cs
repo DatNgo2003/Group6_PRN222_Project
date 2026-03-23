@@ -23,10 +23,10 @@ namespace Group6_PRN222_Project.Pages.Organizer.Staffs
         [BindProperty]
         public int? SelectedRoleId { get; set; }
 
-        public string StaffFullName { get; set; }
-        public string StaffEmail { get; set; }
+        public string StaffFullName { get; set; } = string.Empty;
+        public string StaffEmail { get; set; } = string.Empty;
 
-        public SelectList RolesList { get; set; }
+        public SelectList RolesList { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -44,8 +44,8 @@ namespace Group6_PRN222_Project.Pages.Organizer.Staffs
 
             TargetUserId = user.UserId;
             SelectedRoleId = user.RoleId;
-            StaffFullName = user.FullName;
-            StaffEmail = user.Email;
+            StaffFullName = user.FullName ?? string.Empty;
+            StaffEmail = user.Email ?? string.Empty;
 
             // Only allow assigning specific roles (Security, MKT, Logistics)
             var allowedRoleNames = new[] { "Security", "MKT", "Marketing", "Logistics", "Staff" };

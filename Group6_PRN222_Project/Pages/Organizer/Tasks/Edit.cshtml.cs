@@ -18,7 +18,7 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
         }
 
         [BindProperty]
-        public EventTask Task { get; set; } = default!;
+        public Group6_PRN222_Project.Models.Task Task { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {

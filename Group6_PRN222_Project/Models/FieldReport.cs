@@ -17,6 +17,8 @@ public partial class FieldReport
 
     public DateTime? ReportTime { get; set; }
 
+    public string? Status { get; set; }
+
     public virtual Event? Event { get; set; }
 
     public virtual User? Staff { get; set; }
