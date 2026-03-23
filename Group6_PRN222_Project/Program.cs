@@ -85,6 +85,16 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();   
 builder.Services.AddScoped<IUserService, UserService>();      
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+
+builder.Services.AddScoped<IRevenueReportService, RevenueReportService>();
+builder.Services.AddScoped<IDepartmentKpiService, DepartmentKpiService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IDiscountPolicyService, DiscountPolicyService>();
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+builder.Services.AddScoped<IParticipantService, ParticipantService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<IFieldReportService, FieldReportService>();
 // ================================================================
 var app = builder.Build();
 
