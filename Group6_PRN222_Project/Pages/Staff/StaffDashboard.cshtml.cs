@@ -22,7 +22,7 @@ namespace Group6_PRN222_Project.Pages.Staff
         public int MyPendingTasks { get; set; }
         public int MyReports { get; set; }
 
-        public List<Group6_PRN222_Project.Models.EventTask> MyTasks { get; set; } = new();
+        public List<Group6_PRN222_Project.Models.Task> MyTasks { get; set; } = new();
         public List<FieldReport> MyFieldReports { get; set; } = new();
 
         public async System.Threading.Tasks.Task OnGetAsync()

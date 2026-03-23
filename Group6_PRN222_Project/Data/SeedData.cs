@@ -1,4 +1,4 @@
-﻿using Group6_PRN222_Project.Models;
+using Group6_PRN222_Project.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Group6_PRN222_Project.Data
@@ -164,13 +164,13 @@ namespace Group6_PRN222_Project.Data
             // =============================================
             // 8. TASKS
             // =============================================
-            var tasks = new List<Group6_PRN222_Project.Models.EventTask>
+            var tasks = new List<Group6_PRN222_Project.Models.Task>
             {
-                new Group6_PRN222_Project.Models.EventTask { EventId = events[0].EventId, TaskName = "Chuẩn bị danh sách VIP",     Description = "Tổng hợp và xác nhận danh sách khách VIP cho sự kiện",          Deadline = DateTime.Now.AddDays(10), Status = "In Progress", AssignedTo = userSecurity.UserId },
-                new Group6_PRN222_Project.Models.EventTask { EventId = events[0].EventId, TaskName = "Chạy quảng cáo Facebook",    Description = "Thiết lập và chạy chiến dịch quảng cáo trên Facebook Ads",       Deadline = DateTime.Now.AddDays(5),  Status = "To Do",       AssignedTo = userMkt.UserId      },
-                new Group6_PRN222_Project.Models.EventTask { EventId = events[0].EventId, TaskName = "Kiểm tra thiết bị âm thanh", Description = "Kiểm tra toàn bộ hệ thống âm thanh, ánh sáng sân khấu",         Deadline = DateTime.Now.AddDays(14), Status = "To Do",       AssignedTo = userLogistics.UserId},
-                new Group6_PRN222_Project.Models.EventTask { EventId = events[6].EventId, TaskName = "Setup sân khấu chính",       Description = "Lắp đặt và kiểm tra toàn bộ sân khấu chính cho sự kiện",        Deadline = DateTime.Now.AddDays(18), Status = "To Do",       AssignedTo = userLogistics.UserId},
-                new Group6_PRN222_Project.Models.EventTask { EventId = events[7].EventId, TaskName = "Thiết kế backdrop sự kiện",  Description = "Thiết kế và in ấn backdrop theo brief từ ban tổ chức",           Deadline = DateTime.Now.AddDays(28), Status = "To Do",       AssignedTo = userMkt.UserId      },
+                new Group6_PRN222_Project.Models.Task { EventId = events[0].EventId, TaskName = "Chuẩn bị danh sách VIP",     Description = "Tổng hợp và xác nhận danh sách khách VIP cho sự kiện",          Deadline = DateTime.Now.AddDays(10), Status = "In Progress", AssignedTo = userSecurity.UserId },
+                new Group6_PRN222_Project.Models.Task { EventId = events[0].EventId, TaskName = "Chạy quảng cáo Facebook",    Description = "Thiết lập và chạy chiến dịch quảng cáo trên Facebook Ads",       Deadline = DateTime.Now.AddDays(5),  Status = "To Do",       AssignedTo = userMkt.UserId      },
+                new Group6_PRN222_Project.Models.Task { EventId = events[0].EventId, TaskName = "Kiểm tra thiết bị âm thanh", Description = "Kiểm tra toàn bộ hệ thống âm thanh, ánh sáng sân khấu",         Deadline = DateTime.Now.AddDays(14), Status = "To Do",       AssignedTo = userLogistics.UserId},
+                new Group6_PRN222_Project.Models.Task { EventId = events[6].EventId, TaskName = "Setup sân khấu chính",       Description = "Lắp đặt và kiểm tra toàn bộ sân khấu chính cho sự kiện",        Deadline = DateTime.Now.AddDays(18), Status = "To Do",       AssignedTo = userLogistics.UserId},
+                new Group6_PRN222_Project.Models.Task { EventId = events[7].EventId, TaskName = "Thiết kế backdrop sự kiện",  Description = "Thiết kế và in ấn backdrop theo brief từ ban tổ chức",           Deadline = DateTime.Now.AddDays(28), Status = "To Do",       AssignedTo = userMkt.UserId      },
             };
             db.Tasks.AddRange(tasks);
             await db.SaveChangesAsync();

@@ -21,7 +21,7 @@ namespace Group6_PRN222_Project.Pages.Organizer
         public int MyTotalTasks { get; set; }
         public int MyPendingTasks { get; set; }
         public List<Event> MyEvents { get; set; } = new();
-        public List<Group6_PRN222_Project.Models.EventTask> MyTasks { get; set; } = new();
+        public List<Group6_PRN222_Project.Models.Task> MyTasks { get; set; } = new();
 
         public async System.Threading.Tasks.Task OnGetAsync()
         {
