@@ -1,41 +1,104 @@
-// ================================================================
-// Program.cs — thêm các dòng này vào file Program.cs hiện có
-// ================================================================
+using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Data;
 using Group6_PRN222_Project.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Project_PRN222.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. DbContext (đã có từ scaffold — giữ nguyên connection string)
+// ── Database ───────────────────────────────────────────────────────────
 builder.Services.AddDbContext<ProjectPrn222Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
 
-// 2. Razor Pages
-builder.Services.AddRazorPages();
-builder.Services.AddHttpContextAccessor();
-
-// 3. Session
+// ── Session (lưu JWT token phía server) ───────────────────────────────
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromHours(8);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.Name = ".EMS.Session";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
-// 4. DI — đăng ký Services
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-// Sau thêm tiếp:
-// builder.Services.AddScoped<IEventService, EventService>();
-// builder.Services.AddScoped<IAuthService,  AuthService>();
+// ── JWT Authentication ─────────────────────────────────────────────────
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+        };
 
+        // Đọc token từ cookie (Razor Pages dùng cookie thay vì header)
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                var token = ctx.HttpContext.Request.Cookies["auth_token"]
+                         ?? ctx.HttpContext.Session.GetString("auth_token");
+                if (!string.IsNullOrEmpty(token))
+                    ctx.Token = token;
+                return System.Threading.Tasks.Task.CompletedTask;
+            },
+            // Redirect về Login thay vì trả 401 JSON
+            OnChallenge = ctx =>
+            {
+                ctx.HandleResponse();
+                ctx.Response.Redirect("/Account/Login?returnUrl=" +
+                    Uri.EscapeDataString(ctx.Request.Path));
+                return System.Threading.Tasks.Task.CompletedTask;
+            }
+        };
+    });
+
+// ── Authorization Policies ─────────────────────────────────────────────
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+    options.AddPolicy("OrganizerOnly", p => p.RequireRole("Organizer"));
+    options.AddPolicy("StaffOnly", p => p.RequireRole("Staff(Security)", "Staff(MKT)", "Staff(Logistics)"));
+    options.AddPolicy("AnyStaff", p => p.RequireRole(
+        "Admin", "Organizer",
+        "Staff(Security)", "Staff(MKT)", "Staff(Logistics)"));
+});
+
+// ── Services ───────────────────────────────────────────────────────────
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddRazorPages();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();   
+builder.Services.AddScoped<IUserService, UserService>();      
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+
+builder.Services.AddScoped<IRevenueReportService, RevenueReportService>();
+builder.Services.AddScoped<IDepartmentKpiService, DepartmentKpiService>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IDiscountPolicyService, DiscountPolicyService>();
+builder.Services.AddScoped<IEquipmentService, EquipmentService>();
+builder.Services.AddScoped<IParticipantService, ParticipantService>();
+builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<IFieldReportService, FieldReportService>();
 // ================================================================
 var app = builder.Build();
 
+// ── Middleware pipeline ────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -45,11 +108,12 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
-// QUAN TRỌNG: UseSession phải trước MapRazorPages
-app.UseSession();
-
+app.UseSession();           // ← Session trước Authentication
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
+
+// ── Seed data khi khởi động (chỉ chạy nếu DB trống) ──────────────────
+await SeedData.InitializeAsync(app.Services);
 
 app.Run();

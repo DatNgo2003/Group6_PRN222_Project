@@ -1,0 +1,21 @@
+﻿@page
+@model Group6_PRN222_Project.Pages.AccessDeniedModel
+@{
+    ViewData["Title"] = "Không có quyền truy cập";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<div style="min-height:60vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
+    <div style="text-align:center;max-width:480px">
+        <div style="font-family:var(--ff-display);font-size:96px;font-weight:700;color:var(--c-sand);line-height:1;margin-bottom:16px">403</div>
+        <h1 style="font-family:var(--ff-display);font-size:32px;font-weight:600;margin-bottom:12px">Không có quyền truy cập</h1>
+        <p style="color:var(--c-ink-60);font-size:15px;margin-bottom:32px;line-height:1.7">
+            Bạn không có quyền truy cập vào trang này.<br>
+            Vui lòng liên hệ Admin nếu bạn cho rằng đây là lỗi.
+        </p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a asp-page="/Index" class="btn btn-primary">Về trang chủ</a>
+            <a asp-page="/Account/Login" class="btn btn-ghost">Đăng nhập lại</a>
+        </div>
+    </div>
+</div>

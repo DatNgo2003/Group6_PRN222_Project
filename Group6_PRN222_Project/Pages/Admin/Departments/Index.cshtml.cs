@@ -1,12 +1,14 @@
+using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project_PRN222.Helpers;
-using Group6_PRN222_Project.Models;
 using Project_PRN222.Services;
 
 namespace Project_PRN222.Pages.Admin.Departments
 {
+    [AuthorizeRole("Admin")]
     public class IndexModel : PageModel
     {
         private readonly IDepartmentService  _deptSvc;
@@ -27,7 +29,6 @@ namespace Project_PRN222.Pages.Admin.Departments
 
         public async Task<IActionResult> OnGetAsync()
         {
-#if DEBUG
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
             {
                 HttpContext.Session.SetInt32("UserID",   1);
@@ -35,10 +36,8 @@ namespace Project_PRN222.Pages.Admin.Departments
                 HttpContext.Session.SetString("FullName", "Dev Admin");
                 HttpContext.Session.SetString("UserName", "admin");
             }
-#else
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#endif
+                return RedirectToPage("/Admin/Login");
 
             var depts = await _deptSvc.GetAllAsync();
 
@@ -60,13 +59,10 @@ namespace Project_PRN222.Pages.Admin.Departments
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-#if DEBUG
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#else
+                return RedirectToPage("/Admin/Login");
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
-#endif
+                return RedirectToPage("/Admin/Login");
 
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
             var success = await _deptSvc.DeleteAsync(id);
