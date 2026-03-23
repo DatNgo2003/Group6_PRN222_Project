@@ -2,7 +2,6 @@ using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project_PRN222.Helpers;
-using Group6_PRN222_Project.Models;
 using Project_PRN222.Services;
 using Group6_PRN222_Project.Auth;
 namespace Project_PRN222.Pages.Admin.Users

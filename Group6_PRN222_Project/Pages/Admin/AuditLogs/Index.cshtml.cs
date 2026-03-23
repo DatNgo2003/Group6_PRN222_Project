@@ -37,7 +37,7 @@ namespace Project_PRN222.Pages.Admin.AuditLogs
                 HttpContext.Session.SetString("UserName", "admin");
             }
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var query = _db.SystemAuditLogs
                            .Include(l => l.User)

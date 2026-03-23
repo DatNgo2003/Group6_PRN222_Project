@@ -29,16 +29,16 @@ namespace Project_PRN222.Pages.Admin.Departments
                 HttpContext.Session.SetString("UserName", "admin");
             }
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             if (await _deptSvc.NameExistsAsync(InputDept.DepartmentName ?? ""))
                 ModelState.AddModelError("InputDept.DepartmentName", "Tên phòng ban đã tồn tại.");

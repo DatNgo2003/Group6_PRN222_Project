@@ -37,7 +37,7 @@ namespace Project_PRN222.Pages.Admin.Departments
                 HttpContext.Session.SetString("UserName", "admin");
             }
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var depts = await _deptSvc.GetAllAsync();
 
@@ -60,9 +60,9 @@ namespace Project_PRN222.Pages.Admin.Departments
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
             var success = await _deptSvc.DeleteAsync(id);

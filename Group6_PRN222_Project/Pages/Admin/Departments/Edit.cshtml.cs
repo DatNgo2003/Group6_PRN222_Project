@@ -29,7 +29,7 @@ namespace Project_PRN222.Pages.Admin.Departments
                 HttpContext.Session.SetString("UserName", "admin");
             }
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var dept = await _deptSvc.GetByIdAsync(id);
             if (dept == null) return NotFound();
@@ -41,9 +41,9 @@ namespace Project_PRN222.Pages.Admin.Departments
         public async Task<IActionResult> OnPostAsync()
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             if (await _deptSvc.NameExistsAsync(InputDept.DepartmentName ?? "", InputDept.DepartmentId))
                 ModelState.AddModelError("InputDept.DepartmentName", "Tên phòng ban đã tồn tại.");
