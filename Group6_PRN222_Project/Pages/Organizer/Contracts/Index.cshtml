@@ -5,37 +5,62 @@
     ViewData["Title"] = "Contracts Management";
 }
 
-<h1>Contracts Management</h1>
+<div class="page-header">
+    <div class="page-title">
+        <h1>Contracts Management</h1>
+        <p class="subtitle">Quản lý hợp đồng</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Create New Contract
+    </a>
+</div>
 
-<p>
-    <a asp-page="Create" class="btn btn-primary">Create New Contract</a>
-</p>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Contract Number</th>
-            <th>Vendor Name</th>
-            <th>Value</th>
-            <th>Sign Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Contracts)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.ContractNumber)</td>
-                <td>@Html.DisplayFor(modelItem => item.VendorName)</td>
-                <td>@Html.DisplayFor(modelItem => item.ContractValue)</td>
-                <td>@Html.DisplayFor(modelItem => item.SignDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
-                <td>
-                    <a asp-page="./Edit" asp-route-id="@item.ContractId" class="btn btn-sm btn-warning">Edit</a> |
-                    <a asp-page="./Delete" asp-route-id="@item.ContractId" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Contract Number</th>
+                    <th>Vendor Name</th>
+                    <th>Value</th>
+                    <th>Sign Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Contracts)
+                {
+                    <tr>
+                        <td class="id-cell"><strong>@Html.DisplayFor(modelItem => item.ContractNumber)</strong></td>
+                        <td style="color:var(--text-3)">@Html.DisplayFor(modelItem => item.VendorName)</td>
+                        <td style="color:var(--c-gold); font-weight:600">@Html.DisplayFor(modelItem => item.ContractValue)</td>
+                        <td class="date-cell">@Html.DisplayFor(modelItem => item.SignDate)</td>
+                        <td>
+                            @{
+                                var bc = item.Status == "Active" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :
+                                         item.Status == "Signed" ? "background:rgba(96,165,250,.15);color:#60A5FA" :
+                                         item.Status == "Expired" ? "background:rgba(220,60,60,.10);color:#f87171" :
+                                         "background:rgba(250,248,244,.07);color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@bc">@item.Status</span>
+                        </td>
+                        <td class="action-cell">
+                            <a asp-page="./Edit" asp-route-id="@item.ContractId" class="btn-action btn-edit">Edit</a>
+                            <a asp-page="./Delete" asp-route-id="@item.ContractId" class="btn-action btn-delete">Delete</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Contracts.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>No contracts found.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

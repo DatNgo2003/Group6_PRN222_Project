@@ -4,44 +4,68 @@
     ViewData["Title"] = "Requirements Management";
 }
 
-<h1>Requirements Management</h1>
+<div class="page-header">
+    <div class="page-title">
+        <h1>Requirements Management</h1>
+        <p class="subtitle">Quản lý yêu cầu thiết bị</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Create New Requirement
+    </a>
+</div>
 
-<p>
-    <a asp-page="Create" class="btn btn-primary">Create New Requirement</a>
-</p>
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Requirement / Equipment</th>
-            <th>Required Quantity</th>
-            <th>Warehouse Stock</th>
-            <th>Status</th>
-            <th>Note</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.EventEquipments)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Equipment.EquipmentName)</td>
-                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
-                <td>
-                    @{ 
-                        var totalStock = item.Equipment.TotalStock ?? 0;
-                        var isSufficient = totalStock >= item.Quantity;
-                        var colorClass = isSufficient ? "text-success" : "text-danger";
-                    }
-                    <span class="@colorClass">@totalStock</span>
-                </td>
-                <td>@Html.DisplayFor(modelItem => item.Status)</td>
-                <td>@Html.DisplayFor(modelItem => item.Note)</td>
-                <td>
-                    <a asp-page="./Edit" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn btn-sm btn-warning">Edit</a> |
-                    <a asp-page="./Delete" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Requirement / Equipment</th>
+                    <th>Required Quantity</th>
+                    <th>Warehouse Stock</th>
+                    <th>Status</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.EventEquipments)
+                {
+                    <tr>
+                        <td><strong>@Html.DisplayFor(modelItem => item.Equipment.EquipmentName)</strong></td>
+                        <td style="color:var(--text-3)">@Html.DisplayFor(modelItem => item.Quantity)</td>
+                        <td>
+                            @{ 
+                                var totalStock = item.Equipment.TotalStock ?? 0;
+                                var isSufficient = totalStock >= item.Quantity;
+                                var colorClass = isSufficient ? "color:#6ee7b7" : "color:#f87171";
+                            }
+                            <span style="@colorClass; font-weight:600">@totalStock</span>
+                        </td>
+                        <td>
+                            @{
+                                var bc = item.Status == "Approved" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :
+                                         item.Status == "Requested" ? "background:rgba(96,165,250,.15);color:#60A5FA" :
+                                         "background:rgba(250,248,244,.07);color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@bc">@item.Status</span>
+                        </td>
+                        <td style="color:var(--text-3); font-size:13px">@Html.DisplayFor(modelItem => item.Note)</td>
+                        <td class="action-cell">
+                            <a asp-page="./Edit" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-edit">Edit</a>
+                            <a asp-page="./Delete" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-delete">Delete</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.EventEquipments.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>No requirements found.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
