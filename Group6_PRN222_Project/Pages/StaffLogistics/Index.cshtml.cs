@@ -20,7 +20,7 @@ namespace Project_PRN222.Pages.StaffLogistics
         public int EquipmentReportsCount { get; set; }
         public int IssueReportsCount { get; set; }
 
-        public List<EventTask> RecentTasks { get; set; } = new();
+        public List<Group6_PRN222_Project.Models.Task> RecentTasks { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {

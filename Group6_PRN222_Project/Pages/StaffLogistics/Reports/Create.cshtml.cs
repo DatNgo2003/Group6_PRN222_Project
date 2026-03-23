@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Project_PRN222.Helpers;
 using Project_PRN222.Services;
 
+using AppTask = System.Threading.Tasks.Task;
+
 namespace Project_PRN222.Pages.StaffLogistics.Reports
 {
     public class CreateModel : PageModel
@@ -105,7 +107,7 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
             return RedirectToPage("Index");
         }
 
-        private async Task LoadEventsForActorAsync()
+        private async AppTask LoadEventsForActorAsync()
         {
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
 

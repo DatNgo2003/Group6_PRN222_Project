@@ -18,7 +18,7 @@ namespace Project_PRN222.Pages.StaffLogistics.Tasks
             _audit = audit;
         }
 
-        public List<EventTask> Tasks { get; set; } = new();
+        public List<Group6_PRN222_Project.Models.Task> Tasks { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {

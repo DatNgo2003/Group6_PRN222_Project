@@ -24,7 +24,17 @@ builder.Services.AddSession(options =>
 });
 
 // ── JWT Authentication ─────────────────────────────────────────────────
-var jwtKey = builder.Configuration["Jwt:Key"]!;
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(jwtKey) ||
+    string.IsNullOrWhiteSpace(jwtIssuer) ||
+    string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException(
+        "Missing JWT configuration. Please set Jwt:Key, Jwt:Issuer, Jwt:Audience in appsettings.json (or environment variables).");
+}
 builder.Services
     .AddAuthentication(options =>
     {
@@ -38,9 +48,9 @@ builder.Services
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidIssuer = jwtIssuer,
             ValidateAudience = true,
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidAudience = jwtAudience,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
         };

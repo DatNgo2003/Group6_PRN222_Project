@@ -12,4 +12,6 @@ public partial class Equipment
     public int? TotalStock { get; set; }
 
     public string? Status { get; set; }
+
+    public virtual ICollection<EventEquipment> EventEquipments { get; set; } = new List<EventEquipment>();
 }
