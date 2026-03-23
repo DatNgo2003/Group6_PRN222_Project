@@ -1,0 +1,168 @@
+@page
+@model Project_PRN222.Pages.Admin.Config.DiscountPoliciesModel
+@{
+    ViewData["Title"] = "Chính sách giảm giá";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+@section Styles {
+<style>
+.filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px; }
+.filter-group { display:flex; flex-direction:column; gap:5px; }
+.filter-group label { font-size:.75rem; font-weight:600; color:var(--text-3); }
+.filter-group select, .filter-group input { min-width:160px; }
+.pct-pill { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:600; background:var(--c-gold-pale); color:var(--c-gold); border:1px solid rgba(184,151,90,.2); }
+.s-active   { background:rgba(74,154,122,.12); color:#6ee7b7; }
+.s-inactive { background:rgba(220,60,60,.09);  color:#f87171; }
+.status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:600; }
+.modal-backdrop { background:rgba(0,0,0,.55); padding:60px 24px; }
+.modal-box { background:var(--card-bg); border:1px solid var(--card-bdr); border-radius:var(--r-lg); max-width:500px; margin:0 auto; overflow:hidden; }
+.modal-header { padding:16px 22px; border-bottom:1px solid var(--card-bdr); font-size:.72rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:rgba(184,151,90,.55); background:rgba(0,0,0,.12); }
+.modal-body { padding:22px; }
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.form-group label { font-size:.79rem; font-weight:600; color:var(--text-2); }
+.modal-footer { padding:14px 22px; border-top:1px solid var(--card-bdr); display:flex; gap:10px; background:rgba(0,0,0,.1); }
+</style>
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Chính sách giảm giá</h1>
+        <p class="subtitle">Quản lý các chính sách discount theo sự kiện</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal()">+ Thêm mới</button>
+</div>
+
+@if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+@if (TempData["ErrorMessage"]   != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div>   }
+
+<form method="get" class="filter-row">
+    <div class="filter-group">
+        <label>Sự kiện</label>
+        <select name="EventId" class="form-control" onchange="this.form.submit()">
+            <option value="">Tất cả</option>
+            @foreach (var ev in Model.Events)
+            {
+                <option value="@ev.EventId" selected="@(Model.EventId == ev.EventId)">@ev.EventName</option>
+            }
+        </select>
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-toolbar">
+        <span style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(184,151,90,.55)">Danh sách</span>
+        <span class="record-count">@Model.Policies.Count bản ghi</span>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tên chính sách</th>
+                    <th>Sự kiện</th>
+                    <th>Giảm giá</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Policies)
+                {
+                    <tr>
+                        <td class="id-cell">@p.PolicyId</td>
+                        <td style="font-weight:600;color:var(--text-1)">@p.PolicyName</td>
+                        <td style="font-size:.84rem;color:var(--text-2)">@(p.Event?.EventName ?? "—")</td>
+                        <td><span class="pct-pill">@p.DiscountPercent%</span></td>
+                        <td><span class="status-badge @(p.Status == "Active" ? "s-active" : "s-inactive")">@p.Status</span></td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <button class="btn-action btn-edit"
+                                    onclick="openEditModal(@p.PolicyId,'@p.PolicyName',@p.EventId,@p.DiscountPercent,'@p.Status')">
+                                    Sửa
+                                </button>
+                                <form method="post" asp-page-handler="Delete" style="display:inline"
+                                      onsubmit="return confirm('Xoá chính sách này?')">
+                                    <input type="hidden" name="id" value="@p.PolicyId" />
+                                    <button type="submit" class="btn-action btn-delete">Xoá</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Policies.Any())
+                {
+                    <tr><td colspan="6" style="text-align:center;padding:40px 0;color:var(--text-3)">Không có dữ liệu</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modal" style="display:none">
+    <div class="modal-backdrop">
+        <div class="modal-box">
+            <div class="modal-header" id="modal-title">Thêm chính sách</div>
+            <form method="post" id="modal-form">
+                <input type="hidden" name="InputPolicy.PolicyId" id="f-id" value="0" />
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Tên chính sách <span class="required">*</span></label>
+                        <input class="form-control" name="InputPolicy.PolicyName" id="f-name" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Sự kiện</label>
+                        <select class="form-control" name="InputPolicy.EventId" id="f-event">
+                            <option value="">— Không gắn sự kiện —</option>
+                            @foreach (var ev in Model.Events)
+                            {
+                                <option value="@ev.EventId">@ev.EventName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Giảm giá (%) <span class="required">*</span></label>
+                        <input type="number" min="0" max="100" step="0.01" class="form-control"
+                               name="InputPolicy.DiscountPercent" id="f-pct" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Trạng thái</label>
+                        <select class="form-control" name="InputPolicy.Status" id="f-status">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" id="modal-submit">Lưu</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Huỷ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function openModal() {
+    document.getElementById('f-id').value = '0';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-event').value = '';
+    document.getElementById('f-pct').value = '';
+    document.getElementById('f-status').value = 'Active';
+    document.getElementById('modal-title').textContent = 'Thêm chính sách';
+    document.getElementById('modal-form').action = '?handler=Create';
+    document.getElementById('modal').style.display = 'block';
+}
+function openEditModal(id, name, eventId, pct, status) {
+    document.getElementById('f-id').value = id;
+    document.getElementById('f-name').value = name;
+    document.getElementById('f-event').value = eventId || '';
+    document.getElementById('f-pct').value = pct;
+    document.getElementById('f-status').value = status;
+    document.getElementById('modal-title').textContent = 'Sửa chính sách';
+    document.getElementById('modal-form').action = '?handler=Edit';
+    document.getElementById('modal').style.display = 'block';
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+</script>
+}
