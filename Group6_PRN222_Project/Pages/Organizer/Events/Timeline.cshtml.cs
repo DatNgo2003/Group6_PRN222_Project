@@ -84,8 +84,25 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
             var ev = await _context.Events.FindAsync(id);
             if (ev == null) return NotFound();
 
-            var conceptParts = new List<string>();
             var count = Math.Min(StepTimes?.Count ?? 0, StepNames?.Count ?? 0);
+
+            // Validate chronological order of step times
+            DateTime? prevTime = null;
+            for (int i = 0; i < count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(StepTimes[i]) && DateTime.TryParse(StepTimes[i], out var currentTime))
+                {
+                    if (prevTime.HasValue && currentTime <= prevTime.Value)
+                    {
+                        TempData["Error"] = $"Thời gian của bước \"{StepNames[i]}\" phải sau bước trước đó.";
+                        Event = ev;
+                        return Page();
+                    }
+                    prevTime = currentTime;
+                }
+            }
+
+            var conceptParts = new List<string>();
             
             for(int i = 0; i < count; i++)
             {

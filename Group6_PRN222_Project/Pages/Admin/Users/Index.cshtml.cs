@@ -41,7 +41,7 @@ namespace Project_PRN222.Pages.Admin.Users
             }
 
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var all = await _userSvc.GetAllAsync();
 
@@ -62,9 +62,9 @@ namespace Project_PRN222.Pages.Admin.Users
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
 

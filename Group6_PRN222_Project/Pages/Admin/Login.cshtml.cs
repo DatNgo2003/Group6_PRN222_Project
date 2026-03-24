@@ -1,4 +1,4 @@
-﻿using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Auth;
 using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -90,7 +90,7 @@ namespace Group6_PRN222_Project.Pages.Admin
             return roleName switch
             {
                 "Admin" => RedirectToPage("/Admin/DashBoard/AdminDashboard"),
-                "Organizer" => RedirectToPage("/Organizer/OrganizerDashboard"),
+                "Organizer" => RedirectToPage("/Organizer/Dashboard"),
                 "Staff(Security)" => RedirectToPage("/Staff/StaffDashboard"),
                 "Staff(MKT)" => RedirectToPage("/Staff/StaffDashboard"),
                 "Staff(Logistics)" => RedirectToPage("/Staff/StaffDashboard"),
@@ -114,6 +114,12 @@ namespace Group6_PRN222_Project.Pages.Admin
             HttpContext.Session.SetString("fullname", user.FullName ?? user.Username);
             HttpContext.Session.SetInt32("userid", user.UserId);
             HttpContext.Session.SetString("role", user.Role?.RoleName ?? "");
+
+            // SessionHelper uses PascalCase keys — set them too so Organizer pages work
+            HttpContext.Session.SetInt32("UserID", user.UserId);
+            HttpContext.Session.SetString("UserName", user.Username);
+            HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
+            HttpContext.Session.SetString("Role", user.Role?.RoleName ?? "");
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Project_PRN222.Pages.Admin.Users
         public async Task<IActionResult> OnGetAsync(int id)
         {
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             var user = await _userSvc.GetByIdAsync(id);
             if (user == null) return NotFound();
@@ -45,7 +45,7 @@ namespace Project_PRN222.Pages.Admin.Users
         public async Task<IActionResult> OnPostAsync()
         {
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             // Validate new password nếu có nhập
             if (!string.IsNullOrWhiteSpace(NewPassword))

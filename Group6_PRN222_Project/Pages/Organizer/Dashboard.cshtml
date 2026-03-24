@@ -245,7 +245,7 @@
     <script>
         var budgetLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BudgetEventNames));
         var budgetAllocated = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BudgetAllocatedData));
-        var budgetSpent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BudgetSpentData));
+        var budgetRevenue = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueData));
 
         document.addEventListener('DOMContentLoaded', function () {
             // Configure Chart.js for dark theme
@@ -267,8 +267,8 @@
                                 borderSkipped: false
                             },
                             {
-                                label: 'Spent Amount',
-                                data: budgetSpent,
+                                label: 'Revenue',
+                                data: budgetRevenue,
                                 backgroundColor: 'rgba(96,165,250,0.85)',
                                 borderRadius: 4,
                                 borderSkipped: false

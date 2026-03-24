@@ -28,7 +28,7 @@ namespace Group6_PRN222_Project.Pages.Organizer
 
         public List<string> BudgetEventNames { get; set; } = new();
         public List<decimal> BudgetAllocatedData { get; set; } = new();
-        public List<decimal> BudgetSpentData { get; set; } = new();
+        public List<decimal> RevenueData { get; set; } = new();
 
         public async System.Threading.Tasks.Task OnGetAsync()
         {
@@ -58,18 +58,21 @@ namespace Group6_PRN222_Project.Pages.Organizer
             TotalBudgetAllocated = await budgetQuery.SumAsync(b => b.TotalAllocated) ?? 0m;
             TotalBudgetSpent = await budgetQuery.SumAsync(b => b.SpentAmount) ?? 0m;
 
-
-
+            // Chart: only show Approved budgets
             var topBudgets = await budgetQuery
                 .Include(b => b.Event)
-                .Where(b => b.Event != null)
+                    .ThenInclude(e => e!.Tickets)
+                .Where(b => b.Event != null && b.ApprovalStatus == "Approved")
                 .OrderByDescending(b => b.TotalAllocated)
                 .Take(5)
                 .ToListAsync();
 
             BudgetEventNames = topBudgets.Select(b => b.Event!.EventName).ToList();
             BudgetAllocatedData = topBudgets.Select(b => b.TotalAllocated ?? 0).ToList();
-            BudgetSpentData = topBudgets.Select(b => b.SpentAmount ?? 0).ToList();
+            // Revenue = Event.Amount (ticket price) × number of tickets
+            RevenueData = topBudgets.Select(b =>
+                (b.Event!.Amount ?? 0) * b.Event.Tickets.Count
+            ).ToList();
         }
     }
 }

@@ -41,6 +41,16 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Validate StartDate < EndDate
+            if (Event.StartDate.HasValue && Event.EndDate.HasValue && Event.StartDate >= Event.EndDate)
+            {
+                ModelState.AddModelError(string.Empty, "Ngày bắt đầu phải trước ngày kết thúc.");
+                ViewData["OrganizerId"] = new SelectList(_context.Users, "UserId", "FullName");
+                var statuses = new[] { "Planning", "Ongoing", "Completed", "Cancelled" };
+                ViewData["StatusList"] = new SelectList(statuses);
+                return Page();
+            }
+
             _context.Attach(Event).State = EntityState.Modified;
 
             try
