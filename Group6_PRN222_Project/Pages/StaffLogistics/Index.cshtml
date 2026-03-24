@@ -1,0 +1,133 @@
+@page
+@model Project_PRN222.Pages.StaffLogistics.IndexModel
+
+@{
+    ViewData["Title"] = "Staff (Logistics) — Dashboard";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Vận hành thực địa</h1>
+        <p class="subtitle">Tác vụ & báo cáo logistics dành cho Staff (Logistics)</p>
+    </div>
+    <div class="header-actions">
+        <a asp-page="/StaffLogistics/Tasks/Index" class="btn btn-secondary">Xem Tasks</a>
+        <a asp-page="/StaffLogistics/Reports/Create" class="btn btn-primary">Tạo báo cáo</a>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
+    .page-title h1 { font-size:1.6rem; font-weight:700; margin:0 0 4px; color:var(--text-primary); }
+    .subtitle { color:var(--text-muted); font-size:.9rem; margin:0; }
+    .header-actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+    .btn {
+        display:inline-flex; align-items:center; gap:8px;
+        padding:10px 16px; border-radius:10px; font-weight:700; font-size:.9rem;
+        text-decoration:none; border:1px solid var(--border);
+    }
+    .btn-primary { background: #1f6e43; border-color: #1f6e43; color: #fff; }
+    .btn-primary:hover { background: #2f855a; border-color: #2f855a; }
+    .btn-secondary { background: var(--card-bg); color: var(--text-primary); border-color: var(--border); }
+    .btn-secondary:hover { background: #fff; }
+
+    .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:16px; }
+    @@media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 18px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.03);
+    }
+    .stat-label { color: var(--text-muted); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; }
+    .stat-value { font-size: 2rem; font-weight: 800; margin-top: 10px; color: var(--text-primary); }
+
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-top: 16px;
+    }
+    .card-head { padding: 16px 18px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .card-head h2 { font-size:1.05rem; font-weight:800; }
+    .card-body { padding: 12px 18px 18px; }
+
+    table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    th { text-align:left; padding: 12px 10px; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 10px; border-bottom: 1px solid var(--border-light); }
+    tr:last-child td { border-bottom:none; }
+
+    .badge {
+        display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px;
+        font-weight:800; font-size:.8rem;
+        background: #eef2ff; color: #3730a3;
+    }
+</style>
+}
+
+<div class="grid-3">
+    <div class="stat-card">
+        <div class="stat-label">To Do</div>
+        <div class="stat-value">@Model.ToDoCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">In Progress</div>
+        <div class="stat-value">@Model.InProgressCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Done</div>
+        <div class="stat-value">@Model.DoneCount</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <h2>Gần đây nhất</h2>
+        <div style="color:var(--text-muted); font-weight:700; font-size:.9rem;">
+            Logistics reports: <strong>@Model.LogisticsReportsCount</strong> |
+            Equipment reports: <strong>@Model.EquipmentReportsCount</strong> |
+            Issue reports: <strong>@Model.IssueReportsCount</strong>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (!Model.RecentTasks.Any())
+        {
+            <div style="padding:18px 0; color:var(--text-muted); font-weight:700;">
+                Chưa có task nào được gán cho bạn.
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Sự kiện</th>
+                        <th>Deadline</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var t in Model.RecentTasks)
+                {
+                    <tr>
+                        <td style="font-weight:800;">@(t.TaskName ?? "—")</td>
+                        <td>@(t.Event?.EventName ?? "—")</td>
+                        <td>@(t.Deadline?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                        <td>
+                            <span class="badge">@(t.Status ?? "—")</span>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+

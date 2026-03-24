@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Group6_PRN222_Project.Models;
@@ -18,7 +18,19 @@ namespace Group6_PRN222_Project.Auth
         // ── Tạo JWT token từ User ──────────────────────────────────────
         public string GenerateToken(User user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+            var jwtKey = _config["Jwt:Key"];
+            var jwtIssuer = _config["Jwt:Issuer"];
+            var jwtAudience = _config["Jwt:Audience"];
+
+            if (string.IsNullOrWhiteSpace(jwtKey) ||
+                string.IsNullOrWhiteSpace(jwtIssuer) ||
+                string.IsNullOrWhiteSpace(jwtAudience))
+            {
+                throw new InvalidOperationException(
+                    "Missing JWT configuration. Please set Jwt:Key, Jwt:Issuer, Jwt:Audience in appsettings.json (or environment variables).");
+            }
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.UtcNow.AddHours(
                           int.Parse(_config["Jwt:ExpireHours"] ?? "8"));
@@ -33,8 +45,8 @@ namespace Group6_PRN222_Project.Auth
             };
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: jwtIssuer,
+                audience: jwtAudience,
                 claims: claims,
                 expires: expires,
                 signingCredentials: creds);
@@ -48,15 +60,24 @@ namespace Group6_PRN222_Project.Auth
             try
             {
                 var handler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
+                var jwtKey = _config["Jwt:Key"];
+                var jwtIssuer = _config["Jwt:Issuer"];
+                var jwtAudience = _config["Jwt:Audience"];
+                if (string.IsNullOrWhiteSpace(jwtKey) ||
+                    string.IsNullOrWhiteSpace(jwtIssuer) ||
+                    string.IsNullOrWhiteSpace(jwtAudience))
+                {
+                    return null;
+                }
+                var key = Encoding.UTF8.GetBytes(jwtKey);
                 var parameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = _config["Jwt:Issuer"],
+                    ValidIssuer = jwtIssuer,
                     ValidateAudience = true,
-                    ValidAudience = _config["Jwt:Audience"],
+                    ValidAudience = jwtAudience,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
                 };

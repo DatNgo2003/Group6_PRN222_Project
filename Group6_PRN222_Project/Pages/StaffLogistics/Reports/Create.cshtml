@@ -1,0 +1,149 @@
+@page
+@model Project_PRN222.Pages.StaffLogistics.Reports.CreateModel
+
+@{
+    ViewData["Title"] = "Staff (Logistics) — Create Report";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+@section Styles {
+<style>
+    .form-wrap {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+        max-width: 860px;
+    }
+
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .label {
+        display:block;
+        font-weight: 900;
+        font-size: .85rem;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+    }
+
+    input.control, select.control, textarea.control {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    textarea.control { min-height: 160px; font-weight: 700; line-height: 1.35; }
+
+    .help { color: var(--text-muted); font-weight: 700; font-size: .86rem; margin-top: 6px; }
+
+    .btn-row { display:flex; gap: 10px; align-items:center; flex-wrap: wrap; margin-top: 14px; }
+    .btn {
+        display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+        font-weight: 900; cursor:pointer; text-decoration:none; background:#fff;
+    }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color:#fff; }
+    .btn-primary:hover { background: var(--accent-dim); border-color: var(--accent-dim); }
+
+    .validation {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #f5c6cb;
+        background: #f8d7da;
+        color: #721c24;
+        font-weight: 900;
+    }
+    .back-link { color: var(--text-primary); font-weight: 900; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+</style>
+}
+
+<div class="page-header" style="margin-bottom: 16px;">
+    <div>
+        <h1 style="font-size:1.4rem;margin-bottom:6px;">Tạo báo cáo</h1>
+        <p style="margin:0;" class="help">Loại: Logistics / Equipment / Issue — nội dung mô tả tình hình thực địa</p>
+    </div>
+</div>
+
+<form method="post">
+    <div class="form-wrap">
+        <div class="grid-2">
+            <div>
+                <label class="label" asp-for="EventId">Sự kiện</label>
+                <select asp-for="EventId" class="control">
+                    @foreach (var e in Model.Events)
+                    {
+                        if (Model.EventId == e.EventId)
+                        {
+                            <option value="@e.EventId" selected>@e.EventName</option>
+                        }
+                        else
+                        {
+                            <option value="@e.EventId">@e.EventName</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label class="label" asp-for="ReportType">Loại báo cáo</label>
+                <select asp-for="ReportType" class="control">
+                    @if (string.Equals(Model.ReportType, "Logistics", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="Logistics" selected>Logistics</option>
+                    }
+                    else
+                    {
+                        <option value="Logistics">Logistics</option>
+                    }
+
+                    @if (string.Equals(Model.ReportType, "Equipment", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="Equipment" selected>Equipment</option>
+                    }
+                    else
+                    {
+                        <option value="Equipment">Equipment</option>
+                    }
+
+                    @if (string.Equals(Model.ReportType, "Issue", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <option value="Issue" selected>Issue</option>
+                    }
+                    else
+                    {
+                        <option value="Issue">Issue</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top:12px;">
+            <label class="label" asp-for="ReportContent">Nội dung</label>
+            <textarea asp-for="ReportContent" class="control" placeholder="Ví dụ: tình hình thiết bị, checklist, issue phát sinh..."></textarea>
+            <div class="help">Ghi rõ thông tin quan trọng để Admin/Organizer theo dõi.</div>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="validation">
+                @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@err.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <div class="btn-row">
+            <button type="submit" class="btn btn-primary">Lưu báo cáo</button>
+            <a asp-page="Index" class="btn" style="background:transparent;">Quay lại</a>
+        </div>
+    </div>
+</form>
+
