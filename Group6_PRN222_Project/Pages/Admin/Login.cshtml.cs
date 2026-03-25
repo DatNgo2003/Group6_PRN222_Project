@@ -89,7 +89,7 @@ namespace Group6_PRN222_Project.Pages.Admin
 
             return roleName switch
             {
-                "Admin" => RedirectToPage("/Admin/DashBoard/AdminDashboard"),
+                "Admin" => RedirectToPage("/Admin/Reports/RevenueReport"),
                 "Organizer" => RedirectToPage("/Organizer/OrganizerDashboard"),
                 "Staff(Security)" => RedirectToPage("/Staff/StaffDashboard"),
                 "Staff(MKT)" => RedirectToPage("/Staff/StaffDashboard"),

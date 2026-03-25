@@ -42,6 +42,13 @@ namespace Project_PRN222.Pages.Admin.Config
             if (!SessionHelper.IsAdmin(HttpContext.Session))
                 return RedirectToPage("/Account/Login");
 
+            var role = await _roleSvc.GetByIdAsync(id);
+            if (role?.RoleName == "Admin")
+            {
+                SuccessMessage = "Không thể thay đổi trạng thái role Admin.";
+                return RedirectToPage();
+            }
+
             var newStatus = currentStatus == "Active" ? "Inactive" : "Active";
             await _roleSvc.UpdateStatusAsync(id, newStatus);
 

@@ -51,7 +51,6 @@
 <div class="card">
     <div class="card-toolbar">
         <span style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(184,151,90,.55)">Danh sách</span>
-        <span class="record-count">@Model.Policies.Count bản ghi</span>
     </div>
     <div class="table-wrapper">
         <table class="data-table">
@@ -62,7 +61,6 @@
                     <th>Sự kiện</th>
                     <th>Giảm giá</th>
                     <th>Trạng thái</th>
-                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,19 +72,6 @@
                         <td style="font-size:.84rem;color:var(--text-2)">@(p.Event?.EventName ?? "—")</td>
                         <td><span class="pct-pill">@p.DiscountPercent%</span></td>
                         <td><span class="status-badge @(p.Status == "Active" ? "s-active" : "s-inactive")">@p.Status</span></td>
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <button class="btn-action btn-edit"
-                                    onclick="openEditModal(@p.PolicyId,'@p.PolicyName',@p.EventId,@p.DiscountPercent,'@p.Status')">
-                                    Sửa
-                                </button>
-                                <form method="post" asp-page-handler="Delete" style="display:inline"
-                                      onsubmit="return confirm('Xoá chính sách này?')">
-                                    <input type="hidden" name="id" value="@p.PolicyId" />
-                                    <button type="submit" class="btn-action btn-delete">Xoá</button>
-                                </form>
-                            </div>
-                        </td>
                     </tr>
                 }
                 @if (!Model.Policies.Any())

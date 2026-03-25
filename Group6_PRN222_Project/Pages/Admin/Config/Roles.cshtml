@@ -5,17 +5,73 @@
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
 }
 @section Styles {
-<style>
-.config-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; margin-top:20px; }
-.role-card { background:var(--card-bg); border:1px solid var(--card-bdr); border-radius:var(--r-lg); padding:20px 22px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
-.role-name { font-size:.95rem; font-weight:600; color:var(--text-1); }
-.role-id   { font-family:var(--ff-mono); font-size:.75rem; color:var(--text-3); margin-top:2px; }
-.status-badge { display:inline-block; padding:3px 12px; border-radius:20px; font-size:.72rem; font-weight:600; }
-.s-active   { background:rgba(74,154,122,.12); color:#6ee7b7; }
-.s-inactive { background:rgba(220,60,60,.09);  color:#f87171; }
-.toggle-btn { padding:5px 14px; border-radius:var(--r-sm); font-size:.775rem; font-weight:600; border:1px solid var(--card-bdr); background:rgba(250,248,244,.05); color:var(--text-2); cursor:pointer; font-family:var(--ff-body); transition:opacity var(--tr); }
-.toggle-btn:hover { opacity:.75; }
-</style>
+    <style>
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .role-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-bdr);
+            border-radius: var(--r-lg);
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .role-name {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--text-1);
+        }
+
+        .role-id {
+            font-family: var(--ff-mono);
+            font-size: .75rem;
+            color: var(--text-3);
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .s-active {
+            background: rgba(74,154,122,.12);
+            color: #6ee7b7;
+        }
+
+        .s-inactive {
+            background: rgba(220,60,60,.09);
+            color: #f87171;
+        }
+
+        .toggle-btn {
+            padding: 5px 14px;
+            border-radius: var(--r-sm);
+            font-size: .775rem;
+            font-weight: 600;
+            border: 1px solid var(--card-bdr);
+            background: rgba(250,248,244,.05);
+            color: var(--text-2);
+            cursor: pointer;
+            font-family: var(--ff-body);
+            transition: opacity var(--tr);
+        }
+
+            .toggle-btn:hover {
+                opacity: .75;
+            }
+    </style>
 }
 
 <div class="page-header">
@@ -43,13 +99,22 @@
                     </span>
                 </div>
             </div>
-            <form method="post" asp-page-handler="ToggleStatus">
-                <input type="hidden" name="id" value="@role.RoleId" />
-                <input type="hidden" name="currentStatus" value="@role.Status" />
-                <button type="submit" class="toggle-btn">
-                    @(role.Status == "Active" ? "Tắt" : "Bật")
+            @if (role.RoleName == "Admin")
+            {
+                <button class="toggle-btn" disabled style="opacity:.28;cursor:not-allowed" title="Không thể tắt role Admin">
+                    Tắt
                 </button>
-            </form>
+            }
+            else
+            {
+                <form method="post" asp-page-handler="ToggleStatus">
+                    <input type="hidden" name="id" value="@role.RoleId" />
+                    <input type="hidden" name="currentStatus" value="@role.Status" />
+                    <button type="submit" class="toggle-btn">
+                        @(role.Status == "Active" ? "Tắt" : "Bật")
+                    </button>
+                </form>
+            }
         </div>
     }
 </div>
