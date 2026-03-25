@@ -1,4 +1,5 @@
 using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Helpers;
 using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,13 +13,6 @@ namespace Group6_PRN222_Project.Pages.Admin
     {
         private readonly ProjectPrn222Context _db;
         private readonly JwtService _jwt;
-
-        // Các role được phép dùng trang này
-        private static readonly HashSet<string> AllowedRoles = new()
-        {
-            "Admin", "Organizer",
-            "Staff(Security)", "Staff(MKT)", "Staff(Logistics)"
-        };
 
         public LoginModel(ProjectPrn222Context db, JwtService jwt)
         {
@@ -59,23 +53,23 @@ namespace Group6_PRN222_Project.Pages.Admin
                 return Page();
             }
 
-            // ── Chặn Participant: yêu cầu dùng trang login thường ─────
-            var roleName = user.Role?.RoleName ?? "";
-            if (!AllowedRoles.Contains(roleName))
+            // ── Chuẩn hóa role DB → role app (JWT / AuthorizeRole) ────
+            var dbRoleName = user.Role?.RoleName ?? "";
+            if (!InternalRoleResolver.TryResolveAppRole(dbRoleName, out var appRole))
             {
-                ErrorMessage = "Tài khoản của bạn không có quyền truy cập hệ thống nội bộ. Vui lòng sử dụng trang đăng nhập thường.";
+                ErrorMessage = "Tài khoản của bạn không có quyền truy cập hệ thống nội bộ. Role trong DB \"" + dbRoleName + "\" chưa được map (cần Admin, Organizer, Staff, Staff(Security), Marketing, Logistics…).";
                 return Page();
             }
 
             // ── Tạo JWT + lưu cookie & session ────────────────────────
-            var token = _jwt.GenerateToken(user);
-            SetAuthCookieAndSession(token, user, RememberMe);
+            var token = _jwt.GenerateToken(user, appRole);
+            SetAuthCookieAndSession(token, user, appRole, RememberMe);
 
             // ── Ghi audit log ──────────────────────────────────────────
             _db.SystemAuditLogs.Add(new SystemAuditLog
             {
                 UserId = user.UserId,
-                Action = $"LOGIN_STAFF_{roleName.ToUpper().Replace("(", "").Replace(")", "").Replace(" ", "_")}",
+                Action = $"LOGIN_STAFF_{appRole.ToUpper().Replace("(", "").Replace(")", "").Replace(" ", "_")}",
                 TableName = "Users",
                 ActionTime = DateTime.Now
             });
@@ -87,18 +81,18 @@ namespace Group6_PRN222_Project.Pages.Admin
             if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
                 return LocalRedirect(ReturnUrl);
 
-            return roleName switch
+            return appRole switch
             {
-                "Admin" => RedirectToPage("/Admin/Reports/RevenueReport"),
-                "Organizer" => RedirectToPage("/Organizer/OrganizerDashboard"),
-                "Staff(Security)" => RedirectToPage("/Staff/StaffDashboard"),
-                "Staff(MKT)" => RedirectToPage("/Staff/StaffDashboard"),
-                "Staff(Logistics)" => RedirectToPage("/Staff/StaffDashboard"),
+                InternalRoleResolver.Admin => RedirectToPage("/Admin/Reports/RevenueReport"),
+                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/OrganizerDashboard"),
+                InternalRoleResolver.StaffSecurity => RedirectToPage("/StaffSecurity/Index"),
+                InternalRoleResolver.StaffMkt => RedirectToPage("/Staff/StaffDashboard"),
+                InternalRoleResolver.StaffLogistics => RedirectToPage("/Staff/StaffDashboard"),
                 _ => RedirectToPage("/Index")
             };
         }
 
-        private void SetAuthCookieAndSession(string token, User user, bool rememberMe)
+        private void SetAuthCookieAndSession(string token, User user, string appRole, bool rememberMe)
         {
             Response.Cookies.Append("auth_token", token, new CookieOptions
             {
@@ -113,13 +107,7 @@ namespace Group6_PRN222_Project.Pages.Admin
             HttpContext.Session.SetString("username", user.Username);
             HttpContext.Session.SetString("fullname", user.FullName ?? user.Username);
             HttpContext.Session.SetInt32("userid", user.UserId);
-            HttpContext.Session.SetString("role", user.Role?.RoleName ?? "");
-
-            // SessionHelper uses PascalCase keys — set them too so Organizer pages work
-            HttpContext.Session.SetInt32("UserID", user.UserId);
-            HttpContext.Session.SetString("UserName", user.Username);
-            HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
-            HttpContext.Session.SetString("Role", user.Role?.RoleName ?? "");
+            HttpContext.Session.SetString("role", appRole);
         }
     }
 }

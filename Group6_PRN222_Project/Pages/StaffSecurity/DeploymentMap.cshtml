@@ -1,0 +1,119 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffSecurity.DeploymentMapModel
+@{
+    ViewData["Title"] = "Bản đồ triển khai";
+    ViewData["StaffSecActive"] = "map";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">Bản đồ triển khai an ninh</h1>
+        <p class="sec-hero__sub">Sơ đồ khu vực chuẩn hóa và địa điểm sự kiện; đối chiếu với nhiệm vụ được gán cho bạn.</p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    @if (!Model.Events.Any())
+    {
+        <div class="alert alert-info">Chưa có sự kiện để hiển thị.</div>
+    }
+    else
+    {
+        <form method="get" class="sec-filter-bar" style="margin-bottom:24px;">
+            <label class="form-label" for="eid">Sự kiện</label>
+            <select class="form-input" id="eid" name="eventId" style="max-width:420px;" onchange="this.form.submit()">
+                @foreach (var ev in Model.Events)
+                {
+                    if (Model.EventId == ev.EventId)
+                    {
+                        <option value="@ev.EventId" selected>@ev.EventName</option>
+                    }
+                    else
+                    {
+                        <option value="@ev.EventId">@ev.EventName</option>
+                    }
+                }
+            </select>
+        </form>
+
+        @if (Model.CurrentEvent != null)
+        {
+            <div class="alert alert-info" style="margin-bottom:24px;">
+                <strong>Địa điểm:</strong> @(Model.CurrentEvent.Location ?? "—")<br />
+                <strong>Thời gian:</strong> @(Model.CurrentEvent.StartDate?.ToString("dd/MM/yyyy HH:mm") ?? "—") — @(Model.CurrentEvent.EndDate?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+            </div>
+        }
+
+        <div class="deploy-stage">
+            <div class="deploy-zone deploy-zone--gate">
+                <h3>Cổng phụ</h3>
+                <p>Luồng VIP / backstage. Kiểm tra thẻ phụ và danh sách ưu tiên.</p>
+            </div>
+            <div class="deploy-zone deploy-zone--vip" style="grid-column:2;grid-row:1 / span 2;">
+                <h3>Khu VIP &amp; lối vào chính</h3>
+                <p>Ưu tiên check-in nhanh; đối chiếu blacklist trước khi cho vào. Phối hợp MKT/Logistics tại ranh giới khu vực.</p>
+            </div>
+            <div class="deploy-zone deploy-zone--gate">
+                <h3>Cổng chính</h3>
+                <p>Quét QR vé; xử lý tình huống vé lỗi hoặc khách không có trong hệ thống.</p>
+            </div>
+            <div class="deploy-zone deploy-zone--stage deploy-span-3">
+                <h3>Sân khấu &amp; khán đài</h3>
+                <p>Giám sát lối thoát hiểm, hàng rào ngoại vi và đông người. Báo cáo bất thường qua mục Báo cáo hiện trường.</p>
+            </div>
+            <div class="deploy-zone">
+                <h3>Ngoại vi</h3>
+                <p>Tuần tra ranh giới; kiểm soát hàng rào tạm và khu vực hậu cần.</p>
+            </div>
+            <div class="deploy-zone">
+                <h3>Trung tâm chỉ huy</h3>
+                <p>Liên lạc nội bộ; tổng hợp headcount và sự cố từ các cổng.</p>
+            </div>
+        </div>
+
+        <div class="data-table-wrap" style="margin-top:32px;">
+            <div class="data-table-header" style="padding:20px 24px;border-bottom:1px solid var(--c-sand);">
+                <span class="data-table-title" style="font-family:var(--ff-display);font-size:18px;font-weight:600;">Nhiệm vụ an ninh được gán (bạn)</span>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Nhiệm vụ</th><th>Mô tả</th><th>Deadline</th><th>Trạng thái</th></tr>
+                </thead>
+                <tbody>
+                @foreach (var t in Model.MySecurityTasks)
+                {
+                    <tr>
+                        <td style="font-weight:600;">@t.TaskName</td>
+                        <td style="font-size:13px;color:var(--c-ink-60);">@(t.Description ?? "—")</td>
+                        <td style="font-size:13px;">@t.Deadline?.ToString("dd/MM HH:mm")</td>
+                        <td>
+                            @{
+                                var bc = t.Status == "Done" ? "badge-green" : t.Status == "In Progress" ? "badge-blue" : "badge-gray";
+                            }
+                            <span class="badge @bc">@t.Status</span>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.MySecurityTasks.Any())
+                {
+                    <tr><td colspan="4" style="text-align:center;padding:28px;color:var(--c-ink-60);">Chưa có task gán cho bạn tại sự kiện này.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .data-table-wrap { background:#fff; border:1px solid var(--c-sand); border-radius:var(--radius-lg); overflow:hidden; }
+    .sec-filter-bar { display:flex; flex-direction:column; gap:6px; max-width:480px; }
+    table { width:100%; border-collapse:collapse; }
+    th { text-align:left; padding:12px 20px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--c-ink-60); background:var(--c-cream); border-bottom:1px solid var(--c-sand); }
+    td { padding:14px 20px; border-bottom:1px solid var(--c-sand); }
+    tr:last-child td { border-bottom:none; }
+</style>

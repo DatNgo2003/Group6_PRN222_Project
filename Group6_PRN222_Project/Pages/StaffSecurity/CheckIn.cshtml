@@ -1,0 +1,117 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffSecurity.CheckInModel
+@{
+    ViewData["Title"] = "Check-in QR";
+    ViewData["StaffSecActive"] = "qr";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">Quầy check-in QR</h1>
+        <p class="sec-hero__sub">Quét mã trên e-ticket hoặc dán GUID. Hệ thống ghi nhận thời điểm vào cổng và cập nhật headcount.</p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    @if (Model.ResultMessage != null)
+    {
+        <div class="alert @(Model.ResultSuccess ? "alert-success" : "alert-danger")" style="margin-bottom:20px;">@Model.ResultMessage</div>
+    }
+
+    @if (!Model.Events.Any())
+    {
+        <div class="alert alert-info">Chưa có sự kiện để check-in.</div>
+    }
+    else
+    {
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
+            <div style="background:#fff;border:1px solid var(--c-sand);border-radius:var(--radius-lg);padding:28px;">
+                <h2 style="font-family:var(--ff-display);font-size:22px;font-weight:600;margin:0 0 8px;">Nhập / quét mã</h2>
+                <p style="font-size:13px;color:var(--c-ink-60);margin:0 0 20px;">Chọn sự kiện đang làm việc để tránh nhầm vé giữa các show.</p>
+
+                <form method="post">
+                    <div style="margin-bottom:16px;">
+                        <label class="form-label" asp-for="EventId">Sự kiện</label>
+                        <select class="form-input" asp-for="EventId">
+                            @foreach (var ev in Model.Events)
+                            {
+                                <option value="@ev.EventId">@ev.EventName</option>
+                            }
+                        </select>
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label class="form-label" asp-for="QrInput">Mã vé (GUID)</label>
+                        <textarea class="form-input" asp-for="QrInput" rows="3" placeholder="Dán GUID hoặc URL chứa mã QR..."></textarea>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger" style="margin-bottom:14px;">
+                            @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <div>@err.ErrorMessage</div>
+                            }
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-primary">Xác nhận check-in</button>
+                </form>
+            </div>
+
+            <div style="background:#fff;border:1px solid var(--c-sand);border-radius:var(--radius-lg);padding:24px;overflow:hidden;">
+                <h2 style="font-family:var(--ff-display);font-size:22px;font-weight:600;margin:0 0 12px;">Camera</h2>
+                <p style="font-size:13px;color:var(--c-ink-60);margin:0 0 16px;">Cho phép trình duyệt dùng camera. Khi đọc được mã, nội dung sẽ điền vào ô GUID.</p>
+                <div id="qr-reader" style="border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--c-sand);min-height:280px;background:var(--c-cream);"></div>
+                <p id="qr-status" style="font-size:12px;color:var(--c-ink-60);margin-top:12px;"></p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        (function () {
+            const el = document.getElementById("qr-reader");
+            const status = document.getElementById("qr-status");
+            const ta = document.querySelector("textarea[name='QrInput']");
+            if (!el || !ta || typeof Html5Qrcode === "undefined") return;
+
+            const cam = new Html5Qrcode("qr-reader");
+            status.textContent = "Đang khởi động camera…";
+
+            Html5Qrcode.getCameras().then(cams => {
+                if (!cams || cams.length === 0) {
+                    status.textContent = "Không tìm thấy camera.";
+                    return;
+                }
+                cam.start(
+                    { facingMode: "environment" },
+                    { fps: 8, qrbox: { width: 240, height: 240 } },
+                    (decoded) => {
+                        ta.value = decoded;
+                        status.textContent = "Đã đọc mã — kiểm tra và bấm Xác nhận check-in.";
+                        try { cam.pause(true); } catch (e) { }
+                    },
+                    () => { }
+                ).then(() => { status.textContent = "Đưa mã QR vào khung hình."; })
+                 .catch(() => {
+                    status.textContent = "Không bật được camera — bạn vẫn có thể dán GUID thủ công.";
+                });
+            }).catch(() => {
+                status.textContent = "Trình duyệt không hỗ trợ liệt kê camera.";
+            });
+        })();
+    </script>
+}
+
+<style>
+    @@media (max-width: 900px) {
+        .sec-wrap > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+    }
+</style>

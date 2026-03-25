@@ -1,0 +1,80 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffSecurity.HeadcountModel
+@{
+    ViewData["Title"] = "Số lượng tại chỗ";
+    ViewData["StaffSecActive"] = "head";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">Headcount &amp; check-in</h1>
+        <p class="sec-hero__sub">Số vé đã thanh toán hợp lệ, đã qua cổng và vé chờ thanh toán — theo từng sự kiện.</p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    @if (!Model.Events.Any())
+    {
+        <div class="alert alert-info">Chưa có sự kiện để hiển thị.</div>
+    }
+    else
+    {
+        <form method="get" class="sec-filter-bar" style="margin-bottom:28px;">
+            <label class="form-label" for="eid">Sự kiện</label>
+            <select class="form-input" id="eid" name="eventId" style="max-width:420px;" onchange="this.form.submit()">
+                @foreach (var ev in Model.Events)
+                {
+                    if (Model.EventId == ev.EventId)
+                    {
+                        <option value="@ev.EventId" selected>@ev.EventName</option>
+                    }
+                    else
+                    {
+                        <option value="@ev.EventId">@ev.EventName</option>
+                    }
+                }
+            </select>
+        </form>
+
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-bottom:28px;">
+            <div class="sec-stat" style="padding:28px;">
+                <div class="sec-stat__val" style="font-size:40px;color:var(--c-info)">@Model.EligibleTickets</div>
+                <div class="sec-stat__lbl">Vé Paid &amp; hợp lệ</div>
+            </div>
+            <div class="sec-stat" style="padding:28px;">
+                <div class="sec-stat__val" style="font-size:40px;color:var(--c-success)">@Model.CheckedIn</div>
+                <div class="sec-stat__lbl">Đã check-in</div>
+            </div>
+            <div class="sec-stat" style="padding:28px;">
+                <div class="sec-stat__val" style="font-size:40px;color:var(--c-danger)">@Model.PendingPayment</div>
+                <div class="sec-stat__lbl">Vé Pending</div>
+            </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--c-sand);border-radius:var(--radius-lg);padding:28px 32px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <span style="font-family:var(--ff-display);font-size:20px;font-weight:600;">Tiến độ vào cổng</span>
+                <span class="badge badge-blue">@Model.CheckInPercent %</span>
+            </div>
+            <div class="progress-bar" style="height:12px;background:var(--c-sand);border-radius:6px;overflow:hidden;">
+                <div class="progress-bar__fill" style="width:@(Math.Min(100, Model.CheckInPercent))%;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--c-accent),var(--c-gold));"></div>
+            </div>
+            <p style="margin-top:14px;font-size:13px;color:var(--c-ink-60);line-height:1.6;">
+                Công thức: <strong>Đã check-in</strong> / <strong>Vé Paid hợp lệ</strong>. Cập nhật theo thời gian thực khi nhân viên quét QR tại trang Check-in.
+            </p>
+        </div>
+    }
+</div>
+
+<style>
+    .sec-filter-bar { display:flex; flex-direction:column; gap:6px; max-width:480px; }
+    .sec-stat { background:#fff; border:1px solid var(--c-sand); border-radius:var(--radius-lg); text-align:center; }
+    .sec-stat__val { font-weight:700; font-family:var(--ff-display); line-height:1; }
+    .sec-stat__lbl { font-size:12px; color:var(--c-ink-60); margin-top:8px; }
+    @@media (max-width:720px) { .sec-wrap > div:nth-of-type(2) { grid-template-columns:1fr !important; } }
+</style>

@@ -126,4 +126,7 @@ app.MapRazorPages();
 // ── Seed data khi khởi động (chỉ chạy nếu DB trống) ──────────────────
 await SeedData.InitializeAsync(app.Services);
 
+// ── Thêm dữ liệu demo dồi dào (một lần; xóa audit SEED_EXTRA_DEMO_V1 để chạy lại) ──
+await ExtraDemoDataSeeder.EnsureAsync(app.Services);
+
 app.Run();

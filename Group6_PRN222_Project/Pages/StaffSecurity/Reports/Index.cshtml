@@ -1,0 +1,62 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffSecurity.Reports.IndexModel
+@{
+    ViewData["Title"] = "Báo cáo an ninh";
+    ViewData["StaffSecActive"] = "reports";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">Báo cáo hiện trường</h1>
+        <p class="sec-hero__sub">Các báo cáo loại Security bạn đã gửi lên hệ thống.</p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <span style="font-size:14px;color:var(--c-ink-60);">@Model.Items.Count báo cáo gần đây</span>
+        <a class="btn btn-primary" asp-page="Create">+ Tạo báo cáo mới</a>
+    </div>
+
+    <div class="data-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Sự kiện</th>
+                    <th>Nội dung</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var r in Model.Items)
+            {
+                <tr>
+                    <td style="font-weight:600;">@(r.Event?.EventName ?? "—")</td>
+                    <td style="font-size:13px;color:var(--c-ink-60);max-width:360px;">@(string.IsNullOrEmpty(r.Content) ? "—" : (r.Content.Length > 120 ? r.Content.Substring(0, 120) + "…" : r.Content))</td>
+                    <td style="font-size:13px;">@r.ReportTime?.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td><span class="badge badge-green">@(r.Status ?? "Submitted")</span></td>
+                </tr>
+            }
+            @if (!Model.Items.Any())
+            {
+                <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--c-ink-60);">Chưa có báo cáo. <a asp-page="Create">Tạo báo cáo đầu tiên</a></td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .data-table-wrap { background:#fff; border:1px solid var(--c-sand); border-radius:var(--radius-lg); overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { text-align:left; padding:12px 20px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--c-ink-60); background:var(--c-cream); border-bottom:1px solid var(--c-sand); }
+    td { padding:14px 20px; border-bottom:1px solid var(--c-sand); vertical-align:top; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--c-cream); }
+</style>

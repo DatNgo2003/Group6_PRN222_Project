@@ -1,0 +1,53 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffSecurity.Reports.CreateModel
+@{
+    ViewData["Title"] = "Tạo báo cáo an ninh";
+    ViewData["StaffSecActive"] = "reports";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">Báo cáo hiện trường</h1>
+        <p class="sec-hero__sub">Ghi nhận sự cố, tình hình cổng, VIP hoặc an ninh chung — loại báo cáo: Security.</p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    <form method="post" style="max-width:720px;">
+        <div style="background:#fff;border:1px solid var(--c-sand);border-radius:var(--radius-lg);padding:28px;">
+            <div style="margin-bottom:18px;">
+                <label class="form-label" asp-for="EventId">Sự kiện</label>
+                <select class="form-input" asp-for="EventId">
+                    @foreach (var e in Model.Events)
+                    {
+                        <option value="@e.EventId">@e.EventName</option>
+                    }
+                </select>
+            </div>
+            <div style="margin-bottom:18px;">
+                <label class="form-label" asp-for="ReportContent">Nội dung báo cáo</label>
+                <textarea class="form-input" asp-for="ReportContent" rows="8" placeholder="Ví dụ: Cổng B đông, đã phát hiện vé giả; khu VIP ổn định…"></textarea>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger" style="margin-bottom:14px;">
+                    @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@err.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary">Gửi báo cáo</button>
+                <a class="btn btn-ghost" asp-page="Index">Quay lại</a>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,91 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffSecurity.VipBlacklistModel
+@{
+    ViewData["Title"] = "VIP & Blacklist";
+    ViewData["StaffSecActive"] = "vip";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">VIP &amp; Blacklist</h1>
+        <p class="sec-hero__sub">Danh sách khách ưu tiên và khách bị cấm có vé cho sự kiện đang chọn — phục vụ kiểm soát cổng.</p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    @if (!Model.Events.Any())
+    {
+        <div class="alert alert-info">Chưa có sự kiện để hiển thị. Liên hệ Ban tổ chức để được gán nhiệm vụ sự kiện.</div>
+    }
+    else
+    {
+        <form method="get" class="sec-filter-bar">
+            <label class="form-label" for="eid">Sự kiện</label>
+            <select class="form-input" id="eid" name="eventId" style="max-width:420px;" onchange="this.form.submit()">
+                @foreach (var ev in Model.Events)
+                {
+                    if (Model.EventId == ev.EventId)
+                    {
+                        <option value="@ev.EventId" selected>@ev.EventName</option>
+                    }
+                    else
+                    {
+                        <option value="@ev.EventId">@ev.EventName</option>
+                    }
+                }
+            </select>
+        </form>
+
+        <div class="data-table-wrap" style="margin-top:20px;">
+            <div class="data-table-header" style="padding:20px 24px;border-bottom:1px solid var(--c-sand);">
+                <span class="data-table-title" style="font-family:var(--ff-display);font-size:18px;font-weight:600;">Danh sách</span>
+                <span class="badge badge-gold">@Model.Rows.Count khách</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Khách</th>
+                        <th>Liên hệ</th>
+                        <th>Trạng thái</th>
+                        <th>Thanh toán vé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in Model.Rows)
+                {
+                    <tr>
+                        <td style="font-weight:600;">@r.FullName</td>
+                        <td style="font-size:13px;color:var(--c-ink-60);">@r.Email<br />@r.Phone</td>
+                        <td>
+                            @if (r.IsBlacklisted)
+                            { <span class="badge badge-red">Blacklist</span> }
+                            @if (r.IsVip)
+                            { <span class="badge badge-gold">VIP</span> }
+                        </td>
+                        <td><span class="badge @(r.PaymentStatus == "Paid" ? "badge-green" : "badge-gray")">@r.PaymentStatus</span></td>
+                    </tr>
+                }
+                @if (!Model.Rows.Any())
+                {
+                    <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--c-ink-60);">Không có VIP hoặc blacklist cho sự kiện này.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<style>
+    .data-table-wrap { background:#fff; border:1px solid var(--c-sand); border-radius:var(--radius-lg); overflow:hidden; }
+    .sec-filter-bar { display:flex; flex-direction:column; gap:6px; max-width:480px; }
+    table { width:100%; border-collapse:collapse; }
+    th { text-align:left; padding:12px 20px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--c-ink-60); background:var(--c-cream); border-bottom:1px solid var(--c-sand); }
+    td { padding:14px 20px; font-size:14px; border-bottom:1px solid var(--c-sand); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:var(--c-cream); }
+</style>

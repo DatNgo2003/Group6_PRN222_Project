@@ -1,0 +1,12 @@
+@{
+    var a = ViewData["StaffSecActive"]?.ToString() ?? "";
+}
+<nav class="sec-nav" aria-label="An ninh sự kiện">
+    <a class="sec-nav__link @(a == "index" ? "is-active" : "")" asp-page="/StaffSecurity/Index">Tổng quan</a>
+    <a class="sec-nav__link @(a == "vip" ? "is-active" : "")" asp-page="/StaffSecurity/VipBlacklist">VIP &amp; Blacklist</a>
+    <a class="sec-nav__link @(a == "map" ? "is-active" : "")" asp-page="/StaffSecurity/DeploymentMap">Bản đồ triển khai</a>
+    <a class="sec-nav__link @(a == "head" ? "is-active" : "")" asp-page="/StaffSecurity/Headcount">Số lượng tại chỗ</a>
+    <a class="sec-nav__link @(a == "qr" ? "is-active" : "")" asp-page="/StaffSecurity/CheckIn">Check-in QR</a>
+    <a class="sec-nav__link @(a == "reports" ? "is-active" : "")" asp-page="/StaffSecurity/Reports/Index">Báo cáo</a>
+    <a class="sec-nav__link sec-nav__link--muted" asp-page="/Staff/StaffDashboard">Dashboard chung</a>
+</nav>

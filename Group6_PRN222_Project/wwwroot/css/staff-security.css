@@ -1,0 +1,201 @@
+/* Staff (Security) — shared with EventPro _Layout tokens */
+
+.sec-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 64px;
+}
+
+.sec-hero {
+    background: linear-gradient(135deg, #1A3A5A 0%, #0d1f33 55%, #1a2f4a 100%);
+    color: #fff;
+    padding: 28px 0 32px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.sec-hero__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.sec-hero__eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.45);
+    margin-bottom: 8px;
+}
+
+.sec-hero__title {
+    font-family: var(--ff-display);
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0 0 6px;
+}
+
+.sec-hero__sub {
+    font-size: 14px;
+    color: rgba(255,255,255,.55);
+    max-width: 560px;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.sec-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.sec-nav__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,.72);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    transition: background .2s, color .2s, border-color .2s;
+}
+
+.sec-nav__link:hover {
+    color: #fff;
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.2);
+}
+
+.sec-nav__link.is-active {
+    color: #fff;
+    background: rgba(184, 151, 90, .28);
+    border-color: rgba(184, 151, 90, .45);
+}
+
+.sec-nav__link--muted {
+    opacity: .85;
+    border-style: dashed;
+}
+
+.sec-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+@media (max-width: 960px) {
+    .sec-card-grid { grid-template-columns: 1fr; }
+    .sec-wrap, .sec-hero__inner { padding-left: 20px; padding-right: 20px; }
+}
+
+.sec-tile {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--c-sand);
+    border-radius: var(--radius-lg);
+    padding: 22px 22px 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .22s cubic-bezier(.4,0,.2,1), box-shadow .22s, border-color .22s;
+    min-height: 148px;
+}
+
+.sec-tile:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--c-taupe);
+}
+
+.sec-tile__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+}
+
+.sec-tile__title {
+    font-family: var(--ff-display);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+
+.sec-tile__desc {
+    font-size: 13px;
+    color: var(--c-ink-60);
+    line-height: 1.5;
+    margin: 0;
+    flex: 1;
+}
+
+.sec-tile__go {
+    margin-top: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c-info);
+    letter-spacing: .02em;
+}
+
+/* Deployment map */
+.deploy-stage {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+    .deploy-stage { grid-template-columns: 1fr; }
+}
+
+.deploy-zone {
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    border: 1px solid var(--c-sand);
+    background: var(--c-cream);
+    position: relative;
+    overflow: hidden;
+}
+
+.deploy-zone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--c-gold), var(--c-gold-light));
+    opacity: .85;
+}
+
+.deploy-zone--vip { background: linear-gradient(180deg, #F0E8D4 0%, #F3EFE7 100%); }
+.deploy-zone--gate { background: linear-gradient(180deg, #E4EDF8 0%, #F3EFE7 100%); }
+.deploy-zone--stage { background: linear-gradient(180deg, #E8F2EC 0%, #F3EFE7 100%); }
+
+.deploy-zone h3 {
+    font-family: var(--ff-display);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 4px;
+}
+
+.deploy-zone p {
+    font-size: 12px;
+    color: var(--c-ink-60);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.deploy-span-3 { grid-column: 1 / -1; }

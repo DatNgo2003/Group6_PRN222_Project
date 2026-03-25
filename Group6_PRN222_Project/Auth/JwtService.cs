@@ -16,7 +16,8 @@ namespace Group6_PRN222_Project.Auth
         }
 
         // ── Tạo JWT token từ User ──────────────────────────────────────
-        public string GenerateToken(User user)
+        /// <param name="roleClaimValue">Claim role dùng cho phân quyền (sau khi chuẩn hóa từ DB). Mặc định lấy từ user.Role.</param>
+        public string GenerateToken(User user, string? roleClaimValue = null)
         {
             var jwtKey = _config["Jwt:Key"];
             var jwtIssuer = _config["Jwt:Issuer"];
@@ -41,7 +42,7 @@ namespace Group6_PRN222_Project.Auth
                 new Claim(ClaimTypes.Name,           user.Username),
                 new Claim("FullName",                user.FullName ?? user.Username),
                 new Claim("Email",                   user.Email    ?? ""),
-                new Claim(ClaimTypes.Role,           user.Role?.RoleName ?? ""),
+                new Claim(ClaimTypes.Role,           roleClaimValue ?? user.Role?.RoleName ?? ""),
             };
 
             var token = new JwtSecurityToken(

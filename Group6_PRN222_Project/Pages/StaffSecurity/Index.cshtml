@@ -1,0 +1,92 @@
+@page "/StaffSecurity"
+@model Group6_PRN222_Project.Pages.StaffSecurity.IndexModel
+@{
+    ViewData["Title"] = "An ninh sự kiện";
+    ViewData["StaffSecActive"] = "index";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/staff-security.css" asp-append-version="true" />
+
+<div class="sec-hero">
+    <div class="sec-hero__inner">
+        <div class="sec-hero__eyebrow">Staff · Security</div>
+        <h1 class="sec-hero__title">Xin chào, @Model.FullName</h1>
+        <p class="sec-hero__sub">
+            Trung tâm vận hành an ninh: VIP &amp; blacklist, bản đồ triển khai, số người tại chỗ, check-in QR và báo cáo hiện trường — đồng bộ với hệ thống EventPro.
+        </p>
+        <partial name="Shared/_StaffSecurityNav" />
+    </div>
+</div>
+
+<div class="sec-wrap">
+    <div class="sec-card-grid">
+        <a class="sec-tile" asp-page="/StaffSecurity/VipBlacklist">
+            <div class="sec-tile__icon" style="background:#F0E8D4">⭐</div>
+            <h2 class="sec-tile__title">VIP &amp; Blacklist</h2>
+            <p class="sec-tile__desc">Danh sách ưu tiên và khách bị cấm theo từng sự kiện.</p>
+            <span class="sec-tile__go">Mở danh sách →</span>
+        </a>
+        <a class="sec-tile" asp-page="/StaffSecurity/DeploymentMap">
+            <div class="sec-tile__icon" style="background:#E4EDF8">🗺</div>
+            <h2 class="sec-tile__title">Bản đồ triển khai</h2>
+            <p class="sec-tile__desc">Sơ đồ khu vực cổng, VIP, sân khấu và nhiệm vụ được gán.</p>
+            <span class="sec-tile__go">Xem bố trí →</span>
+        </a>
+        <a class="sec-tile" asp-page="/StaffSecurity/Headcount">
+            <div class="sec-tile__icon" style="background:#E8F2EC">👥</div>
+            <h2 class="sec-tile__title">Số lượng tại chỗ</h2>
+            <p class="sec-tile__desc">Đã check-in / vé hợp lệ theo sự kiện đang mở.</p>
+            <span class="sec-tile__go">Xem headcount →</span>
+        </a>
+        <a class="sec-tile" asp-page="/StaffSecurity/CheckIn">
+            <div class="sec-tile__icon" style="background:#FAF0E6">📱</div>
+            <h2 class="sec-tile__title">Check-in QR</h2>
+            <p class="sec-tile__desc">Quét hoặc nhập mã vé để ghi nhận vào cổng.</p>
+            <span class="sec-tile__go">Mở quầy check-in →</span>
+        </a>
+        <a class="sec-tile" asp-page="/StaffSecurity/Reports/Index">
+            <div class="sec-tile__icon" style="background:#F3EFE7">📝</div>
+            <h2 class="sec-tile__title">Báo cáo hiện trường</h2>
+            <p class="sec-tile__desc">Gửi báo cáo an ninh cho Ban tổ chức / Admin.</p>
+            <span class="sec-tile__go">Danh sách &amp; tạo mới →</span>
+        </a>
+        <a class="sec-tile" asp-page="/Staff/StaffDashboard">
+            <div class="sec-tile__icon" style="background:#E8E0D0">📋</div>
+            <h2 class="sec-tile__title">Nhiệm vụ của tôi</h2>
+            <p class="sec-tile__desc">Tổng quan task và báo cáo đã gửi (dashboard chung).</p>
+            <span class="sec-tile__go">Về dashboard →</span>
+        </a>
+    </div>
+
+    <div class="sec-stats-row">
+        <div class="sec-stat">
+            <div class="sec-stat__val" style="color:var(--c-info)">@Model.VipCount</div>
+            <div class="sec-stat__lbl">VIP (vé)</div>
+        </div>
+        <div class="sec-stat">
+            <div class="sec-stat__val" style="color:var(--c-danger)">@Model.BlacklistCount</div>
+            <div class="sec-stat__lbl">Blacklist</div>
+        </div>
+        <div class="sec-stat">
+            <div class="sec-stat__val" style="color:var(--c-success)">@Model.CheckedInToday</div>
+            <div class="sec-stat__lbl">Check-in hôm nay</div>
+        </div>
+        <div class="sec-stat">
+            <div class="sec-stat__val" style="color:var(--c-gold)">@Model.SecurityReportsCount</div>
+            <div class="sec-stat__lbl">Báo cáo Security</div>
+        </div>
+        <div class="sec-stat">
+            <div class="sec-stat__val" style="color:var(--c-ink)">@Model.OpenTasks</div>
+            <div class="sec-stat__lbl">Task chưa Done</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .sec-stats-row { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:16px; margin-top:8px; }
+    .sec-stat { background:#fff; border:1px solid var(--c-sand); border-radius:var(--radius-lg); padding:20px; text-align:center; }
+    .sec-stat__val { font-size:28px; font-weight:700; font-family:var(--ff-display); line-height:1; }
+    .sec-stat__lbl { font-size:12px; color:var(--c-ink-60); margin-top:6px; }
+    @@media (max-width: 900px) { .sec-stats-row { grid-template-columns:1fr 1fr; } }
+</style>
