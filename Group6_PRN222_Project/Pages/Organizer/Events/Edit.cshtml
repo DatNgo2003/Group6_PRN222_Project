@@ -33,6 +33,11 @@
                 <span asp-validation-for="Event.Location" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
+                <label asp-for="Event.Amount" class="control-label">Ticket Price (Amount)</label>
+                <input asp-for="Event.Amount" class="form-control" type="number" step="0.01" min="0" placeholder="VNĐ" />
+                <span asp-validation-for="Event.Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
                 <label asp-for="Event.Status" class="control-label">Status</label>
                 <select asp-for="Event.Status" class="form-select" asp-items="ViewBag.StatusList"></select>
             </div>
@@ -57,4 +62,14 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var start = document.querySelector('[name="Event.StartDate"]').value;
+            var end = document.querySelector('[name="Event.EndDate"]').value;
+            if (start && end && new Date(start) >= new Date(end)) {
+                e.preventDefault();
+                alert('Ngày bắt đầu phải trước ngày kết thúc!');
+            }
+        });
+    </script>
 }

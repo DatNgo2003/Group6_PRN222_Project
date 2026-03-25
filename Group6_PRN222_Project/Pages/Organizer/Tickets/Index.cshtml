@@ -1,0 +1,71 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Tickets.IndexModel
+@{
+    ViewData["Title"] = "Tickets Management";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Tickets Management</h1>
+        <p class="subtitle">Quản lý vé sự kiện</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <span class="btn-icon">+</span> Create New Ticket
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Event</th>
+                    <th>Participant</th>
+                    <th>QR Code</th>
+                    <th>Ticket Price</th>
+                    <th>Check-In Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Tickets)
+                {
+                    <tr>
+                        <td class="id-cell">@item.TicketId</td>
+                        <td><strong>@item.Event?.EventName</strong></td>
+                        <td style="color:var(--text-3)">@(item.Participant?.FullName ?? "N/A")</td>
+                        <td class="id-cell" style="font-size:.72rem">@(item.Qrcode?.ToString("N").Substring(0, 12) ?? "N/A")…</td>
+                        <td style="color:var(--c-gold); font-weight:600">
+                            @(item.PaymentStatus ?? "0") VNĐ
+                        </td>
+                        <td class="date-cell">@(item.CheckInTime?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                        <td>
+                            @{
+                                var sc = item.Status == "Valid" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :
+                                         item.Status == "Used" ? "background:rgba(96,165,250,.15);color:#60A5FA" :
+                                         item.Status == "Cancelled" ? "background:rgba(220,60,60,.10);color:#f87171" :
+                                         "background:rgba(250,248,244,.07);color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@sc">@item.Status</span>
+                        </td>
+                        <td class="action-cell">
+                            <a asp-page="./Edit" asp-route-id="@item.TicketId" class="btn-action btn-edit">Edit</a>
+                            <a asp-page="./Delete" asp-route-id="@item.TicketId" class="btn-action btn-delete">Delete</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Tickets.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="empty-icon">⊘</div>
+                            <div>No tickets found.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

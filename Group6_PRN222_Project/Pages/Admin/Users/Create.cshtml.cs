@@ -32,7 +32,7 @@ namespace Project_PRN222.Pages.Admin.Users
         public async Task<IActionResult> OnGetAsync()
         {
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             await LoadSelectListsAsync();
             return Page();
@@ -41,7 +41,7 @@ namespace Project_PRN222.Pages.Admin.Users
         public async Task<IActionResult> OnPostAsync()
         {
             if (!SessionHelper.IsAdmin(HttpContext.Session))
-                return RedirectToPage("/Auth/Login");
+                return RedirectToPage("/Admin/Login");
 
             // Validate password
             if (string.IsNullOrWhiteSpace(PlainPassword))

@@ -24,6 +24,12 @@
             </div>
             
             <form method="post" asp-page-handler="UpdateConcept" asp-route-id="@Model.Event.EventId" id="conceptForm">
+                @if (TempData["Error"] != null)
+                {
+                    <div style="padding:10px 14px;background:rgba(220,60,60,.12);border:1px solid rgba(220,60,60,.25);border-radius:var(--r-sm);color:#f87171;font-size:.84rem;margin-bottom:14px;">
+                        ⚠ @TempData["Error"]
+                    </div>
+                }
                 <div id="stepsContainer" style="margin-bottom: 16px;">
                     @for(int i = 0; i < Model.StepNames.Count; i++)
                     {
@@ -198,6 +204,27 @@
                         row.remove();
                     } else {
                         alert('You must have at least one step in the timeline.');
+                    }
+                }
+            });
+
+            // Validate chronological order before submit
+            document.getElementById('conceptForm').addEventListener('submit', function(e) {
+                var timeInputs = document.querySelectorAll('input[name="StepTimes"]');
+                var nameInputs = document.querySelectorAll('input[name="StepNames"]');
+                var prevTime = null;
+                for (var i = 0; i < timeInputs.length; i++) {
+                    var val = timeInputs[i].value;
+                    if (val) {
+                        var current = new Date(val);
+                        if (prevTime && current <= prevTime) {
+                            e.preventDefault();
+                            var stepName = nameInputs[i] ? nameInputs[i].value : ('Bước ' + (i+1));
+                            alert('Thời gian của bước "' + stepName + '" phải sau bước trước đó!');
+                            timeInputs[i].focus();
+                            return;
+                        }
+                        prevTime = current;
                     }
                 }
             });

@@ -1,0 +1,68 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.Tickets.CreateModel
+
+@{
+    ViewData["Title"] = "Create Ticket";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Create Ticket</h1>
+        <p class="subtitle">Tạo vé mới cho sự kiện</p>
+    </div>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        
+        <div class="form-section">
+            <div class="section-title">Ticket Information</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="Ticket.EventId">Event <span class="required">*</span></label>
+                    <select asp-for="Ticket.EventId" class="form-control" asp-items="Model.EventList" required>
+                        <option value="">-- Select Event --</option>
+                    </select>
+                    <span asp-validation-for="Ticket.EventId" class="field-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Ticket.ParticipantId">Participant <span class="required">*</span></label>
+                    <select asp-for="Ticket.ParticipantId" class="form-control" asp-items="Model.ParticipantList" required>
+                        <option value="">-- Select Participant --</option>
+                    </select>
+                    <span asp-validation-for="Ticket.ParticipantId" class="field-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DiscountPolicyId">Discount Policy</label>
+                    <select asp-for="DiscountPolicyId" class="form-control" asp-items="Model.DiscountPolicyList">
+                        <option value="">-- No Discount --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Ticket.Status">Status</label>
+                    <select asp-for="Ticket.Status" class="form-control">
+                        <option value="Valid">Valid</option>
+                        <option value="Used">Used</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <p style="margin-top:14px;color:var(--text-3);font-size:.82rem;">
+                💡 Giá vé sẽ được tự động tính: <strong style="color:var(--c-gold)">Ticket Price = Event Amount − Discount%</strong>
+            </p>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Ticket</button>
+            <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
