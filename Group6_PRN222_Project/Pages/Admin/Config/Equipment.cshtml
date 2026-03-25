@@ -30,7 +30,6 @@
         <h1>Quản lý thiết bị</h1>
         <p class="subtitle">Theo dõi kho thiết bị và trạng thái</p>
     </div>
-    <button class="btn btn-primary" onclick="openModal()">+ Thêm thiết bị</button>
 </div>
 
 @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
@@ -60,7 +59,6 @@
                 <option value="Unavailable" selected="@(Model.StatusFilter=="Unavailable")">Unavailable</option>
             </select>
         </form>
-        <span class="record-count">@Model.Equipments.Count bản ghi</span>
     </div>
     <div class="table-wrapper">
         <table class="data-table">
@@ -70,7 +68,6 @@
                     <th>Tên thiết bị</th>
                     <th style="text-align:center">Tổng kho</th>
                     <th>Trạng thái</th>
-                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -82,19 +79,6 @@
                         <td style="font-weight:600;color:var(--text-1)">@eq.EquipmentName</td>
                         <td style="text-align:center" class="id-cell">@eq.TotalStock</td>
                         <td><span class="status-badge @sc">@eq.Status</span></td>
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <button class="btn-action btn-edit"
-                                    onclick="openEditModal(@eq.EquipmentId,'@eq.EquipmentName',@(eq.TotalStock??0),'@eq.Status')">
-                                    Sửa
-                                </button>
-                                <form method="post" asp-page-handler="Delete" style="display:inline"
-                                      onsubmit="return confirm('Xoá thiết bị này?')">
-                                    <input type="hidden" name="id" value="@eq.EquipmentId" />
-                                    <button type="submit" class="btn-action btn-delete">Xoá</button>
-                                </form>
-                            </div>
-                        </td>
                     </tr>
                 }
                 @if (!Model.Equipments.Any())

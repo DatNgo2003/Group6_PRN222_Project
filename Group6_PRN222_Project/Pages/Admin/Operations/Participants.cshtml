@@ -70,7 +70,6 @@
 <div class="card">
     <div class="card-toolbar">
         <span style="font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(184,151,90,.55)">Danh sách</span>
-        <span class="record-count">@Model.Participants.Count bản ghi</span>
     </div>
     <div class="table-wrapper">
         <table class="data-table">
@@ -81,7 +80,6 @@
                     <th>Email</th>
                     <th>SĐT</th>
                     <th>Loại</th>
-                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -98,23 +96,6 @@
                             @if (isBl)  { <span class="pill pill-bl">Blacklist</span> }
                             else if (isVip) { <span class="pill pill-vip">VIP</span> }
                             else { <span class="pill pill-norm">Thường</span> }
-                        </td>
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <form method="post" asp-page-handler="ToggleVip" style="display:inline">
-                                    <input type="hidden" name="id" value="@p.ParticipantId" />
-                                    <button type="submit" class="toggle-vip">
-                                        @(isVip ? "Bỏ VIP" : "Đặt VIP")
-                                    </button>
-                                </form>
-                                <form method="post" asp-page-handler="ToggleBlacklist" style="display:inline"
-                                      onsubmit="return confirm('@(isBl ? "Bỏ khỏi Blacklist?" : "Thêm vào Blacklist?")')">
-                                    <input type="hidden" name="id" value="@p.ParticipantId" />
-                                    <button type="submit" class="toggle-bl">
-                                        @(isBl ? "Bỏ BL" : "+ Blacklist")
-                                    </button>
-                                </form>
-                            </div>
                         </td>
                     </tr>
                 }

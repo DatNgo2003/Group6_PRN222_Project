@@ -11,23 +11,26 @@ namespace Project_PRN222.Pages.Admin.Users
 {
     public class EditModel : PageModel
     {
-        private readonly IUserService     _userSvc;
+        private readonly IUserService _userSvc;
         private readonly IAuditLogService _audit;
         private readonly ProjectPrn222Context _db;
 
         public EditModel(IUserService userSvc, IAuditLogService audit, ProjectPrn222Context db)
         {
             _userSvc = userSvc;
-            _audit   = audit;
-            _db      = db;
+            _audit = audit;
+            _db = db;
         }
 
-        [BindProperty] public User   InputUser      { get; set; } = new();
-        [BindProperty] public string NewPassword    { get; set; } = string.Empty;
-        [BindProperty] public string ConfirmPassword{ get; set; } = string.Empty;
+        [BindProperty] public User InputUser { get; set; } = new();
+        [BindProperty] public string NewPassword { get; set; } = string.Empty;
+        [BindProperty] public string ConfirmPassword { get; set; } = string.Empty;
 
-        public SelectList RoleList       { get; set; } = default!;
+        public SelectList RoleList { get; set; } = default!;
         public SelectList DepartmentList { get; set; } = default!;
+
+        // True nếu đang sửa một Admin khác (không phải chính mình)
+        public bool IsOtherAdmin { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -36,6 +39,9 @@ namespace Project_PRN222.Pages.Admin.Users
 
             var user = await _userSvc.GetByIdAsync(id);
             if (user == null) return NotFound();
+
+            var currentUserId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
+            IsOtherAdmin = user.Role?.RoleName == "Admin" && user.UserId != currentUserId;
 
             InputUser = user;
             await LoadSelectListsAsync();
@@ -47,7 +53,20 @@ namespace Project_PRN222.Pages.Admin.Users
             if (!SessionHelper.IsAdmin(HttpContext.Session))
                 return RedirectToPage("/Admin/Login");
 
-            // Validate new password nếu có nhập
+            // Guard backend — không cho sửa Admin khác
+            var currentUserId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
+            var existing = await _db.Users
+                .Include(u => u.Role)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserId == InputUser.UserId);
+
+            if (existing?.Role?.RoleName == "Admin" && existing.UserId != currentUserId)
+            {
+                TempData["ErrorMessage"] = "Không thể chỉnh sửa tài khoản Admin khác.";
+                return RedirectToPage("Index");
+            }
+
+            // Validate password
             if (!string.IsNullOrWhiteSpace(NewPassword))
             {
                 if (NewPassword.Length < 6)
@@ -56,7 +75,6 @@ namespace Project_PRN222.Pages.Admin.Users
                     ModelState.AddModelError(nameof(ConfirmPassword), "Xác nhận mật khẩu không khớp.");
             }
 
-            // Validate duplicate username (trừ user hiện tại)
             if (await _userSvc.UsernameExistsAsync(InputUser.Username, InputUser.UserId))
                 ModelState.AddModelError("InputUser.Username", "Username đã tồn tại.");
 
@@ -66,22 +84,18 @@ namespace Project_PRN222.Pages.Admin.Users
 
             if (!ModelState.IsValid)
             {
+                IsOtherAdmin = false;
                 await LoadSelectListsAsync();
                 return Page();
             }
 
-            // Giữ nguyên PasswordHash cũ nếu không đổi mật khẩu
+            // Giữ PasswordHash cũ nếu không đổi mật khẩu
             if (string.IsNullOrWhiteSpace(NewPassword))
-            {
-                var existing = await _db.Users.AsNoTracking()
-                                              .FirstOrDefaultAsync(u => u.UserId == InputUser.UserId);
                 InputUser.PasswordHash = existing?.PasswordHash ?? InputUser.PasswordHash;
-            }
 
             await _userSvc.UpdateAsync(InputUser, string.IsNullOrWhiteSpace(NewPassword) ? null : NewPassword);
 
-            var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
-            _audit.Log(actorId, $"UPDATE User '{InputUser.Username}' (ID={InputUser.UserId})", "Users");
+            _audit.Log(currentUserId, $"UPDATE User '{InputUser.Username}' (ID={InputUser.UserId})", "Users");
 
             TempData["SuccessMessage"] = $"Đã cập nhật tài khoản '{InputUser.Username}' thành công.";
             return RedirectToPage("Index");
@@ -91,7 +105,7 @@ namespace Project_PRN222.Pages.Admin.Users
         {
             var roles = await _db.Roles.OrderBy(r => r.RoleId).ToListAsync();
             var depts = await _db.Departments.OrderBy(d => d.DepartmentId).ToListAsync();
-            RoleList       = new SelectList(roles, "RoleId", "RoleName", InputUser.RoleId);
+            RoleList = new SelectList(roles, "RoleId", "RoleName", InputUser.RoleId);
             DepartmentList = new SelectList(depts, "DepartmentId", "DepartmentName", InputUser.DepartmentId);
         }
     }

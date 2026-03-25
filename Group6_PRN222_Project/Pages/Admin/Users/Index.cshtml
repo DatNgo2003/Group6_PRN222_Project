@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Quản lý người dùng";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    var currentUserId = HttpContext.Session.GetInt32("UserID");
 }
 
 <div class="page-header">
@@ -55,15 +56,16 @@
                     <th>Email</th>
                     <th>Vai trò</th>
                     <th>Phòng ban</th>
+                    <th>Trạng thái</th>
                     <th>Ngày tạo</th>
-                    <th style="width:140px">Thao tác</th>
+                    <th style="width:100px">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
                 @if (!Model.Users.Any())
                 {
                     <tr>
-                        <td colspan="8" class="empty-state">
+                        <td colspan="9" class="empty-state">
                             <div class="empty-icon">⊘</div>
                             <div>Không tìm thấy người dùng nào</div>
                         </td>
@@ -71,6 +73,8 @@
                 }
                 @foreach (var user in Model.Users)
                 {
+                    var isOtherAdmin = user.Role?.RoleName == "Admin" && user.UserId != currentUserId;
+                    var statusClass  = user.Status == "Active" ? "status-active" : "status-inactive";
                     <tr>
                         <td class="id-cell">@user.UserId</td>
                         <td><strong>@user.Username</strong></td>
@@ -82,15 +86,21 @@
                             </span>
                         </td>
                         <td>@(user.Department?.DepartmentName ?? "—")</td>
+                        <td>
+                            <span class="status-badge @statusClass">
+                                @(user.Status ?? "Active")
+                            </span>
+                        </td>
                         <td class="date-cell">@(user.CreatedAt?.ToString("dd/MM/yyyy") ?? "—")</td>
                         <td class="action-cell">
-                            <a asp-page="Edit" asp-route-id="@user.UserId" class="btn-action btn-edit" title="Sửa">Sửa</a>
-                            <form method="post" asp-page-handler="Delete" asp-route-id="@user.UserId"
-                                  onsubmit="return confirm('Xác nhận xoá người dùng @user.Username?')"
-                                  style="display:inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-action btn-delete" title="Xoá">Xoá</button>
-                            </form>
+                            @if (isOtherAdmin)
+                            {
+                                <span class="btn-action btn-edit disabled" title="Không thể sửa Admin khác">Sửa</span>
+                            }
+                            else
+                            {
+                                <a asp-page="Edit" asp-route-id="@user.UserId" class="btn-action btn-edit" title="Sửa">Sửa</a>
+                            }
                         </td>
                     </tr>
                 }
@@ -136,13 +146,19 @@
 .role-stafflogistics { background:#e2d9f3; color:#4a235a; }
 .role-default        { background:var(--bg-muted); color:var(--text-muted); }
 
+.status-badge { display:inline-block; padding:3px 10px; border-radius:20px;
+                font-size:.73rem; font-weight:600; }
+.status-active   { background:rgba(74,154,122,.12); color:#6ee7b7; }
+.status-inactive { background:rgba(220,60,60,.09);  color:#f87171; }
+
 .action-cell { white-space:nowrap; }
 .btn-action { display:inline-block; padding:4px 12px; border-radius:6px;
               font-size:.8rem; font-weight:500; cursor:pointer; border:none;
               text-decoration:none; transition:opacity .15s; }
 .btn-action:hover { opacity:.8; }
-.btn-edit   { background:#e7f1ff; color:#1a56db; }
-.btn-delete { background:#fde8e8; color:#c81e1e; }
+.btn-edit          { background:#e7f1ff; color:#1a56db; }
+.btn-edit.disabled { background:var(--bg-muted); color:var(--text-muted);
+                     cursor:not-allowed; opacity:.45; pointer-events:none; }
 
 .empty-state { text-align:center; padding:48px 0; color:var(--text-muted); }
 .empty-icon  { font-size:2rem; margin-bottom:8px; }

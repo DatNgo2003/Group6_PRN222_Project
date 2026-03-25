@@ -794,20 +794,7 @@
             </div>
         </div>
 
-        <nav class="nav-section">
-            <div class="nav-label">Tổng quan</div>
-            <a asp-page="/Admin/DashBoard/AdminDashboard"
-               class="nav-item @(currentPage == "/Admin/DashBoard/AdminDashboard" ? "active" : "")">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                </svg>
-                Dashboard
-            </a>
-        </nav>
-
+        
         <nav class="nav-section">
             <div class="nav-label">Quản trị</div>
             <a asp-page="/Admin/Users/Index"
@@ -853,14 +840,14 @@
                 </svg>
                 Doanh thu
             </a>
-            <a asp-page="/Admin/KPIs/DepartmentKpi"
+           @*  <a asp-page="/Admin/KPIs/DepartmentKpi"
                class="nav-item @(currentPage.StartsWith("/Admin/KPIs") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <polyline points="12 6 12 12 16 14" />
                 </svg>
                 KPI Phòng ban
-            </a>
+            </a> *@
             <a asp-page="/Admin/Budgets/Index"
                class="nav-item @(currentPage.StartsWith("/Admin/Budgets") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -931,15 +918,7 @@
 
         <div class="nav-divider"></div>
 
-        <nav class="nav-section">
-            <div class="nav-label">Điều hướng</div>
-            <a asp-page="/Index" class="nav-item">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                </svg>
-                Về trang chủ
-            </a>
-        </nav>
+      
 
         <div class="sidebar-footer">
             <div class="user-chip">
