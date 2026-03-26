@@ -1,0 +1,84 @@
+@page
+@model Project_PRN222.Pages.StaffMKT.Campaigns.CreateModel
+
+@{
+    ViewData["Title"] = "Staff (MKT) — Create Campaign";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+@section Styles {
+<style>
+    .form-wrap { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px; max-width: 900px; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @@media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+    .label { display:block; font-weight: 900; font-size: .85rem; color: var(--text-muted); margin-bottom: 6px; }
+    input.control, select.control, textarea.control { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-weight: 800; color: var(--text-primary); }
+    textarea.control { min-height: 140px; font-weight: 700; line-height: 1.35; }
+    .help { color: var(--text-muted); font-weight: 700; font-size: .86rem; margin-top: 6px; }
+    .btn-row { display:flex; gap: 10px; align-items:center; flex-wrap: wrap; margin-top: 14px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:10px; border:1px solid var(--border); font-weight: 900; cursor:pointer; text-decoration:none; background:#fff; color:var(--text-primary); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color:#fff; }
+    .validation { margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid #f5c6cb; background: #f8d7da; color: #721c24; font-weight: 900; }
+</style>
+}
+
+<div style="margin-bottom: 16px;">
+    <h1 style="font-size:1.4rem;margin-bottom:6px;">Tạo campaign</h1>
+    <p style="margin:0;" class="help">Nhập ad content, ngân sách chạy ads và chỉ số engagement.</p>
+</div>
+
+<form method="post">
+    <div class="form-wrap">
+        <div class="grid-2">
+            <div>
+                <label class="label" asp-for="EventId">Sự kiện</label>
+                <select asp-for="EventId" class="control">
+                    @foreach (var e in Model.Events)
+                    {
+                        if (Model.EventId == e.EventId) { <option value="@e.EventId" selected>@e.EventName</option> } else { <option value="@e.EventId">@e.EventName</option> }
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="label" asp-for="Status">Trạng thái</label>
+                <select asp-for="Status" class="control">
+                    @if (Model.Status == "Running") { <option value="Running" selected>Running</option> } else { <option value="Running">Running</option> }
+                    @if (Model.Status == "Paused") { <option value="Paused" selected>Paused</option> } else { <option value="Paused">Paused</option> }
+                    @if (Model.Status == "Completed") { <option value="Completed" selected>Completed</option> } else { <option value="Completed">Completed</option> }
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px;">
+            <div>
+                <label class="label" asp-for="AdSpend">Ad Spend</label>
+                <input asp-for="AdSpend" class="control" type="number" min="0" step="1000" />
+            </div>
+            <div>
+                <label class="label" asp-for="EngagementRate">Engagement Rate (%)</label>
+                <input asp-for="EngagementRate" class="control" type="number" min="0" max="100" step="0.01" />
+            </div>
+        </div>
+
+        <div style="margin-top:12px;">
+            <label class="label" asp-for="AdContent">Ad Content</label>
+            <textarea asp-for="AdContent" class="control" placeholder="Ví dụ: nội dung quảng cáo, CTA, target audience..."></textarea>
+            <div class="help">Nội dung càng rõ thì team organizer/admin càng dễ đánh giá hiệu quả.</div>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="validation">
+                @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@err.ErrorMessage</div>
+                }
+            </div>
+        }
+
+        <div class="btn-row">
+            <button type="submit" class="btn btn-primary">Lưu campaign</button>
+            <a asp-page="Index" class="btn">Quay lại</a>
+        </div>
+    </div>
+</form>

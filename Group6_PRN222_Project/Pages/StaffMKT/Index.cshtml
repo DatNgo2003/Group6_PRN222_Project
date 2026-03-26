@@ -1,0 +1,121 @@
+@page
+@model Project_PRN222.Pages.StaffMKT.IndexModel
+
+@{
+    ViewData["Title"] = "Staff (MKT) — Dashboard";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Marketing Operations</h1>
+        <p class="subtitle">Theo dõi campaign, ad spend và engagement theo sự kiện</p>
+    </div>
+    <div class="header-actions">
+        <a asp-page="/StaffMKT/Campaigns/Index" class="btn btn-secondary">Xem Campaigns</a>
+        <a asp-page="/StaffMKT/Campaigns/Create" class="btn btn-primary">Tạo Campaign</a>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
+    .page-title h1 { font-size:1.6rem; font-weight:700; margin:0 0 4px; color:var(--text-primary); }
+    .subtitle { color:var(--text-muted); font-size:.9rem; margin:0; }
+    .header-actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+    .btn {
+        display:inline-flex; align-items:center; gap:8px;
+        padding:10px 16px; border-radius:10px; font-weight:700; font-size:.9rem;
+        text-decoration:none; border:1px solid var(--border);
+    }
+    .btn-primary { background: #1f6e43; border-color: #1f6e43; color: #fff; }
+    .btn-primary:hover { background: #2f855a; border-color: #2f855a; }
+    .btn-secondary { background: var(--card-bg); color: var(--text-primary); border-color: var(--border); }
+
+    .grid-4 { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:16px; }
+    @@media (max-width: 900px) { .grid-4 { grid-template-columns: 1fr 1fr; } }
+    @@media (max-width: 560px) { .grid-4 { grid-template-columns: 1fr; } }
+
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+    .stat-label { color: var(--text-muted); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; }
+    .stat-value { font-size: 1.85rem; font-weight: 800; margin-top: 10px; color: var(--text-primary); }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 16px; }
+    .card-head { padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .card-head h2 { font-size:1.05rem; font-weight:800; }
+    .card-body { padding: 12px 18px 18px; }
+    table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    th { text-align:left; padding: 12px 10px; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 10px; border-bottom: 1px solid var(--border-light); }
+    tr:last-child td { border-bottom:none; }
+    .badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px; font-weight:800; font-size:.8rem; }
+    .badge-green { background: #e8f5e9; color: #1b5e20; }
+    .badge-gray { background: #f1f5f9; color: #334155; }
+    .badge-blue { background: #eef2ff; color: #3730a3; }
+</style>
+}
+
+<div class="grid-4">
+    <div class="stat-card">
+        <div class="stat-label">Running</div>
+        <div class="stat-value">@Model.RunningCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Paused</div>
+        <div class="stat-value">@Model.PausedCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value">@Model.CompletedCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Ad Spend</div>
+        <div class="stat-value">@Model.TotalAdSpend.ToString("N0")</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <h2>Campaign gần nhất</h2>
+        <div style="color:var(--text-muted); font-size:.9rem;">Avg Engagement: <strong>@Model.AvgEngagementRate.ToString("0.##")%</strong></div>
+    </div>
+    <div class="card-body">
+        @if (!Model.RecentCampaigns.Any())
+        {
+            <div style="padding:18px 0; color:var(--text-muted); font-weight:700;">Chưa có campaign nào.</div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Campaign</th>
+                        <th>Sự kiện</th>
+                        <th>Ad Spend</th>
+                        <th>Engagement</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var c in Model.RecentCampaigns)
+                {
+                    <tr>
+                        <td style="font-weight:800;">#@c.CampaignId</td>
+                        <td>@(c.Event?.EventName ?? "—")</td>
+                        <td>@((c.AdSpend ?? 0m).ToString("N0"))</td>
+                        <td>@((c.EngagementRate ?? 0m).ToString("0.##"))%</td>
+                        <td>
+                            @{
+                                var status = c.Status ?? "Running";
+                                var cls = status == "Completed" ? "badge-green" : status == "Paused" ? "badge-gray" : "badge-blue";
+                            }
+                            <span class="badge @cls">@status</span>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

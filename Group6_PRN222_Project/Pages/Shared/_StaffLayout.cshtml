@@ -2,6 +2,8 @@
     var currentPage = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
     var role     = Context.Session.GetString("Role")     ?? "";
     var fullName = Context.Session.GetString("FullName") ?? "Staff";
+    var isMkt = role == "Staff(MKT)";
+    var isLogistics = role == "Staff(Logistics)";
 }
 
 <!DOCTYPE html>
@@ -151,27 +153,52 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="brand-name">EMS Staff</div>
-            <div class="brand-sub">Event Logistics</div>
+            <div class="brand-sub">@(isMkt ? "Event Marketing" : "Event Logistics")</div>
         </div>
 
         <nav class="nav-section">
             <div class="nav-label">Tổng quan</div>
-            <a asp-page="/StaffLogistics/Index" class="nav-item @(currentPage == "/StaffLogistics/Index" ? "active" : "")">
-                <span class="nav-icon">&#9632;</span> Dashboard
-            </a>
+            @if (isMkt)
+            {
+                <a asp-page="/StaffMKT/Index" class="nav-item @(currentPage == "/StaffMKT/Index" ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Dashboard
+                </a>
+            }
+            else
+            {
+                <a asp-page="/StaffLogistics/Index" class="nav-item @(currentPage == "/StaffLogistics/Index" ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Dashboard
+                </a>
+            }
         </nav>
 
         <nav class="nav-section">
-            <div class="nav-label">Vận hành</div>
-            <a asp-page="/StaffLogistics/Tasks/Index" class="nav-item @(currentPage.StartsWith("/StaffLogistics/Tasks") ? "active" : "")">
-                <span class="nav-icon">&#9632;</span> Tasks
-            </a>
-            <a asp-page="/StaffLogistics/Equipment/Index" class="nav-item @(currentPage.StartsWith("/StaffLogistics/Equipment") ? "active" : "")">
-                <span class="nav-icon">&#9632;</span> Equipment
-            </a>
-            <a asp-page="/StaffLogistics/Reports/Index" class="nav-item @(currentPage.StartsWith("/StaffLogistics/Reports") ? "active" : "")">
-                <span class="nav-icon">&#9632;</span> Reports
-            </a>
+            @if (isMkt)
+            {
+                <div class="nav-label">Marketing</div>
+                <a asp-page="/StaffMKT/Campaigns/Index" class="nav-item @(currentPage.StartsWith("/StaffMKT/Campaigns") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Campaigns
+                </a>
+                <a asp-page="/StaffMKT/Analytics/Index" class="nav-item @(currentPage.StartsWith("/StaffMKT/Analytics") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Analytics
+                </a>
+                <a asp-page="/StaffMKT/Reports/Index" class="nav-item @(currentPage.StartsWith("/StaffMKT/Reports") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Reports
+                </a>
+            }
+            else
+            {
+                <div class="nav-label">Vận hành</div>
+                <a asp-page="/StaffLogistics/Tasks/Index" class="nav-item @(currentPage.StartsWith("/StaffLogistics/Tasks") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Tasks
+                </a>
+                <a asp-page="/StaffLogistics/Equipment/Index" class="nav-item @(currentPage.StartsWith("/StaffLogistics/Equipment") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Equipment
+                </a>
+                <a asp-page="/StaffLogistics/Reports/Index" class="nav-item @(currentPage.StartsWith("/StaffLogistics/Reports") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Reports
+                </a>
+            }
         </nav>
 
         <div class="sidebar-footer">
