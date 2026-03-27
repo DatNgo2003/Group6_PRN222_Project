@@ -4,6 +4,7 @@ using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Project_PRN222.Helpers;
 using System.ComponentModel.DataAnnotations;
 using AppTask = System.Threading.Tasks.Task;
 
@@ -84,7 +85,7 @@ namespace Group6_PRN222_Project.Pages.Admin
             return appRole switch
             {
                 InternalRoleResolver.Admin => RedirectToPage("/Admin/Reports/RevenueReport"),
-                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/OrganizerDashboard"),
+                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/Dashboard"),
                 InternalRoleResolver.StaffSecurity => RedirectToPage("/StaffSecurity/Index"),
                 InternalRoleResolver.StaffMkt => RedirectToPage("/Staff/StaffDashboard"),
                 InternalRoleResolver.StaffLogistics => RedirectToPage("/Staff/StaffDashboard"),
@@ -104,10 +105,9 @@ namespace Group6_PRN222_Project.Pages.Admin
                               : DateTimeOffset.UtcNow.AddHours(8)
             });
             HttpContext.Session.SetString("auth_token", token);
-            HttpContext.Session.SetString("username", user.Username);
-            HttpContext.Session.SetString("fullname", user.FullName ?? user.Username);
-            HttpContext.Session.SetInt32("userid", user.UserId);
-            HttpContext.Session.SetString("role", appRole);
+            // Dùng SessionHelper để ghi đúng PascalCase keys mà toàn bộ app đọc
+            SessionHelper.SetUser(HttpContext.Session, user.UserId, user.Username, user.FullName ?? user.Username, appRole);
         }
+
     }
 }
