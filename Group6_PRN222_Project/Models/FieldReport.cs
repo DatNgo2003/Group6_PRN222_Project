@@ -15,6 +15,8 @@ public partial class FieldReport
 
     public string? Content { get; set; }
 
+    public decimal? EstimatePrice { get; set; }
+
     public DateTime? ReportTime { get; set; }
 
     public string? Status { get; set; }

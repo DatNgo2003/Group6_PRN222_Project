@@ -154,6 +154,8 @@ public partial class ProjectPrn222Context : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Planning");
+            entity.Property(e => e.Scale).HasMaxLength(50);
+            entity.Property(e => e.Capacity);
 
             entity.HasOne(d => d.Organizer).WithMany(p => p.Events)
                 .HasForeignKey(d => d.OrganizerId)
@@ -191,6 +193,9 @@ public partial class ProjectPrn222Context : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.ReportType).HasMaxLength(50);
+            entity.Property(e => e.EstimatePrice)
+                .HasColumnName("EstimatePrice")
+                .HasColumnType("decimal(18,2)");
             entity.Property(e => e.StaffId).HasColumnName("StaffID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
@@ -333,6 +338,8 @@ public partial class ProjectPrn222Context : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Valid");
+            entity.Property(e => e.TicketType).HasMaxLength(50);
+            entity.Property(e => e.Price).HasColumnType("money");
 
             entity.HasOne(d => d.Event).WithMany(p => p.Tickets)
                 .HasForeignKey(d => d.EventId)

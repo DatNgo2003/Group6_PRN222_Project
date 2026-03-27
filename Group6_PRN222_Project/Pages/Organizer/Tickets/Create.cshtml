@@ -28,18 +28,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="Ticket.ParticipantId">Participant <span class="required">*</span></label>
-                    <select asp-for="Ticket.ParticipantId" class="form-control" asp-items="Model.ParticipantList" required>
-                        <option value="">-- Select Participant --</option>
+                    <label asp-for="Ticket.TicketType">Loại vé <span class="required">*</span></label>
+                    <select asp-for="Ticket.TicketType" class="form-control" required>
+                        <option value="">-- Chọn loại vé --</option>
+                        <option value="Standard">Standard</option>
+                        <option value="VIP">VIP</option>
                     </select>
-                    <span asp-validation-for="Ticket.ParticipantId" class="field-error"></span>
+                    <span asp-validation-for="Ticket.TicketType" class="field-error"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="DiscountPolicyId">Discount Policy</label>
-                    <select asp-for="DiscountPolicyId" class="form-control" asp-items="Model.DiscountPolicyList">
-                        <option value="">-- No Discount --</option>
-                    </select>
+                    <label asp-for="Ticket.Price">Giá vé (VNĐ) <span class="required">*</span></label>
+                    <input asp-for="Ticket.Price" class="form-control" type="number" min="0" step="1000" placeholder="VNĐ" required />
+                    <span asp-validation-for="Ticket.Price" class="field-error"></span>
                 </div>
 
                 <div class="form-group">
@@ -51,9 +52,6 @@
                     </select>
                 </div>
             </div>
-            <p style="margin-top:14px;color:var(--text-3);font-size:.82rem;">
-                💡 Giá vé sẽ được tự động tính: <strong style="color:var(--c-gold)">Ticket Price = Event Amount − Discount%</strong>
-            </p>
         </div>
 
         <div class="form-actions">

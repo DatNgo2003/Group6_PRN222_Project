@@ -1,0 +1,103 @@
+@page
+@model Group6_PRN222_Project.Pages.Organizer.FieldReports.IndexModel
+@{
+    ViewData["Title"] = "Notification Reports";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Notification Reports</h1>
+        <p class="subtitle">Duyệt báo cáo từ nhân viên hiện trường</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Report ID</th>
+                    <th>Event</th>
+                    <th>Staff</th>
+                    <th>Report Type</th>
+                    <th>Content</th>
+                    <th>Price (VNĐ)</th>
+                    <th>Report Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Reports)
+                {
+                    <tr>
+                        <td class="id-cell">@r.ReportId</td>
+                        <td><strong>@(r.Event?.EventName ?? "—")</strong></td>
+                        <td style="color:var(--text-3)">@(r.Staff?.FullName ?? "—")</td>
+                        <td>
+                            <span class="role-badge role-default">@(r.ReportType ?? "—")</span>
+                        </td>
+                        <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-2)">
+                            @(r.Content ?? "—")
+                        </td>
+                        <td style="color:var(--c-gold); font-weight:600; text-align:right;">
+                            @(r.EstimatePrice.HasValue ? r.EstimatePrice.Value.ToString("N0") : "—")
+                        </td>
+                        <td class="date-cell">@(r.ReportTime?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                        <td>
+                            @{
+                                var badge = r.Status switch
+                                {
+                                    "Approved" => "background:rgba(74,154,122,.12);color:#6ee7b7",
+                                    "Rejected" => "background:rgba(220,60,60,.10);color:#f87171",
+                                    _ => "background:rgba(250,248,244,.07);color:var(--text-3)"
+                                };
+                            }
+                            <span class="role-badge" style="@badge">@(r.Status ?? "Submitted")</span>
+                        </td>
+                        <td class="action-cell" style="white-space:nowrap;">
+                            @if (r.Status == "Submitted" || r.Status == null)
+                            {
+                                <form method="post" asp-page-handler="Approve" style="display:inline;">
+                                    <input type="hidden" name="reportId" value="@r.ReportId" />
+                                    <button type="submit" class="btn-action btn-edit"
+                                            style="background:rgba(74,154,122,.15);color:#6ee7b7;border-color:rgba(74,154,122,.25);">
+                                        ✓ Duyệt
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="Reject" style="display:inline; margin-left:4px;">
+                                    <input type="hidden" name="reportId" value="@r.ReportId" />
+                                    <button type="submit" class="btn-action btn-delete">
+                                        ✗ Từ chối
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-3); font-size:.8rem; font-style:italic;">Đã xử lý</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Reports.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div>Không có báo cáo nào.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

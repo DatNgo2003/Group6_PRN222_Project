@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Group6_PRN222_Project.Models;
@@ -26,6 +26,10 @@ public partial class Event
     public string? Images { get; set; }
 
     public string? Status { get; set; }
+
+    public string? Scale { get; set; }
+
+    public int? Capacity { get; set; }
 
     public int? OrganizerId { get; set; }
 

@@ -30,6 +30,9 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
         [BindProperty]
         public Event Event { get; set; } = default!;
 
+        [BindProperty]
+        public IFormFile? ImageFile { get; set; }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!SessionHelper.IsOrganizer(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -42,6 +45,17 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
                 var statuses = new[] { "Planning", "Ongoing", "Completed", "Cancelled" };
                 ViewData["StatusList"] = new SelectList(statuses);
                 return Page();
+            }
+
+            // Handle image upload → store as base64 in Images column
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                using var ms = new System.IO.MemoryStream();
+                await ImageFile.CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                var base64 = Convert.ToBase64String(bytes);
+                var mimeType = ImageFile.ContentType;
+                Event.Images = $"data:{mimeType};base64,{base64}";
             }
 
             Event.OrganizerId = HttpContext.Session.GetInt32("UserID");
