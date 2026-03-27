@@ -13,6 +13,8 @@ public partial class Budget
 
     public decimal? SpentAmount { get; set; }
 
+    public decimal? Profit { get; set; }
+
     public string? ApprovalStatus { get; set; }
 
     public int? ApprovedBy { get; set; }

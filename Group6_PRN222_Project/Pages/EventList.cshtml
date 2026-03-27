@@ -1,0 +1,526 @@
+﻿@page "/Events/EventList"
+@model Group6_PRN222_Project.Pages.Events.EventListModel
+@{
+    ViewData["Title"] = "Tất cả sự kiện";
+    ViewData["ActivePage"] = "Events";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .events-page-hero {
+            background: var(--c-ink);
+            padding: 52px 0;
+        }
+
+        .events-page-hero__title {
+            font-family: var(--ff-display);
+            font-size: clamp(32px, 4vw, 52px);
+            font-weight: 700;
+            color: var(--c-ivory);
+            letter-spacing: -.5px;
+            margin-bottom: 8px;
+        }
+
+        .events-page-hero__sub {
+            font-size: 15px;
+            color: rgba(250,248,244,.45);
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            background: #fff;
+            border-bottom: 1px solid var(--c-sand);
+            padding: 20px 0;
+            position: sticky;
+            top: 68px;
+            z-index: 50;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .filter-bar__inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-input {
+            flex: 1;
+            min-width: 220px;
+            padding: 10px 16px 10px 40px;
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-size: 14px;
+            color: var(--c-ink);
+            background: var(--c-cream);
+            outline: none;
+            transition: border-color var(--transition);
+        }
+
+            .filter-input:focus {
+                border-color: var(--c-gold);
+                background: #fff;
+            }
+
+        .filter-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .filter-input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--c-ink-30);
+            pointer-events: none;
+        }
+
+            .filter-input-icon svg {
+                width: 15px;
+                height: 15px;
+                display: block;
+            }
+
+        .filter-select {
+            padding: 10px 36px 10px 14px;
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-size: 14px;
+            color: var(--c-ink);
+            background: var(--c-cream);
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            transition: border-color var(--transition);
+        }
+
+            .filter-select:focus {
+                border-color: var(--c-gold);
+            }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: var(--c-ink);
+            color: var(--c-ivory);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background var(--transition);
+            white-space: nowrap;
+        }
+
+            .filter-btn:hover {
+                background: var(--c-accent);
+            }
+
+        .filter-btn-clear {
+            padding: 10px 16px;
+            background: transparent;
+            color: var(--c-ink-60);
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+
+            .filter-btn-clear:hover {
+                border-color: var(--c-taupe);
+                color: var(--c-ink);
+            }
+
+        /* Results info */
+        .results-info {
+            font-size: 14px;
+            color: var(--c-ink-60);
+            margin-bottom: 28px;
+        }
+
+            .results-info strong {
+                color: var(--c-ink);
+            }
+
+        /* Events grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .event-card {
+            background: #fff;
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+        }
+
+            .event-card:hover {
+                transform: translateY(-5px);
+                box-shadow: var(--shadow-lg);
+                border-color: var(--c-taupe);
+            }
+
+        .event-card__thumb {
+            height: 190px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card__thumb-bg {
+            position: absolute;
+            inset: 0;
+            transition: transform .5s ease;
+        }
+
+        .event-card:hover .event-card__thumb-bg {
+            transform: scale(1.06);
+        }
+
+        .theme-1 {
+            background: linear-gradient(135deg, #2C4A3E 0%, #4A7A6A 60%, #B8975A 100%);
+        }
+
+        .theme-2 {
+            background: linear-gradient(135deg, #3A2A5A 0%, #6A4A9A 60%, #D4B882 100%);
+        }
+
+        .theme-3 {
+            background: linear-gradient(135deg, #5A2A1E 0%, #9A4A3A 60%, #E8975A 100%);
+        }
+
+        .theme-4 {
+            background: linear-gradient(135deg, #1A3A5A 0%, #2A6A9A 60%, #B8D4F0 100%);
+        }
+
+        .theme-5 {
+            background: linear-gradient(135deg, #3A4A1E 0%, #6A7A3A 60%, #C8C875 100%);
+        }
+
+        .theme-6 {
+            background: linear-gradient(135deg, #4A1A3A 0%, #9A3A7A 60%, #F0B8D4 100%);
+        }
+
+        .event-card__status {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 1;
+        }
+
+        .event-card__date-badge {
+            position: absolute;
+            bottom: 14px;
+            right: 14px;
+            background: rgba(26,23,20,.55);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            z-index: 1;
+        }
+
+        .event-card__body {
+            padding: 20px 22px 22px;
+        }
+
+        .event-card__title {
+            font-family: var(--ff-display);
+            font-size: 19px;
+            font-weight: 600;
+            line-height: 1.25;
+            margin-bottom: 8px;
+            letter-spacing: -.2px;
+            color: var(--c-ink);
+        }
+
+        .event-card__location {
+            font-size: 13px;
+            color: var(--c-ink-60);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 14px;
+        }
+
+        .event-card__concept {
+            font-size: 13px;
+            color: var(--c-ink-60);
+            line-height: 1.55;
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .event-card__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--c-sand);
+        }
+
+        .event-card__organizer {
+            font-size: 12px;
+            color: var(--c-ink-60);
+        }
+
+            .event-card__organizer strong {
+                color: var(--c-ink);
+                font-weight: 500;
+            }
+
+        .event-card__cta {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--c-gold);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: gap var(--transition);
+        }
+
+        .event-card:hover .event-card__cta {
+            gap: 7px;
+        }
+
+        /* Empty state */
+        .events-empty {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--c-ink-60);
+        }
+
+        .events-empty__icon {
+            font-size: 52px;
+            margin-bottom: 16px;
+        }
+
+        .events-empty__title {
+            font-family: var(--ff-display);
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--c-ink);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 48px;
+        }
+
+        .page-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--c-ink-60);
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+
+            .page-btn:hover {
+                border-color: var(--c-gold);
+                color: var(--c-gold);
+            }
+
+            .page-btn.active {
+                background: var(--c-ink);
+                border-color: var(--c-ink);
+                color: #fff;
+            }
+
+            .page-btn.disabled {
+                opacity: .35;
+                pointer-events: none;
+            }
+
+        @@media (max-width: 900px) {
+            .events-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-bar__inner {
+                padding: 0 20px;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+<!-- Page Hero -->
+<div class="events-page-hero">
+    <div class="container">
+        <div class="events-page-hero__title">Tất cả sự kiện</div>
+        <div class="events-page-hero__sub">Khám phá @Model.TotalCount sự kiện đang diễn ra trên hệ thống</div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <form method="get" class="filter-bar__inner">
+        <div class="filter-input-wrap">
+            <span class="filter-input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            </span>
+            <input name="Search" value="@Model.Search" class="filter-input"
+                   placeholder="Tìm kiếm sự kiện, địa điểm..." />
+        </div>
+
+        <select name="Status" class="filter-select">
+            <option value="">Tất cả trạng thái</option>
+            <option value="Active" selected="@(Model.Status == "Active")">Đang mở</option>
+            <option value="Planning" selected="@(Model.Status == "Planning")">Chuẩn bị</option>
+            <option value="Completed" selected="@(Model.Status == "Completed")">Đã kết thúc</option>
+        </select>
+
+        <button type="submit" class="filter-btn">Tìm kiếm</button>
+
+        @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Status))
+        {
+            <a href="/Events/EventList" class="filter-btn-clear">Xóa bộ lọc</a>
+        }
+    </form>
+</div>
+
+<!-- Main Content -->
+<div class="section">
+    <div class="container">
+        <div class="results-info">
+            Tìm thấy <strong>@Model.TotalCount</strong> sự kiện
+            @if (!string.IsNullOrEmpty(Model.Search))
+            {
+                <span> cho "<strong>@Model.Search</strong>"</span>
+            }
+        </div>
+
+        <div class="events-grid">
+            @if (Model.Events.Any())
+            {
+                string[] themes = { "theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6" };
+                int ti = 0;
+                foreach (var ev in Model.Events)
+                {
+                    string theme = themes[ti % themes.Length]; ti++;
+                    <a href="/Events/EventDetail/@ev.EventId" class="event-card">
+                        <div class="event-card__thumb">
+                            <div class="event-card__thumb-bg @theme"></div>
+                            <div class="event-card__status">
+                                @{
+                                    var bc = ev.Status switch
+                                    {
+                                        "Active" => "badge-green",
+                                        "Planning" => "badge-blue",
+                                        "Completed" => "badge-gray",
+                                        _ => "badge-gray"
+                                    };
+                                    var bt = ev.Status switch
+                                    {
+                                        "Active" => "Đang mở",
+                                        "Planning" => "Chuẩn bị",
+                                        "Completed" => "Đã kết thúc",
+                                        _ => ev.Status ?? ""
+                                    };
+                                }
+                                <span class="badge @bc">@bt</span>
+                            </div>
+                            <div class="event-card__date-badge">
+                                @ev.StartDate?.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                        <div class="event-card__body">
+                            <div class="event-card__title">@ev.EventName</div>
+                            @if (!string.IsNullOrEmpty(ev.Location))
+                            {
+                                <div class="event-card__location">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                    @ev.Location
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(ev.Concept))
+                            {
+                                <div class="event-card__concept">@ev.Concept</div>
+                            }
+                            <div class="event-card__footer">
+                                <div class="event-card__organizer">
+                                    Tổ chức bởi: <strong>@(ev.Organizer?.FullName ?? "N/A")</strong>
+                                </div>
+                                <div class="event-card__cta">
+                                    Xem chi tiết
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <div class="events-empty">
+                    <div class="events-empty__icon">🔍</div>
+                    <div class="events-empty__title">Không tìm thấy sự kiện</div>
+                    <p>Thử thay đổi bộ lọc hoặc từ khoá tìm kiếm.</p>
+                    <a href="/Events/EventList" class="btn btn-primary" style="margin-top:20px;display:inline-flex">Xem tất cả sự kiện</a>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination">
+                <a class="page-btn @(Model.Page <= 1 ? "disabled" : "")"
+                   href="?Search=@Model.Search&Status=@Model.Status&Page=@(Model.Page - 1)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+                </a>
+                @for (int p = 1; p <= Model.TotalPages; p++)
+                {
+                    <a class="page-btn @(p == Model.Page ? "active" : "")"
+                       href="?Search=@Model.Search&Status=@Model.Status&Page=@p">@p</a>
+                }
+                <a class="page-btn @(Model.Page >= Model.TotalPages ? "disabled" : "")"
+                   href="?Search=@Model.Search&Status=@Model.Status&Page=@(Model.Page + 1)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                </a>
+            </div>
+        }
+    </div>
+</div>

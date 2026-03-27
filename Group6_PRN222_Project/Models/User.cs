@@ -31,6 +31,10 @@ public partial class User
 
     public virtual ICollection<FieldReport> FieldReports { get; set; } = new List<FieldReport>();
 
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ICollection<Participant> Participants { get; set; } = new List<Participant>();
+
     public virtual Role? Role { get; set; }
 
     public virtual ICollection<SystemAuditLog> SystemAuditLogs { get; set; } = new List<SystemAuditLog>();

@@ -1,0 +1,697 @@
+﻿@page "/Events/EventDetail/{id:int}"
+@model Group6_PRN222_Project.Pages.Events.EventDetailModel
+@{
+    ViewData["Title"] = Model.Event?.EventName ?? "Chi tiết sự kiện";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+    var ev = Model.Event;
+    var isLoggedIn = HttpContext.Session.GetInt32("userid").HasValue;
+    var themes = new[] { "theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6" };
+    var theme = themes[Math.Abs((ev?.EventId ?? 0) % themes.Length)];
+}
+
+@section Styles {
+    <style>
+        /* ── Hero Banner ───────────────────────────────── */
+        .detail-hero {
+            height: 360px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detail-hero__bg {
+            position: absolute;
+            inset: 0;
+        }
+
+        .detail-hero__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(26,23,20,.2) 0%, rgba(26,23,20,.75) 100%);
+        }
+
+        .detail-hero__content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .detail-hero__badge {
+            margin-bottom: 12px;
+        }
+
+        .detail-hero__title {
+            font-family: var(--ff-display);
+            font-size: clamp(28px, 4vw, 52px);
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -.5px;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .detail-hero__meta {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .detail-hero__meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: rgba(255,255,255,.75);
+        }
+
+            .detail-hero__meta-item svg {
+                width: 15px;
+                height: 15px;
+                flex-shrink: 0;
+            }
+
+        /* ── Layout ─────────────────────────────────────── */
+        .detail-layout {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 40px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* ── Left: Info ─────────────────────────────────── */
+        .detail-section {
+            margin-bottom: 36px;
+        }
+
+        .detail-section-title {
+            font-family: var(--ff-display);
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            letter-spacing: -.2px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--c-sand);
+        }
+
+        .detail-concept {
+            font-size: 15px;
+            color: var(--c-ink-60);
+            line-height: 1.8;
+        }
+
+        .detail-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .detail-info-item {
+            background: var(--c-cream);
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .detail-info-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            background: var(--c-gold-pale);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .detail-info-label {
+            font-size: 11px;
+            color: var(--c-ink-60);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            margin-bottom: 3px;
+        }
+
+        .detail-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--c-ink);
+        }
+
+        /* ── Right: Register Card ───────────────────────── */
+        .register-card {
+            background: #fff;
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            position: sticky;
+            top: 100px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .register-card__header {
+            background: var(--c-ink);
+            padding: 24px;
+        }
+
+        .register-card__event-name {
+            font-family: var(--ff-display);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--c-ivory);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .register-card__date {
+            font-size: 13px;
+            color: rgba(250,248,244,.5);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .register-card__body {
+            padding: 24px;
+        }
+
+        .ticket-count-bar {
+            margin-bottom: 20px;
+        }
+
+        .ticket-count-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--c-ink-60);
+            margin-bottom: 6px;
+        }
+
+            .ticket-count-label strong {
+                color: var(--c-ink);
+            }
+
+        .progress {
+            height: 6px;
+            background: var(--c-sand);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress__fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--c-accent), var(--c-gold));
+            transition: width .6s ease;
+        }
+
+        /* Payment method selector */
+        .payment-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--c-ink-60);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .payment-option {
+            position: relative;
+        }
+
+            .payment-option input[type="radio"] {
+                position: absolute;
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .payment-option__label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--c-ink);
+        }
+
+        .payment-option input:checked + .payment-option__label {
+            border-color: var(--c-gold);
+            background: var(--c-gold-pale);
+            color: #8B6020;
+        }
+
+        .payment-option__label:hover {
+            border-color: var(--c-taupe);
+        }
+
+        .payment-option__icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            background: var(--c-cream);
+        }
+
+        .payment-option__desc {
+            font-size: 11px;
+            color: var(--c-ink-60);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* Bank info (hiện khi chọn Transfer) */
+        .bank-info {
+            background: #E4EDF8;
+            border: 1px solid #B5D4F4;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+            line-height: 1.7;
+        }
+
+            .bank-info strong {
+                color: var(--c-info);
+            }
+
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            justify-content: center;
+            font-size: 15px;
+            border-radius: var(--radius-md);
+        }
+
+        .btn-register-gold {
+            background: var(--c-gold);
+            border-color: var(--c-gold);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(184,151,90,.25);
+        }
+
+            .btn-register-gold:hover {
+                background: var(--c-gold-light);
+                border-color: var(--c-gold-light);
+                transform: translateY(-1px);
+                box-shadow: 0 6px 24px rgba(184,151,90,.35);
+            }
+
+        .already-joined {
+            background: #E8F2EC;
+            border: 1px solid #9FD8B8;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .already-joined__icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .already-joined__title {
+            font-weight: 600;
+            color: var(--c-success);
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .already-joined__sub {
+            font-size: 13px;
+            color: var(--c-success);
+            opacity: .75;
+        }
+
+        .login-prompt {
+            background: var(--c-cream);
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .login-prompt__title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .login-prompt__sub {
+            font-size: 13px;
+            color: var(--c-ink-60);
+            margin-bottom: 16px;
+        }
+
+        .register-note {
+            font-size: 12px;
+            color: var(--c-ink-60);
+            text-align: center;
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        @@media (max-width: 900px) {
+            .detail-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .register-card {
+                position: static;
+            }
+
+            .detail-hero__content {
+                padding: 24px 20px;
+            }
+
+            .detail-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+}
+
+@if (ev == null)
+{
+    <div class="container" style="padding:80px 40px;text-align:center">
+        <div style="font-size:52px;margin-bottom:16px">😕</div>
+        <h2 style="font-family:var(--ff-display);font-size:28px;margin-bottom:8px">Không tìm thấy sự kiện</h2>
+        <a asp-page="/Events/EventList" class="btn btn-primary" style="margin-top:16px;display:inline-flex">Xem tất cả sự kiện</a>
+    </div>
+    return;
+}
+
+<!-- Hero Banner -->
+<div class="detail-hero">
+    <div class="detail-hero__bg @theme"></div>
+    <div class="detail-hero__overlay"></div>
+    <div class="detail-hero__content container">
+        <div class="detail-hero__badge">
+            @{
+                var bc = ev.Status switch { "Active" => "badge-green", "Planning" => "badge-blue", _ => "badge-gray" };
+                var bt = ev.Status switch { "Active" => "Đang mở đăng ký", "Planning" => "Chuẩn bị", _ => ev.Status ?? "" };
+            }
+            <span class="badge @bc">@bt</span>
+        </div>
+        <h1 class="detail-hero__title">@ev.EventName</h1>
+        <div class="detail-hero__meta">
+            @if (ev.StartDate.HasValue)
+            {
+                <div class="detail-hero__meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                    @ev.StartDate.Value.ToString("dd/MM/yyyy")
+                    @if (ev.EndDate.HasValue && ev.EndDate != ev.StartDate)
+                    {
+                        <span>— @ev.EndDate.Value.ToString("dd/MM/yyyy")</span>
+                    }
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(ev.Location))
+            {
+                <div class="detail-hero__meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                    @ev.Location
+                </div>
+            }
+            <div class="detail-hero__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                Tổ chức bởi @(ev.Organizer?.FullName ?? "Ban tổ chức")
+            </div>
+            <div class="detail-hero__meta-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                @Model.TicketCount người đã đăng ký
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Breadcrumb -->
+<div style="background:var(--c-cream);border-bottom:1px solid var(--c-sand);padding:12px 0">
+    <div class="container">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--c-ink-60)">
+            <a asp-page="/Index" style="color:var(--c-gold);text-decoration:none">Trang chủ</a>
+            <span>/</span>
+            <a asp-page="/Events/EventList" style="color:var(--c-gold);text-decoration:none">Sự kiện</a>
+            <span>/</span>
+            <span>@ev.EventName</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Layout -->
+<div class="detail-layout">
+
+    <!-- LEFT: Event Info -->
+    <div>
+        @if (!string.IsNullOrEmpty(ev.Concept))
+        {
+            <div class="detail-section">
+                <div class="detail-section-title">Giới thiệu sự kiện</div>
+                <div class="detail-concept">@ev.Concept</div>
+            </div>
+        }
+
+        <div class="detail-section">
+            <div class="detail-section-title">Thông tin chi tiết</div>
+            <div class="detail-info-grid">
+                <div class="detail-info-item">
+                    <div class="detail-info-icon">📅</div>
+                    <div>
+                        <div class="detail-info-label">Ngày bắt đầu</div>
+                        <div class="detail-info-value">@(ev.StartDate?.ToString("dd/MM/yyyy") ?? "Chưa xác định")</div>
+                    </div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-icon">🏁</div>
+                    <div>
+                        <div class="detail-info-label">Ngày kết thúc</div>
+                        <div class="detail-info-value">@(ev.EndDate?.ToString("dd/MM/yyyy") ?? "Chưa xác định")</div>
+                    </div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-icon">📍</div>
+                    <div>
+                        <div class="detail-info-label">Địa điểm</div>
+                        <div class="detail-info-value">@(ev.Location ?? "Chưa xác định")</div>
+                    </div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-icon">🎯</div>
+                    <div>
+                        <div class="detail-info-label">Ban tổ chức</div>
+                        <div class="detail-info-value">@(ev.Organizer?.FullName ?? "N/A")</div>
+                    </div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-icon">🎟</div>
+                    <div>
+                        <div class="detail-info-label">Đã đăng ký</div>
+                        <div class="detail-info-value">@Model.TicketCount người</div>
+                    </div>
+                </div>
+                <div class="detail-info-item">
+                    <div class="detail-info-icon">✅</div>
+                    <div>
+                        <div class="detail-info-label">Trạng thái</div>
+                        <div class="detail-info-value">@(ev.Status == "Active" ? "Đang mở đăng ký" : ev.Status == "Planning" ? "Chuẩn bị" : ev.Status)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">Phương thức thanh toán</div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px">
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c-cream);border:1px solid var(--c-sand);border-radius:var(--radius-md);font-size:13px">
+                    💵 Thanh toán trực tiếp
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c-cream);border:1px solid var(--c-sand);border-radius:var(--radius-md);font-size:13px">
+                    🏦 Chuyển khoản ngân hàng
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c-cream);border:1px solid var(--c-sand);border-radius:var(--radius-md);font-size:13px">
+                    💳 Thẻ tín dụng
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#E4F0FF;border:1px solid #B5D4F4;border-radius:var(--radius-md);font-size:13px;color:#1A5FA8;font-weight:500">
+                    ⚡ ZaloPay
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Register Card -->
+    <div>
+        <div class="register-card">
+            <div class="register-card__header">
+                <div class="register-card__event-name">@ev.EventName</div>
+                <div class="register-card__date">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                    @ev.StartDate?.ToString("dd/MM/yyyy HH:mm")
+                </div>
+            </div>
+
+            <div class="register-card__body">
+                <!-- Ticket count progress -->
+                <div class="ticket-count-bar">
+                    <div class="ticket-count-label">
+                        <span>Đã đăng ký</span>
+                        <strong>@Model.TicketCount người</strong>
+                    </div>
+                    <div class="progress">
+                        <div class="progress__fill" style="width:@(Math.Min(Model.TicketCount * 2, 100))%"></div>
+                    </div>
+                </div>
+
+                @if (Model.AlreadyJoined)
+                {
+                    <!-- Đã đăng ký rồi -->
+                    <div class="already-joined">
+                        <div class="already-joined__icon">🎉</div>
+                        <div class="already-joined__title">Bạn đã đăng ký!</div>
+                        <div class="already-joined__sub">Hẹn gặp bạn tại sự kiện nhé.</div>
+                    </div>
+                }
+                else if (!isLoggedIn)
+                {
+                    <!-- Chưa đăng nhập -->
+                    <div class="login-prompt">
+                        <div class="login-prompt__title">Đăng nhập để đăng ký</div>
+                        <div class="login-prompt__sub">Bạn cần đăng nhập tài khoản Participant để đăng ký tham gia sự kiện này.</div>
+                        <a asp-page="/Account/Login"
+                           asp-route-returnUrl="/Events/EventDetail/@ev.EventId"
+                           class="btn btn-primary" style="width:100%;justify-content:center">
+                            Đăng nhập ngay
+                        </a>
+                        <div style="margin-top:10px;font-size:12px;color:var(--c-ink-60)">
+                            Chưa có tài khoản? <a asp-page="/Account/Register" style="color:var(--c-gold)">Đăng ký miễn phí</a>
+                        </div>
+                    </div>
+                }
+                else if (ev.Status == "Active")
+                {
+                    <!-- Form đăng ký -->
+                    <form method="post" asp-page-handler="Register" asp-route-id="@ev.EventId">
+                        <span class="payment-label">Chọn phương thức thanh toán</span>
+
+                        <div class="payment-methods">
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-direct" value="Direct" checked />
+                                <label class="payment-option__label" for="pm-direct">
+                                    <div class="payment-option__icon">💵</div>
+                                    <div>
+                                        Thanh toán trực tiếp
+                                        <div class="payment-option__desc">Nộp tiền tại quầy vào ngày sự kiện</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-transfer" value="Transfer"
+                                       onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-transfer">
+                                    <div class="payment-option__icon">🏦</div>
+                                    <div>
+                                        Chuyển khoản ngân hàng
+                                        <div class="payment-option__desc">Chuyển khoản trước, chờ xác nhận</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-card" value="CreditCard"
+                                       onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-card">
+                                    <div class="payment-option__icon">💳</div>
+                                    <div>
+                                        Thẻ tín dụng / Ghi nợ
+                                        <div class="payment-option__desc">Thanh toán ngay, xác nhận tức thì</div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-zalopay" value="ZaloPay"
+                                       onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-zalopay">
+                                    <div class="payment-option__icon">⚡</div>
+                                    <div>
+                                        ZaloPay
+                                        <div class="payment-option__desc">Thanh toán qua ví ZaloPay</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin chuyển khoản -->
+                        <div class="bank-info" id="bankInfo">
+                            <strong>Thông tin chuyển khoản:</strong><br>
+                            Ngân hàng: <strong>Vietcombank</strong><br>
+                            Số tài khoản: <strong>1234567890</strong><br>
+                            Chủ tài khoản: <strong>EVENTPRO GROUP 6</strong><br>
+                            Nội dung: <strong>DANGKY @ev.EventId - [Họ tên]</strong>
+                        </div>
+
+                        <button type="submit" class="btn btn-register btn-register-gold">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12" /><path d="M22 7H2v5h20V7z" /><path d="M12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></svg>
+                            Đăng ký tham gia
+                        </button>
+                        <div class="register-note">
+                            Bằng cách đăng ký, bạn đồng ý với điều khoản tham gia sự kiện của EventPro.
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div style="text-align:center;padding:20px;color:var(--c-ink-60)">
+                        <div style="font-size:32px;margin-bottom:8px">🔒</div>
+                        <div style="font-weight:600;color:var(--c-ink);margin-bottom:4px">Sự kiện không còn nhận đăng ký</div>
+                        <div style="font-size:13px">Trạng thái: @ev.Status</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleBankInfo(radio) {
+            const bankInfo = document.getElementById('bankInfo');
+            bankInfo.style.display = radio.value === 'Transfer' ? 'block' : 'none';
+        }
+        // Reset khi chọn Direct
+        document.getElementById('pm-direct').addEventListener('change', function() {
+            document.getElementById('bankInfo').style.display = 'none';
+        });
+    </script>
+}
