@@ -58,6 +58,11 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
                 Event.Images = $"data:{mimeType};base64,{base64}";
             }
 
+            // Only allow values permitted by CHK_Events_Scale constraint
+            var allowedScales = new[] { "Nhỏ", "Vừa", "Lớn" };
+            if (string.IsNullOrWhiteSpace(Event.Scale) || !allowedScales.Contains(Event.Scale))
+                Event.Scale = null;
+
             Event.OrganizerId = HttpContext.Session.GetInt32("UserID");
             _context.Events.Add(Event);
             await _context.SaveChangesAsync();
