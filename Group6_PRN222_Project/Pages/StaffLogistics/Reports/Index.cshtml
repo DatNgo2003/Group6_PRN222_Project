@@ -3,95 +3,22 @@
 
 @{
     ViewData["Title"] = "Staff (Logistics) — Reports";
-    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
-}
-
-@section Styles {
-<style>
-    .page-header { margin-bottom: 18px; }
-    .subtitle { color: var(--text-muted); font-weight: 700; font-size: .9rem; margin: 0; }
-
-    .card {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    .card-head {
-        padding: 16px 18px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .form-row { display:flex; gap: 10px; flex-wrap: wrap; align-items:center; }
-
-    .control {
-        padding: 9px 10px;
-        border-radius: 10px;
-        border: 1px solid var(--border);
-        background: #fff;
-        font-weight: 800;
-        color: var(--text-primary);
-    }
-    textarea.control { min-height: 120px; }
-
-    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-    thead th {
-        text-align: left;
-        padding: 12px 12px;
-        font-size: .78rem;
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        color: var(--text-muted);
-        background: #f8fafc;
-        border-bottom: 1px solid var(--border);
-    }
-    tbody td { padding: 12px 12px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
-    tbody tr:last-child td { border-bottom: none; }
-
-    .badge {
-        display:inline-flex; align-items:center;
-        padding:4px 10px; border-radius:999px;
-        font-weight:900; font-size:.82rem;
-        background: #eef2ff; color: #3730a3;
-    }
-    .badge-green { background: #e8f5e9; color: #1b5e20; }
-    .badge-purple { background: #f1e9ff; color: #4a235a; }
-    .badge-amber { background: #fff7ed; color: #9a3412; }
-    .badge-gray { background: #f1f5f9; color: #334155; }
-
-    .content {
-        max-width: 520px;
-        white-space: pre-wrap;
-        word-break: break-word;
-        color: var(--text-primary);
-        font-weight: 700;
-        line-height: 1.35;
-    }
-</style>
 }
 
 <div class="page-header">
-    <div>
-        <h1 style="font-size:1.4rem;margin-bottom:6px;">Báo cáo của bạn</h1>
+    <div class="page-title">
+        <h1>Báo cáo của bạn</h1>
         <p class="subtitle">Logistics reports / Equipment reports (từ bảng FieldReports)</p>
     </div>
-    <div style="margin-top:14px;">
-        <a asp-page="/StaffLogistics/Reports/Create" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; background:var(--accent); border:1px solid var(--accent); color:#fff; font-weight:900; text-decoration:none;">
-            Tạo báo cáo mới
-        </a>
+    <div class="header-actions">
+        <a asp-page="/StaffLogistics/Reports/Create" class="btn btn-primary">+ Tạo báo cáo mới</a>
     </div>
 </div>
 
 <div class="card">
     <div class="card-head">
-        <form method="get" class="form-row">
-            <select name="FilterEventId" class="control">
+        <form method="get" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <select name="FilterEventId" class="form-control">
                 @if (Model.FilterEventId == null)
                 {
                     <option value="" selected>-- Tất cả sự kiện --</option>
@@ -114,7 +41,7 @@
                 }
             </select>
 
-            <select name="FilterReportType" class="control" style="min-width:220px;">
+            <select name="FilterReportType" class="form-control">
                 @if (string.IsNullOrWhiteSpace(Model.FilterReportType) || string.Equals(Model.FilterReportType, "All", StringComparison.OrdinalIgnoreCase))
                 {
                     <option value="" selected>-- Tất cả loại --</option>
@@ -152,7 +79,7 @@
                 }
             </select>
 
-            <select name="FilterStatus" class="control" style="min-width:220px;">
+            <select name="FilterStatus" class="form-control">
                 @if (string.IsNullOrWhiteSpace(Model.FilterStatus) || string.Equals(Model.FilterStatus, "All", StringComparison.OrdinalIgnoreCase))
                 {
                     <option value="" selected>-- Tất cả trạng thái --</option>
@@ -190,60 +117,59 @@
                 }
             </select>
 
-            <button type="submit" class="btn btn-ghost" style="padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:#fff; font-weight:900; cursor:pointer;">
-                Lọc
-            </button>
-            <a asp-page="Index" class="btn btn-ghost" style="padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:#fff; font-weight:900; text-decoration:none; color:var(--text-primary);">
-                Xoá lọc
-            </a>
+            <button type="submit" class="btn btn-secondary" style="height:36px; line-height:36px; padding:0 14px;">Lọc</button>
+            <a asp-page="Index" class="btn btn-secondary" style="height:36px; line-height:36px; padding:0 14px;">Xoá lọc</a>
         </form>
     </div>
 
-    <div style="overflow-x:auto;">
-        @if (!Model.Reports.Any())
-        {
-            <div style="padding: 18px; color: var(--text-muted); font-weight: 900;">
-                Không có báo cáo phù hợp.
-            </div>
-        }
-        else
-        {
-            <table>
-                <thead>
+    <div class="table-wrapper" style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width:140px;">Loại</th>
+                    <th style="width:140px;">Trạng thái</th>
+                    <th>Sự kiện</th>
+                    <th style="width:160px;">Thời gian</th>
+                    <th>Nội dung</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Reports)
+                {
                     <tr>
-                        <th style="width:160px;">Loại</th>
-                        <th style="width:160px;">Trạng thái</th>
-                        <th>Sự kiện</th>
-                        <th style="width:180px;">Thời gian</th>
-                        <th>Nội dung</th>
+                        <td>
+                            @{
+                                var type = r.ReportType ?? "";
+                                var badgeType = type == "Equipment" ? "background:rgba(184,151,90,.15); color:var(--c-gold)" : 
+                                                type == "Issue" ? "background:rgba(220,60,60,.12); color:#f87171" : 
+                                                "background:rgba(110,231,183,.12); color:#6ee7b7";
+                            }
+                            <span class="role-badge" style="@badgeType">@type</span>
+                        </td>
+                        <td>
+                            @{
+                                var reportStatus = r.Status ?? "Submitted";
+                                var statusClass = reportStatus == "Resolved" ? "background:rgba(110,231,183,.12); color:#6ee7b7" : 
+                                                  reportStatus == "Reviewed" ? "background:rgba(184,151,90,.15); color:var(--c-gold)" : 
+                                                  "background:rgba(250,248,244,.07); color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@statusClass">@reportStatus</span>
+                        </td>
+                        <td><strong>@(r.Event?.EventName ?? "—")</strong></td>
+                        <td style="color:var(--text-3); font-family:var(--ff-mono);">@(r.ReportTime?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                        <td style="color:var(--text-1); font-weight:600; white-space:pre-wrap;">@(r.Content ?? "—")</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var r in Model.Reports)
-                    {
-                        <tr>
-                            <td>
-                                @{
-                                    var type = r.ReportType ?? "";
-                                    var cls = type == "Equipment" ? "badge-purple" : type == "Issue" ? "badge-amber" : "badge-green";
-                                }
-                                <span class="badge @cls">@type</span>
-                            </td>
-                            <td>
-                                @{
-                                    var reportStatus = r.Status ?? "Submitted";
-                                    var statusClass = reportStatus == "Resolved" ? "badge-green" : reportStatus == "Reviewed" ? "badge-purple" : "badge-gray";
-                                }
-                                <span class="badge @statusClass">@reportStatus</span>
-                            </td>
-                            <td>@(r.Event?.EventName ?? "—")</td>
-                            <td>@(r.ReportTime?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
-                            <td class="content">@(r.Content ?? "—")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+                }
+                @if (!Model.Reports.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <div>Không có báo cáo phù hợp.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-

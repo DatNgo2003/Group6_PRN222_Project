@@ -193,16 +193,16 @@ namespace Group6_PRN222_Project.Data
             // =============================================
             var equipments = new List<Equipment>
             {
-                new Equipment { EquipmentName = "Màn hình LED P3 (3x2m)",    TotalStock = 4,  Status = "Available"   },
-                new Equipment { EquipmentName = "Hệ thống âm thanh JBL",      TotalStock = 2,  Status = "Available"   },
-                new Equipment { EquipmentName = "Máy chiếu 10.000 lumen",     TotalStock = 3,  Status = "Available"   },
-                new Equipment { EquipmentName = "Mic không dây Shure",         TotalStock = 20, Status = "Available"   },
-                new Equipment { EquipmentName = "Đèn sân khấu Moving Head",   TotalStock = 16, Status = "Available"   },
-                new Equipment { EquipmentName = "Bàn mixer âm thanh 32ch",    TotalStock = 2,  Status = "Maintenance" },
-                new Equipment { EquipmentName = "Camera livestream 4K",        TotalStock = 5,  Status = "Available"   },
-                new Equipment { EquipmentName = "Máy phát điện dự phòng",     TotalStock = 1,  Status = "Maintenance" },
-                new Equipment { EquipmentName = "Cổng check-in QR",           TotalStock = 8,  Status = "Available"   },
-                new Equipment { EquipmentName = "Bộ đàm Motorola (set 10)",   TotalStock = 3,  Status = "Unavailable" },
+                new Equipment { EquipmentName = "Màn hình LED P3 (3x2m)",    TotalOwned = 4,  AvailableQuantity = 4 },
+                new Equipment { EquipmentName = "Hệ thống âm thanh JBL",      TotalOwned = 2,  AvailableQuantity = 2 },
+                new Equipment { EquipmentName = "Máy chiếu 10.000 lumen",     TotalOwned = 3,  AvailableQuantity = 3 },
+                new Equipment { EquipmentName = "Mic không dây Shure",         TotalOwned = 20, AvailableQuantity = 20 },
+                new Equipment { EquipmentName = "Đèn sân khấu Moving Head",   TotalOwned = 16, AvailableQuantity = 16 },
+                new Equipment { EquipmentName = "Bàn mixer âm thanh 32ch",    TotalOwned = 2,  AvailableQuantity = 0, DefectiveQuantity = 2 },
+                new Equipment { EquipmentName = "Camera livestream 4K",        TotalOwned = 5,  AvailableQuantity = 5 },
+                new Equipment { EquipmentName = "Máy phát điện dự phòng",     TotalOwned = 1,  AvailableQuantity = 0, DefectiveQuantity = 1 },
+                new Equipment { EquipmentName = "Cổng check-in QR",           TotalOwned = 8,  AvailableQuantity = 8 },
+                new Equipment { EquipmentName = "Bộ đàm Motorola (set 10)",   TotalOwned = 3,  AvailableQuantity = 0, DefectiveQuantity = 3 },
             };
             db.Equipments.AddRange(equipments);
             await db.SaveChangesAsync();

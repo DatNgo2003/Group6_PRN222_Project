@@ -1,0 +1,63 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffLogistics.OutsourceRentals.CreateModel
+@{
+    ViewData["Title"] = "Tạo phiếu thuê thiết bị";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Tạo phiếu thuê ngoài</h1>
+        <p class="subtitle">Liên hệ đối tác để thuê thêm thiết bị còn thiếu</p>
+    </div>
+    <a asp-page="./Index" class="back-link">← Quay lại danh sách</a>
+</div>
+
+<div class="form-card">
+    <div class="form-section">
+        <h3 class="section-title">Thông tin Phiếu thuê</h3>
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="OutsourceRental.VendorId">Nhà cung cấp <span class="required">*</span></label>
+                    <select asp-for="OutsourceRental.VendorId" class="form-control" asp-items="Model.VendorsList">
+                        <option value="">-- Chọn Vendor --</option>
+                    </select>
+                    <span class="field-error" asp-validation-for="OutsourceRental.VendorId"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="OutsourceRental.EquipmentId">Thiết bị cần thuê <span class="required">*</span></label>
+                    <select asp-for="OutsourceRental.EquipmentId" class="form-control" asp-items="Model.EquipmentList">
+                        <option value="">-- Chọn Thiết bị --</option>
+                    </select>
+                    <span class="field-error" asp-validation-for="OutsourceRental.EquipmentId"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="OutsourceRental.RentQuantity">Số lượng <span class="required">*</span></label>
+                    <input asp-for="OutsourceRental.RentQuantity" class="form-control" type="number" min="1" />
+                    <span class="field-error" asp-validation-for="OutsourceRental.RentQuantity"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="OutsourceRental.ExpectedReturnDate">Ngày trả dự kiến</label>
+                    <input asp-for="OutsourceRental.ExpectedReturnDate" class="form-control" type="date" />
+                    <span class="field-error" asp-validation-for="OutsourceRental.ExpectedReturnDate"></span>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label asp-for="OutsourceRental.EventId">Cho sự kiện (không bắt buộc)</label>
+                    <select asp-for="OutsourceRental.EventId" class="form-control" asp-items="Model.EventsList">
+                        <option value="">-- Không chọn (Thuê dự phòng) --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions mt-4" style="background:transparent; padding:0; border:none;">
+                <button type="submit" class="btn btn-primary">Xác nhận tạo</button>
+            </div>
+        </form>
+    </div>
+</div>

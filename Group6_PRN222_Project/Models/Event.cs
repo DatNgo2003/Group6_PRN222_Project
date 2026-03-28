@@ -47,6 +47,10 @@ public partial class Event
 
     public virtual User? Organizer { get; set; }
 
+    public virtual ICollection<OutsourceRental> OutsourceRentals { get; set; } = new List<OutsourceRental>();
+
+    public virtual ICollection<ReturnLog> ReturnLogs { get; set; } = new List<ReturnLog>();
+
     public virtual ICollection<SurveyResponse> SurveyResponses { get; set; } = new List<SurveyResponse>();
 
     public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();

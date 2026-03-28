@@ -1,0 +1,98 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffLogistics.Returns.IndexModel
+@{
+    ViewData["Title"] = "Thu hồi thiết bị";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Thu hồi thiết bị</h1>
+        <p class="subtitle">Quản lý các thiết bị sau sự kiện và cập nhật tình trạng</p>
+    </div>
+</div>
+
+<div class="card mb-4" style="margin-bottom:24px;">
+    <div class="card-head">
+        <h2>Đang chờ thu hồi (Chưa hoàn tất)</h2>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Sự kiện</th>
+                    <th>Thiết bị</th>
+                    <th>SL Đã Xuất Đi</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ExportedEquipments)
+                {
+                    <tr>
+                        <td><strong>@item.Event.EventName</strong></td>
+                        <td>@item.Equipment.EquipmentName</td>
+                        <td style="color:var(--c-gold); font-weight:700;">@item.ExportedQuantity</td>
+                        <td>
+                            <span class="role-badge" style="background:rgba(184,151,90,.15); color:var(--c-gold)">@item.Status</span>
+                        </td>
+                        <td class="action-cell">
+                            <a asp-page="./Process" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-edit" style="color:#6ee7b7; border-color:rgba(110,231,183,0.3); background:rgba(110,231,183,0.08);">Nhập phiếu thu hồi</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.ExportedEquipments.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-icon">✓</div>
+                            <div>Không có thiết bị nào đang chờ thu hồi.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <h2>Lịch sử phiếu thu hồi gần đây</h2>
+    </div>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ngày ghi nhận</th>
+                    <th>Sự kiện</th>
+                    <th>Thiết bị</th>
+                    <th>Tốt (Sẵn sàng)</th>
+                    <th>Hỏng/Lỗi</th>
+                    <th>Mất/Thất lạc</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var log in Model.RecentLogs)
+                {
+                    <tr>
+                        <td style="color:var(--text-3); font-family:var(--ff-mono);">@log.CheckDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><strong>@log.Event.EventName</strong></td>
+                        <td>@log.Equipment.EquipmentName</td>
+                        <td style="color:#6ee7b7; font-weight:700;">@log.ReturnedQuantity</td>
+                        <td style="color:#f87171; font-weight:700;">@log.DefectiveQuantity</td>
+                        <td style="color:var(--text-3); font-weight:700;">@log.LostQuantity</td>
+                    </tr>
+                }
+                @if (Model.RecentLogs.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <div>Chưa có dữ liệu lịch sử.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

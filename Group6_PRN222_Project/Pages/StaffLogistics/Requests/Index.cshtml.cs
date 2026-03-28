@@ -5,16 +5,18 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project_PRN222.Helpers;
 
-namespace Project_PRN222.Pages.StaffLogistics.Equipment
+namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
 {
     public class IndexModel : PageModel
     {
-        private readonly ProjectPrn222Context _db;
+        private readonly ProjectPrn222Context _context;
 
-        public IndexModel(ProjectPrn222Context db) => _db = db;
+        public IndexModel(ProjectPrn222Context context)
+        {
+            _context = context;
+        }
 
-        public List<Group6_PRN222_Project.Models.Equipment> Equipments { get; set; } = new();
-
+        public IList<EventEquipment> Requests { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -27,22 +29,18 @@ namespace Project_PRN222.Pages.StaffLogistics.Equipment
                 HttpContext.Session.SetString("UserName", "logistics");
             }
 #else
-            var isLogged = SessionHelper.IsLoggedIn(HttpContext.Session);
-            var role = SessionHelper.GetRole(HttpContext.Session);
-            if (!isLogged || role != RoleConstants.StaffLogistics)
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session) || SessionHelper.GetRole(HttpContext.Session) != RoleConstants.StaffLogistics)
                 return RedirectToPage("/Auth/Login");
 #endif
 
-            var query = _db.Equipments.AsNoTracking();
-
-
-
-            Equipments = await query
-                .OrderBy(e => e.EquipmentId)
+            Requests = await _context.EventEquipments
+                .Include(e => e.Equipment)
+                .Include(e => e.Event)
+                .Where(e => e.Status == "Pending" || e.Status == "Approved")
+                .OrderByDescending(e => e.Event.StartDate)
                 .ToListAsync();
 
             return Page();
         }
     }
 }
-

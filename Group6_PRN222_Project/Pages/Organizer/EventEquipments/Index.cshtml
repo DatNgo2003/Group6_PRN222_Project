@@ -20,8 +20,10 @@
             <thead>
                 <tr>
                     <th>Requirement / Equipment</th>
-                    <th>Required Quantity</th>
-                    <th>Warehouse Stock</th>
+                    <th>Requested Quantity</th>
+                    <th>Approved</th>
+                    <th>Exported</th>
+                    <th>Available Stock</th>
                     <th>Status</th>
                     <th>Note</th>
                     <th>Actions</th>
@@ -32,14 +34,16 @@
                 {
                     <tr>
                         <td><strong>@Html.DisplayFor(modelItem => item.Equipment.EquipmentName)</strong></td>
-                        <td style="color:var(--text-3)">@Html.DisplayFor(modelItem => item.Quantity)</td>
+                        <td style="color:var(--text-3)">@Html.DisplayFor(modelItem => item.RequestedQuantity)</td>
+                        <td style="color:var(--c-gold)">@Html.DisplayFor(modelItem => item.ApprovedQuantity)</td>
+                        <td style="color:var(--c-gold)">@Html.DisplayFor(modelItem => item.ExportedQuantity)</td>
                         <td>
                             @{ 
-                                var totalStock = item.Equipment.TotalStock ?? 0;
-                                var isSufficient = totalStock >= item.Quantity;
+                                var avaiStock = item.Equipment.AvailableQuantity;
+                                var isSufficient = avaiStock >= item.RequestedQuantity;
                                 var colorClass = isSufficient ? "color:#6ee7b7" : "color:#f87171";
                             }
-                            <span style="@colorClass; font-weight:600">@totalStock</span>
+                            <span style="@colorClass; font-weight:600">@avaiStock</span>
                         </td>
                         <td>
                             @{
@@ -51,8 +55,11 @@
                         </td>
                         <td style="color:var(--text-3); font-size:13px">@Html.DisplayFor(modelItem => item.Note)</td>
                         <td class="action-cell">
-                            <a asp-page="./Edit" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-edit">Edit</a>
-                            <a asp-page="./Delete" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-delete">Delete</a>
+                            @if (item.Status == "Pending")
+                            {
+                                <a asp-page="./Edit" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-edit">Edit</a>
+                                <a asp-page="./Delete" asp-route-eventId="@item.EventId" asp-route-equipmentId="@item.EquipmentId" class="btn-action btn-delete">Delete</a>
+                            }
                         </td>
                     </tr>
                 }

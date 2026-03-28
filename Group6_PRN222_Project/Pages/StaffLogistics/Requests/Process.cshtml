@@ -1,0 +1,74 @@
+@page "{eventId:int}/{equipmentId:int}"
+@model Group6_PRN222_Project.Pages.StaffLogistics.Requests.ProcessModel
+@{
+    ViewData["Title"] = "Xét duyệt thiết bị";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Xét duyệt yêu cầu cấp phát</h1>
+        <p class="subtitle">Kiểm tra tồn kho khả dụng và phê duyệt số lượng</p>
+    </div>
+    <a asp-page="./Index" class="back-link">← Quay lại danh sách</a>
+</div>
+
+<div class="form-card">
+    <div class="form-section">
+        <h3 class="section-title">Thông tin yêu cầu</h3>
+        <dl class="row mb-0 mt-3" style="font-size:.875rem;">
+            <dt class="col-sm-3" style="color:var(--text-2);">Sự kiện:</dt>
+            <dd class="col-sm-9" style="font-weight:600;">@Model.RequestDetails.Event.EventName</dd>
+
+            <dt class="col-sm-3" style="color:var(--text-2);">Thiết bị:</dt>
+            <dd class="col-sm-9" style="font-weight:600;">@Model.RequestDetails.Equipment.EquipmentName</dd>
+            
+            <dt class="col-sm-3" style="color:var(--text-2);">Yêu cầu (SL):</dt>
+            <dd class="col-sm-9" style="color:var(--text-1); font-weight:700;">@Model.RequestDetails.RequestedQuantity</dd>
+            
+            <dt class="col-sm-3" style="color:var(--text-2);">Tồn kho (Available):</dt>
+            @{
+                var gap = Model.RequestDetails.RequestedQuantity - Model.RequestDetails.Equipment.AvailableQuantity;
+                var color = gap > 0 ? "#f87171" : "#6ee7b7";
+            }
+            <dd class="col-sm-9" style="color:@color; font-weight:700;">@Model.RequestDetails.Equipment.AvailableQuantity</dd>
+
+            @if (gap > 0)
+            {
+                <dt class="col-sm-3" style="color:#f87171;">Thiếu hụt (SL):</dt>
+                <dd class="col-sm-9" style="color:#f87171; font-weight:700;">@gap</dd>
+            }
+        </dl>
+    </div>
+
+    <form method="post" asp-page-handler="Approve">
+        <input type="hidden" asp-for="RequestDetails.EventId" />
+        <input type="hidden" asp-for="RequestDetails.EquipmentId" />
+
+        <div class="form-section">
+            <h3 class="section-title">Hành động</h3>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="form-group mb-3" style="max-width:300px;">
+                <label asp-for="ApproveQty">Số lượng duyệt cấp phát</label>
+                <input asp-for="ApproveQty" class="form-control" type="number" min="1" max="@Model.RequestDetails.RequestedQuantity" />
+                <span class="field-error" asp-validation-for="ApproveQty"></span>
+            </div>
+
+            <div style="font-size:.8rem; color:var(--text-3); margin-top:10px;">
+                * Khi duyệt, số lượng này sẽ được trừ lập tức vào <strong>Tồn kho khả dụng</strong> của kho vật lý.
+            </div>
+        </div>
+        <div class="form-actions">
+            @if (gap > 0)
+            {
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/StaffLogistics/OutsourceRentals/Create?eventId=@Model.RequestDetails.EventId&equipmentId=@Model.RequestDetails.EquipmentId&gap=@gap'">
+                    + Tạo phiếu thuê ngoài
+                </button>
+            }
+            <button type="submit" class="btn btn-primary" style="background:#6ee7b7; color:#064e3b; margin-left:auto;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Xác nhận duyệt
+            </button>
+        </div>
+    </form>
+</div>
