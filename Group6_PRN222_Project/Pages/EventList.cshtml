@@ -442,7 +442,9 @@
                     string theme = themes[ti % themes.Length]; ti++;
                     <a href="/Events/EventDetail/@ev.EventId" class="event-card">
                         <div class="event-card__thumb">
-                            <div class="event-card__thumb-bg @theme"></div>
+                            @* <div class="event-card__thumb-bg @theme"></div> *@
+                            <img src="@ev.Images" alt="@ev.EventName"
+                                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
                             <div class="event-card__status">
                                 @{
                                     var bc = ev.Status switch

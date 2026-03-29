@@ -1165,7 +1165,9 @@
                     string theme = themes[ti % themes.Length]; ti++;
                     <a asp-page="/Events/EventDetail" asp-route-id="@ev.EventId" class="event-card">
                         <div class="event-card__thumb">
-                            <div class="event-card__thumb-bg @theme"></div>
+                           @*  <div class="event-card__thumb-bg @theme"></div> *@
+                             <img src="@ev.Images" alt="@ev.EventName"
+                                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />
                             <div class="event-card__status">
                                 @{
                                     var badgeClass = ev.Status switch

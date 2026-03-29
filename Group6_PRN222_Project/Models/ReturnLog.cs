@@ -3,19 +3,21 @@ using System.Collections.Generic;
 
 namespace Group6_PRN222_Project.Models;
 
-public partial class EventEquipment
+public partial class ReturnLog
 {
+    public int LogId { get; set; }
+
     public int EventId { get; set; }
 
     public int EquipmentId { get; set; }
 
-    public int RequestedQuantity { get; set; }
+    public int ReturnedQuantity { get; set; }
 
-    public int ApprovedQuantity { get; set; }
+    public int DefectiveQuantity { get; set; }
 
-    public int ExportedQuantity { get; set; }
+    public int LostQuantity { get; set; }
 
-    public string? Status { get; set; }
+    public DateTime CheckDate { get; set; }
 
     public string? Note { get; set; }
 
