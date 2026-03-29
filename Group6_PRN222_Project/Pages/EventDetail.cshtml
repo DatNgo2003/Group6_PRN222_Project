@@ -4,16 +4,17 @@
     ViewData["Title"] = Model.Event?.EventName ?? "Chi tiết sự kiện";
     Layout = "~/Pages/Shared/_Layout.cshtml";
     var ev = Model.Event;
-    var isLoggedIn = HttpContext.Session.GetInt32("userid").HasValue;
     var themes = new[] { "theme-1", "theme-2", "theme-3", "theme-4", "theme-5", "theme-6" };
     var theme = themes[Math.Abs((ev?.EventId ?? 0) % themes.Length)];
+    var capacityPct = ev?.Capacity.HasValue == true && ev.Capacity > 0
+        ? Math.Min((int)((double)Model.TicketCount / ev.Capacity.Value * 100), 100)
+        : Math.Min(Model.TicketCount * 2, 100);
 }
 
 @section Styles {
     <style>
-        /* ── Hero Banner ───────────────────────────────── */
         .detail-hero {
-            height: 360px;
+            height: 380px;
             position: relative;
             overflow: hidden;
         }
@@ -26,7 +27,7 @@
         .detail-hero__overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to bottom, rgba(26,23,20,.2) 0%, rgba(26,23,20,.75) 100%);
+            background: linear-gradient(to bottom, rgba(26,23,20,.15) 0%, rgba(26,23,20,.8) 100%);
         }
 
         .detail-hero__content {
@@ -41,10 +42,6 @@
             margin: 0 auto;
         }
 
-        .detail-hero__badge {
-            margin-bottom: 12px;
-        }
-
         .detail-hero__title {
             font-family: var(--ff-display);
             font-size: clamp(28px, 4vw, 52px);
@@ -52,7 +49,7 @@
             color: #fff;
             letter-spacing: -.5px;
             line-height: 1.1;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .detail-hero__meta {
@@ -67,27 +64,25 @@
             align-items: center;
             gap: 6px;
             font-size: 14px;
-            color: rgba(255,255,255,.75);
+            color: rgba(255,255,255,.8);
         }
 
             .detail-hero__meta-item svg {
-                width: 15px;
-                height: 15px;
+                width: 14px;
+                height: 14px;
                 flex-shrink: 0;
             }
 
-        /* ── Layout ─────────────────────────────────────── */
         .detail-layout {
             max-width: 1200px;
             margin: 0 auto;
             padding: 48px 40px;
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 400px;
             gap: 40px;
             align-items: start;
         }
 
-        /* ── Left: Info ─────────────────────────────────── */
         .detail-section {
             margin-bottom: 36px;
         }
@@ -96,22 +91,16 @@
             font-family: var(--ff-display);
             font-size: 22px;
             font-weight: 600;
-            margin-bottom: 14px;
-            letter-spacing: -.2px;
+            margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--c-sand);
-        }
-
-        .detail-concept {
-            font-size: 15px;
-            color: var(--c-ink-60);
-            line-height: 1.8;
+            letter-spacing: -.2px;
         }
 
         .detail-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 14px;
         }
 
         .detail-info-item {
@@ -151,14 +140,13 @@
             color: var(--c-ink);
         }
 
-        /* ── Right: Register Card ───────────────────────── */
         .register-card {
             background: #fff;
             border: 1px solid var(--c-sand);
             border-radius: var(--radius-xl);
             overflow: hidden;
             position: sticky;
-            top: 100px;
+            top: 88px;
             box-shadow: var(--shadow-md);
         }
 
@@ -188,11 +176,11 @@
             padding: 24px;
         }
 
-        .ticket-count-bar {
+        .capacity-bar {
             margin-bottom: 20px;
         }
 
-        .ticket-count-label {
+        .capacity-bar__labels {
             display: flex;
             justify-content: space-between;
             font-size: 13px;
@@ -200,7 +188,7 @@
             margin-bottom: 6px;
         }
 
-            .ticket-count-label strong {
+            .capacity-bar__labels strong {
                 color: var(--c-ink);
             }
 
@@ -218,22 +206,104 @@
             transition: width .6s ease;
         }
 
-        /* Payment method selector */
-        .payment-label {
-            font-size: 13px;
+            .progress__fill.full {
+                background: linear-gradient(90deg, #C04830, #E06040);
+            }
+
+        .section-label {
+            font-size: 11px;
             font-weight: 600;
             color: var(--c-ink-60);
             text-transform: uppercase;
             letter-spacing: .8px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             display: block;
         }
+
+        .ticket-types {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .ticket-option {
+            position: relative;
+        }
+
+            .ticket-option input[type="radio"] {
+                position: absolute;
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+        .ticket-option__label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border: 1.5px solid var(--c-sand);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+            .ticket-option__label:hover {
+                border-color: var(--c-taupe);
+                background: var(--c-cream);
+            }
+
+        .ticket-option input:checked + .ticket-option__label {
+            border-color: var(--c-gold);
+            background: var(--c-gold-pale);
+        }
+
+        .ticket-option__left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ticket-option__icon {
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .ticket-option__name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--c-ink);
+        }
+
+        .ticket-option__desc {
+            font-size: 11px;
+            color: var(--c-ink-60);
+            margin-top: 1px;
+        }
+
+        .ticket-option__price {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--c-ink);
+            white-space: nowrap;
+        }
+
+            .ticket-option__price.free {
+                color: var(--c-success);
+            }
 
         .payment-methods {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .payment-option {
@@ -250,16 +320,20 @@
         .payment-option__label {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
+            gap: 10px;
+            padding: 10px 14px;
             border: 1.5px solid var(--c-sand);
             border-radius: var(--radius-md);
             cursor: pointer;
-            transition: all var(--transition);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--c-ink);
+            transition: all var(--transition);
         }
+
+            .payment-option__label:hover {
+                border-color: var(--c-taupe);
+            }
 
         .payment-option input:checked + .payment-option__label {
             border-color: var(--c-gold);
@@ -267,43 +341,59 @@
             color: #8B6020;
         }
 
-        .payment-option__label:hover {
-            border-color: var(--c-taupe);
-        }
-
         .payment-option__icon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: var(--radius-sm);
+            background: var(--c-cream);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
             flex-shrink: 0;
-            background: var(--c-cream);
         }
 
-        .payment-option__desc {
-            font-size: 11px;
+        .payment-option__sub {
+            font-size: 10px;
             color: var(--c-ink-60);
             font-weight: 400;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
-        /* Bank info (hiện khi chọn Transfer) */
         .bank-info {
             background: #E4EDF8;
             border: 1px solid #B5D4F4;
             border-radius: var(--radius-md);
             padding: 14px;
-            font-size: 13px;
-            margin-bottom: 16px;
+            font-size: 12px;
+            margin-bottom: 14px;
             display: none;
-            line-height: 1.7;
+            line-height: 1.8;
         }
 
-            .bank-info strong {
-                color: var(--c-info);
+        .order-summary {
+            background: var(--c-cream);
+            border: 1px solid var(--c-sand);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--c-ink-60);
+            margin-bottom: 6px;
+        }
+
+            .order-row:last-child {
+                margin-bottom: 0;
+                padding-top: 8px;
+                border-top: 1px solid var(--c-sand);
+                font-weight: 600;
+                color: var(--c-ink);
+                font-size: 15px;
             }
 
         .btn-register {
@@ -312,18 +402,15 @@
             justify-content: center;
             font-size: 15px;
             border-radius: var(--radius-md);
-        }
-
-        .btn-register-gold {
-            background: var(--c-gold);
-            border-color: var(--c-gold);
-            color: #fff;
+            background: var(--c-gold) !important;
+            border-color: var(--c-gold) !important;
+            color: var(--c-ink) !important;
+            font-weight: 700;
             box-shadow: 0 4px 16px rgba(184,151,90,.25);
         }
 
-            .btn-register-gold:hover {
-                background: var(--c-gold-light);
-                border-color: var(--c-gold-light);
+            .btn-register:hover {
+                background: var(--c-gold-light) !important;
                 transform: translateY(-1px);
                 box-shadow: 0 6px 24px rgba(184,151,90,.35);
             }
@@ -332,26 +419,8 @@
             background: #E8F2EC;
             border: 1px solid #9FD8B8;
             border-radius: var(--radius-md);
-            padding: 16px;
+            padding: 20px;
             text-align: center;
-        }
-
-        .already-joined__icon {
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-
-        .already-joined__title {
-            font-weight: 600;
-            color: var(--c-success);
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .already-joined__sub {
-            font-size: 13px;
-            color: var(--c-success);
-            opacity: .75;
         }
 
         .login-prompt {
@@ -362,24 +431,12 @@
             text-align: center;
         }
 
-        .login-prompt__title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 6px;
-        }
-
-        .login-prompt__sub {
-            font-size: 13px;
-            color: var(--c-ink-60);
-            margin-bottom: 16px;
-        }
-
-        .register-note {
-            font-size: 12px;
-            color: var(--c-ink-60);
+        .closed-notice {
+            background: #FAE8E4;
+            border: 1px solid #F5C4B3;
+            border-radius: var(--radius-md);
+            padding: 20px;
             text-align: center;
-            margin-top: 12px;
-            line-height: 1.6;
         }
 
         @@media (max-width: 900px) {
@@ -412,18 +469,28 @@
     return;
 }
 
-<!-- Hero Banner -->
+<!-- Hero -->
 <div class="detail-hero">
     <div class="detail-hero__bg @theme"></div>
     <div class="detail-hero__overlay"></div>
     <div class="detail-hero__content container">
-        <div class="detail-hero__badge">
-            @{
-                var bc = ev.Status switch { "Active" => "badge-green", "Planning" => "badge-blue", _ => "badge-gray" };
-                var bt = ev.Status switch { "Active" => "Đang mở đăng ký", "Planning" => "Chuẩn bị", _ => ev.Status ?? "" };
-            }
-            <span class="badge @bc">@bt</span>
-        </div>
+        @{
+            var bc = ev.Status switch
+            {
+                "Open" => "badge-green",
+                "Planning" => "badge-blue",
+                "Completed" => "badge-gray",
+                _ => "badge-gray"
+            };
+            var bt = ev.Status switch
+            {
+                "Open" => "Đang mở đăng ký",
+                "Planning" => "Chuẩn bị",
+                "Completed" => "Đã kết thúc",
+                _ => ev.Status ?? ""
+            };
+        }
+        <div style="margin-bottom:12px"><span class="badge @bc">@bt</span></div>
         <h1 class="detail-hero__title">@ev.EventName</h1>
         <div class="detail-hero__meta">
             @if (ev.StartDate.HasValue)
@@ -431,7 +498,7 @@
                 <div class="detail-hero__meta-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
                     @ev.StartDate.Value.ToString("dd/MM/yyyy")
-                    @if (ev.EndDate.HasValue && ev.EndDate != ev.StartDate)
+                    @if (ev.EndDate.HasValue && ev.EndDate.Value.Date != ev.StartDate.Value.Date)
                     {
                         <span>— @ev.EndDate.Value.ToString("dd/MM/yyyy")</span>
                     }
@@ -445,12 +512,12 @@
                 </div>
             }
             <div class="detail-hero__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                Tổ chức bởi @(ev.Organizer?.FullName ?? "Ban tổ chức")
-            </div>
-            <div class="detail-hero__meta-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
                 @Model.TicketCount người đã đăng ký
+                @if (ev.Capacity.HasValue)
+                {
+                    <span>/ @ev.Capacity chỗ</span>
+                }
             </div>
         </div>
     </div>
@@ -469,16 +536,16 @@
     </div>
 </div>
 
-<!-- Main Layout -->
+<!-- Main -->
 <div class="detail-layout">
 
-    <!-- LEFT: Event Info -->
+    <!-- LEFT -->
     <div>
         @if (!string.IsNullOrEmpty(ev.Concept))
         {
             <div class="detail-section">
                 <div class="detail-section-title">Giới thiệu sự kiện</div>
-                <div class="detail-concept">@ev.Concept</div>
+                <p style="font-size:15px;color:var(--c-ink-60);line-height:1.8">@ev.Concept</p>
             </div>
         }
 
@@ -489,62 +556,91 @@
                     <div class="detail-info-icon">📅</div>
                     <div>
                         <div class="detail-info-label">Ngày bắt đầu</div>
-                        <div class="detail-info-value">@(ev.StartDate?.ToString("dd/MM/yyyy") ?? "Chưa xác định")</div>
+                        <div class="detail-info-value">@(ev.StartDate?.ToString("dd/MM/yyyy") ?? "TBD")</div>
                     </div>
                 </div>
                 <div class="detail-info-item">
-                    <div class="detail-info-icon">🏁</div>
+                    <div class="detail-info-icon">🕐</div>
                     <div>
-                        <div class="detail-info-label">Ngày kết thúc</div>
-                        <div class="detail-info-value">@(ev.EndDate?.ToString("dd/MM/yyyy") ?? "Chưa xác định")</div>
+                        <div class="detail-info-label">Giờ bắt đầu</div>
+                        <div class="detail-info-value">@(ev.EventTime?.ToString("hh\\:mm") ?? "TBD")</div>
                     </div>
                 </div>
                 <div class="detail-info-item">
                     <div class="detail-info-icon">📍</div>
                     <div>
                         <div class="detail-info-label">Địa điểm</div>
-                        <div class="detail-info-value">@(ev.Location ?? "Chưa xác định")</div>
+                        <div class="detail-info-value">@(ev.Location ?? "TBD")</div>
                     </div>
                 </div>
                 <div class="detail-info-item">
-                    <div class="detail-info-icon">🎯</div>
+                    <div class="detail-info-icon">👥</div>
                     <div>
-                        <div class="detail-info-label">Ban tổ chức</div>
-                        <div class="detail-info-value">@(ev.Organizer?.FullName ?? "N/A")</div>
+                        <div class="detail-info-label">Sức chứa</div>
+                        <div class="detail-info-value">
+                            @if (ev.Capacity.HasValue)
+                            {
+                                @($"{Model.TicketCount} / {ev.Capacity} chỗ")
+                            }
+                            else
+                            {
+                                <span>Không giới hạn</span>
+                            }
+                        </div>
                     </div>
                 </div>
                 <div class="detail-info-item">
-                    <div class="detail-info-icon">🎟</div>
+                    <div class="detail-info-icon">💰</div>
                     <div>
-                        <div class="detail-info-label">Đã đăng ký</div>
-                        <div class="detail-info-value">@Model.TicketCount người</div>
+                        <div class="detail-info-label">Giá vé cơ bản</div>
+                        <div class="detail-info-value">
+                            @if (ev.Amount > 0)
+                            {
+                                @($"{ev.Amount:N0} VNĐ")
+                            }
+                            else
+                            {
+                                <span style="color:var(--c-success)">Miễn phí</span>
+                            }
+                        </div>
                     </div>
                 </div>
                 <div class="detail-info-item">
-                    <div class="detail-info-icon">✅</div>
+                    <div class="detail-info-icon">📏</div>
                     <div>
-                        <div class="detail-info-label">Trạng thái</div>
-                        <div class="detail-info-value">@(ev.Status == "Active" ? "Đang mở đăng ký" : ev.Status == "Planning" ? "Chuẩn bị" : ev.Status)</div>
+                        <div class="detail-info-label">Quy mô</div>
+                        <div class="detail-info-value">
+                            @(ev.Scale switch { "Nho" => "Nhỏ", "Vua" => "Vừa", "Lon" => "Lớn", _ => "N/A" })
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Ticket types info — dùng giá từ Model -->
         <div class="detail-section">
-            <div class="detail-section-title">Phương thức thanh toán</div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px">
-                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c-cream);border:1px solid var(--c-sand);border-radius:var(--radius-md);font-size:13px">
-                    💵 Thanh toán trực tiếp
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c-cream);border:1px solid var(--c-sand);border-radius:var(--radius-md);font-size:13px">
-                    🏦 Chuyển khoản ngân hàng
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--c-cream);border:1px solid var(--c-sand);border-radius:var(--radius-md);font-size:13px">
-                    💳 Thẻ tín dụng
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#E4F0FF;border:1px solid #B5D4F4;border-radius:var(--radius-md);font-size:13px;color:#1A5FA8;font-weight:500">
-                    ⚡ ZaloPay
-                </div>
+            <div class="detail-section-title">Loại vé</div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+                @{
+                    var ticketInfos = new[]
+                    {
+                                new { Icon="🎟", Label="Standard",  Desc="Vé thường",              Price=Model.PriceStandard,       Color="#E8F2EC", TextColor="#1A5A30" },
+                                new { Icon="⭐", Label="VIP",        Desc="Ưu tiên vị trí tốt",    Price=Model.PriceVip,            Color="#F0E8D4", TextColor="#8B6020" },
+                                new { Icon="🎓", Label="Student",   Desc="Xuất trình thẻ SV",      Price=Model.PriceStudent,        Color="#E4EDF8", TextColor="#1A3A6B" },
+                                new { Icon="🎁", Label="Miễn phí",  Desc="Vé mời đặc biệt",        Price=Model.PriceComplimentary,  Color="#FAE8E4", TextColor="#7A2A1A" },
+                                };
+                }
+                @foreach (var ti in ticketInfos)
+                {
+                    <div style="background:@ti.Color;border-radius:var(--radius-md);padding:14px 16px">
+                        <div style="font-size:18px;margin-bottom:6px">@ti.Icon</div>
+                        <div style="font-weight:600;font-size:14px;color:@ti.TextColor">@ti.Label</div>
+                        <div style="font-size:12px;color:@ti.TextColor;opacity:.7;margin-top:2px">@ti.Desc</div>
+                        <div style="font-size:15px;font-weight:700;color:@ti.TextColor;margin-top:8px">
+                            @(ti.Price == 0 ? "Miễn phí" : $"{ti.Price:N0} ₫")
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -556,37 +652,48 @@
                 <div class="register-card__event-name">@ev.EventName</div>
                 <div class="register-card__date">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-                    @ev.StartDate?.ToString("dd/MM/yyyy HH:mm")
+                    @ev.StartDate?.ToString("dd/MM/yyyy")
+                    @if (ev.EventTime.HasValue)
+                    {
+                        <span>lúc @ev.EventTime.Value.ToString("hh\\:mm")</span>
+                    }
                 </div>
             </div>
 
             <div class="register-card__body">
-                <!-- Ticket count progress -->
-                <div class="ticket-count-bar">
-                    <div class="ticket-count-label">
-                        <span>Đã đăng ký</span>
-                        <strong>@Model.TicketCount người</strong>
+                <!-- Capacity bar -->
+                <div class="capacity-bar">
+                    <div class="capacity-bar__labels">
+                        <span>Đã đăng ký: <strong>@Model.TicketCount</strong></span>
+                        @if (ev.Capacity.HasValue)
+                        {
+                            <span>Còn lại: <strong>@(ev.Capacity.Value - Model.TicketCount)</strong></span>
+                        }
                     </div>
                     <div class="progress">
-                        <div class="progress__fill" style="width:@(Math.Min(Model.TicketCount * 2, 100))%"></div>
+                        <div class="progress__fill @(capacityPct >= 100 ? "full" : "")"
+                             style="width:@capacityPct%"></div>
                     </div>
+                    @if (ev.Capacity.HasValue)
+                    {
+                        <div style="font-size:11px;color:var(--c-ink-60);margin-top:4px;text-align:right">@capacityPct% đã đặt chỗ</div>
+                    }
                 </div>
 
                 @if (Model.AlreadyJoined)
                 {
-                    <!-- Đã đăng ký rồi -->
                     <div class="already-joined">
-                        <div class="already-joined__icon">🎉</div>
-                        <div class="already-joined__title">Bạn đã đăng ký!</div>
-                        <div class="already-joined__sub">Hẹn gặp bạn tại sự kiện nhé.</div>
+                        <div style="font-size:32px;margin-bottom:8px">🎉</div>
+                        <div style="font-weight:700;color:var(--c-success);font-size:16px;margin-bottom:4px">Bạn đã đăng ký!</div>
+                        <div style="font-size:13px;color:var(--c-success);opacity:.8">Hẹn gặp bạn tại sự kiện nhé.</div>
                     </div>
                 }
-                else if (!isLoggedIn)
+                else if (!Model.IsLoggedIn)
                 {
-                    <!-- Chưa đăng nhập -->
                     <div class="login-prompt">
-                        <div class="login-prompt__title">Đăng nhập để đăng ký</div>
-                        <div class="login-prompt__sub">Bạn cần đăng nhập tài khoản Participant để đăng ký tham gia sự kiện này.</div>
+                        <div style="font-size:28px;margin-bottom:10px">🔐</div>
+                        <div style="font-weight:600;font-size:15px;margin-bottom:6px">Đăng nhập để đăng ký</div>
+                        <div style="font-size:13px;color:var(--c-ink-60);margin-bottom:16px">Cần tài khoản Participant để tham gia sự kiện này.</div>
                         <a asp-page="/Account/Login"
                            asp-route-returnUrl="/Events/EventDetail/@ev.EventId"
                            class="btn btn-primary" style="width:100%;justify-content:center">
@@ -597,86 +704,127 @@
                         </div>
                     </div>
                 }
-                else if (ev.Status == "Active")
+                else if (!Model.IsParticipant)
                 {
-                    <!-- Form đăng ký -->
-                    <form method="post" asp-page-handler="Register" asp-route-id="@ev.EventId">
-                        <span class="payment-label">Chọn phương thức thanh toán</span>
-
-                        <div class="payment-methods">
-                            <div class="payment-option">
-                                <input type="radio" name="paymentMethod" id="pm-direct" value="Direct" checked />
-                                <label class="payment-option__label" for="pm-direct">
-                                    <div class="payment-option__icon">💵</div>
-                                    <div>
-                                        Thanh toán trực tiếp
-                                        <div class="payment-option__desc">Nộp tiền tại quầy vào ngày sự kiện</div>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="payment-option">
-                                <input type="radio" name="paymentMethod" id="pm-transfer" value="Transfer"
-                                       onchange="toggleBankInfo(this)" />
-                                <label class="payment-option__label" for="pm-transfer">
-                                    <div class="payment-option__icon">🏦</div>
-                                    <div>
-                                        Chuyển khoản ngân hàng
-                                        <div class="payment-option__desc">Chuyển khoản trước, chờ xác nhận</div>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="payment-option">
-                                <input type="radio" name="paymentMethod" id="pm-card" value="CreditCard"
-                                       onchange="toggleBankInfo(this)" />
-                                <label class="payment-option__label" for="pm-card">
-                                    <div class="payment-option__icon">💳</div>
-                                    <div>
-                                        Thẻ tín dụng / Ghi nợ
-                                        <div class="payment-option__desc">Thanh toán ngay, xác nhận tức thì</div>
-                                    </div>
-                                </label>
-                            </div>
-
-                            <div class="payment-option">
-                                <input type="radio" name="paymentMethod" id="pm-zalopay" value="ZaloPay"
-                                       onchange="toggleBankInfo(this)" />
-                                <label class="payment-option__label" for="pm-zalopay">
-                                    <div class="payment-option__icon">⚡</div>
-                                    <div>
-                                        ZaloPay
-                                        <div class="payment-option__desc">Thanh toán qua ví ZaloPay</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Thông tin chuyển khoản -->
-                        <div class="bank-info" id="bankInfo">
-                            <strong>Thông tin chuyển khoản:</strong><br>
-                            Ngân hàng: <strong>Vietcombank</strong><br>
-                            Số tài khoản: <strong>1234567890</strong><br>
-                            Chủ tài khoản: <strong>EVENTPRO GROUP 6</strong><br>
-                            Nội dung: <strong>DANGKY @ev.EventId - [Họ tên]</strong>
-                        </div>
-
-                        <button type="submit" class="btn btn-register btn-register-gold">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12" /><path d="M22 7H2v5h20V7z" /><path d="M12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></svg>
-                            Đăng ký tham gia
-                        </button>
-                        <div class="register-note">
-                            Bằng cách đăng ký, bạn đồng ý với điều khoản tham gia sự kiện của EventPro.
-                        </div>
-                    </form>
+                    <div class="closed-notice">
+                        <div style="font-size:28px;margin-bottom:8px">⚠️</div>
+                        <div style="font-weight:600;color:var(--c-danger);font-size:14px">Chỉ tài khoản Participant mới đăng ký được sự kiện.</div>
+                    </div>
+                }
+                else if (!Model.IsOpenForReg)
+                {
+                    <div class="closed-notice">
+                        <div style="font-size:28px;margin-bottom:8px">🔒</div>
+                        <div style="font-weight:600;color:var(--c-danger);font-size:15px;margin-bottom:4px">Sự kiện chưa mở đăng ký</div>
+                        <div style="font-size:13px;color:var(--c-danger);opacity:.8">Trạng thái: @ev.Status</div>
+                    </div>
                 }
                 else
                 {
-                    <div style="text-align:center;padding:20px;color:var(--c-ink-60)">
-                        <div style="font-size:32px;margin-bottom:8px">🔒</div>
-                        <div style="font-weight:600;color:var(--c-ink);margin-bottom:4px">Sự kiện không còn nhận đăng ký</div>
-                        <div style="font-size:13px">Trạng thái: @ev.Status</div>
-                    </div>
+                    <!-- Form đăng ký -->
+                    <form method="post" asp-page-handler="Register" asp-route-id="@ev.EventId" id="registerForm">
+
+                        <!-- Chọn loại vé — lấy giá từ Model -->
+                        <span class="section-label">Chọn loại vé</span>
+                        <div class="ticket-types" id="ticketTypesContainer">
+                            @{
+                                var typeOpts = new[]
+                                {
+                                                new { Val="Standard",      Icon="🎟", Name="Standard",  Desc="Vé thường",                     Price=Model.PriceStandard },
+                                                new { Val="VIP",           Icon="⭐", Name="VIP",        Desc="Ưu tiên vị trí tốt",            Price=Model.PriceVip },
+                                                new { Val="Student",       Icon="🎓", Name="Student",   Desc="Xuất trình CMHS/thẻ sinh viên", Price=Model.PriceStudent },
+                                                new { Val="Complimentary", Icon="🎁", Name="Miễn phí",  Desc="Vé mời đặc biệt",               Price=Model.PriceComplimentary },
+                                                };
+                            }
+                            @foreach (var opt in typeOpts)
+                            {
+                                <div class="ticket-option">
+                                    <input type="radio" name="ticketType" id="tt-@opt.Val"
+                                           value="@opt.Val"
+                                           @(opt.Val == "Standard" ? "checked" : "")
+                                           onchange="updatePrice()" />
+                                    <label class="ticket-option__label" for="tt-@opt.Val">
+                                        <div class="ticket-option__left">
+                                            <div class="ticket-option__icon" style="background:var(--c-cream)">@opt.Icon</div>
+                                            <div>
+                                                <div class="ticket-option__name">@opt.Name</div>
+                                                <div class="ticket-option__desc">@opt.Desc</div>
+                                            </div>
+                                        </div>
+                                        <div class="ticket-option__price @(opt.Price == 0 ? "free" : "")">
+                                            @(opt.Price == 0 ? "Miễn phí" : $"{opt.Price:N0} ₫")
+                                        </div>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Chọn thanh toán -->
+                        <span class="section-label">Phương thức thanh toán</span>
+                        <div class="payment-methods">
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-direct" value="Direct" checked onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-direct">
+                                    <div class="payment-option__icon">💵</div>
+                                    <div><div>Thanh toán trực tiếp</div><div class="payment-option__sub">Nộp tại quầy vào ngày sự kiện</div></div>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-transfer" value="Transfer" onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-transfer">
+                                    <div class="payment-option__icon">🏦</div>
+                                    <div><div>Chuyển khoản ngân hàng</div><div class="payment-option__sub">Chuyển trước, chờ xác nhận</div></div>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-card" value="CreditCard" onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-card">
+                                    <div class="payment-option__icon">💳</div>
+                                    <div><div>Thẻ tín dụng / Ghi nợ</div><div class="payment-option__sub">Thanh toán ngay, xác nhận tức thì</div></div>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input type="radio" name="paymentMethod" id="pm-zalopay" value="ZaloPay" onchange="toggleBankInfo(this)" />
+                                <label class="payment-option__label" for="pm-zalopay">
+                                    <div class="payment-option__icon">⚡</div>
+                                    <div><div>ZaloPay</div><div class="payment-option__sub">Ví ZaloPay</div></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Bank info -->
+                        <div class="bank-info" id="bankInfo">
+                            <strong>Thông tin chuyển khoản:</strong><br>
+                            Ngân hàng: <strong>Vietcombank</strong><br>
+                            STK: <strong>1234567890</strong><br>
+                            Chủ TK: <strong>EVENTPRO GROUP 6</strong><br>
+                            Nội dung: <strong>DANGKY @ev.EventId [Họ tên]</strong>
+                        </div>
+
+                        <!-- Order summary -->
+                        <div class="order-summary" id="orderSummary">
+                            <div class="order-row">
+                                <span>Loại vé</span>
+                                <span id="summaryType">Standard</span>
+                            </div>
+                            <div class="order-row">
+                                <span>Đơn giá</span>
+                                <span id="summaryPrice">@Model.PriceStandard.ToString("N0") ₫</span>
+                            </div>
+                            <div class="order-row">
+                                <span>Tổng cộng</span>
+                                <span id="summaryTotal">@Model.PriceStandard.ToString("N0") ₫</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-register">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V22H4V12" /><path d="M22 7H2v5h20V7z" /><path d="M12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></svg>
+                            Đăng ký tham gia
+                        </button>
+                        <div style="font-size:11px;color:var(--c-ink-60);text-align:center;margin-top:10px;line-height:1.6">
+                            Bằng cách đăng ký, bạn đồng ý với điều khoản tham gia sự kiện.
+                        </div>
+                    </form>
                 }
             </div>
         </div>
@@ -685,12 +833,34 @@
 
 @section Scripts {
     <script>
-        function toggleBankInfo(radio) {
-            const bankInfo = document.getElementById('bankInfo');
-            bankInfo.style.display = radio.value === 'Transfer' ? 'block' : 'none';
+        // Giá lấy từ Model server, không hardcode
+        var prices = {
+            Standard:      @Model.PriceStandard.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            VIP:           @Model.PriceVip.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            Student:       @Model.PriceStudent.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            Complimentary: 0
+        };
+
+        function formatVND(n) {
+            return n === 0 ? 'Miễn phí' : n.toLocaleString('vi-VN') + ' ₫';
         }
-        // Reset khi chọn Direct
-        document.getElementById('pm-direct').addEventListener('change', function() {
+
+        function updatePrice() {
+            var sel = document.querySelector('input[name="ticketType"]:checked');
+            if (!sel) return;
+            var type  = sel.value;
+            var price = prices[type] ?? 0;
+            document.getElementById('summaryType').textContent  = type;
+            document.getElementById('summaryPrice').textContent = formatVND(price);
+            document.getElementById('summaryTotal').textContent = formatVND(price);
+        }
+
+        function toggleBankInfo(radio) {
+            document.getElementById('bankInfo').style.display =
+                radio.value === 'Transfer' ? 'block' : 'none';
+        }
+
+        document.getElementById('pm-direct')?.addEventListener('change', function () {
             document.getElementById('bankInfo').style.display = 'none';
         });
     </script>

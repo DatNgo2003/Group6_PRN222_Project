@@ -1,10 +1,10 @@
 ﻿using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Helpers;
 using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using AppTask = System.Threading.Tasks.Task;
 
 namespace Group6_PRN222_Project.Pages.Account
 {
@@ -12,13 +12,6 @@ namespace Group6_PRN222_Project.Pages.Account
     {
         private readonly ProjectPrn222Context _db;
         private readonly JwtService _jwt;
-
-        // Các role KHÔNG được login ở trang này
-        private static readonly HashSet<string> StaffRoles = new()
-        {
-            "Admin", "Organizer",
-            "Staff(Security)", "Staff(MKT)", "Staff(Logistics)"
-        };
 
         public LoginModel(ProjectPrn222Context db, JwtService jwt)
         {
@@ -48,7 +41,6 @@ namespace Group6_PRN222_Project.Pages.Account
         {
             if (!ModelState.IsValid) return Page();
 
-            // ── Tìm user ───────────────────────────────────────────────
             var user = await _db.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Username == Username);
@@ -59,19 +51,34 @@ namespace Group6_PRN222_Project.Pages.Account
                 return Page();
             }
 
-            // ── Chặn Staff/Admin: yêu cầu dùng trang login nội bộ ────
             var roleName = user.Role?.RoleName ?? "";
-            if (StaffRoles.Contains(roleName))
+
+            // ── Chặn role nội bộ, chỉ cho Participant đăng nhập ──────
+            var internalRoles = new[]
+            {
+                InternalRoleResolver.Admin,
+                InternalRoleResolver.Organizer,
+                InternalRoleResolver.StaffSecurity,
+                InternalRoleResolver.StaffMkt,
+                InternalRoleResolver.StaffLogistics
+            };
+
+            if (internalRoles.Any(r => string.Equals(r, roleName, StringComparison.OrdinalIgnoreCase)))
             {
                 ErrorMessage = "Tài khoản nội bộ vui lòng sử dụng trang đăng nhập nhân viên.";
                 return Page();
             }
 
-            // ── Tạo JWT + lưu cookie & session ────────────────────────
-            var token = _jwt.GenerateToken(user);
+            if (!string.Equals(roleName, InternalRoleResolver.Participant, StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = "Tài khoản không hợp lệ.";
+                return Page();
+            }
+
+            // ── Tạo JWT với roleName đúng ─────────────────────────────
+            var token = _jwt.GenerateToken(user, roleName);
             SetAuthCookieAndSession(token, user, RememberMe);
 
-            // ── Ghi audit log ──────────────────────────────────────────
             _db.SystemAuditLogs.Add(new SystemAuditLog
             {
                 UserId = user.UserId,
@@ -91,20 +98,24 @@ namespace Group6_PRN222_Project.Pages.Account
 
         private void SetAuthCookieAndSession(string token, User user, bool rememberMe)
         {
+            // ── Lưu JWT vào cookie ─────────────────────────────────────
             Response.Cookies.Append("auth_token", token, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Strict,
                 Expires = rememberMe
-                              ? DateTimeOffset.UtcNow.AddDays(7)
-                              : DateTimeOffset.UtcNow.AddHours(8)
+                    ? DateTimeOffset.UtcNow.AddDays(7)
+                    : DateTimeOffset.UtcNow.AddHours(8)
             });
+
+            // ── Lưu thông tin cơ bản vào Session để dùng trong UI ─────
             HttpContext.Session.SetString("auth_token", token);
             HttpContext.Session.SetString("username", user.Username);
             HttpContext.Session.SetString("fullname", user.FullName ?? user.Username);
-            HttpContext.Session.SetInt32("userid", user.UserId);
+            HttpContext.Session.SetString("email", user.Email ?? "");
             HttpContext.Session.SetString("role", user.Role?.RoleName ?? "");
+            HttpContext.Session.SetInt32("userid", user.UserId);
         }
     }
 }

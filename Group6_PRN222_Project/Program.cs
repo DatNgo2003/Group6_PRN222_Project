@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ProjectPrn222Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyCnn")));
 
-// ── Session (lưu JWT token phía server) ───────────────────────────────
+// ── Session ────────────────────────────────────────────────────────────
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -33,8 +33,9 @@ if (string.IsNullOrWhiteSpace(jwtKey) ||
     string.IsNullOrWhiteSpace(jwtAudience))
 {
     throw new InvalidOperationException(
-        "Missing JWT configuration. Please set Jwt:Key, Jwt:Issuer, Jwt:Audience in appsettings.json (or environment variables).");
+        "Missing JWT configuration. Please set Jwt:Key, Jwt:Issuer, Jwt:Audience in appsettings.json.");
 }
+
 builder.Services
     .AddAuthentication(options =>
     {
@@ -55,17 +56,18 @@ builder.Services
             ClockSkew = TimeSpan.Zero,
         };
 
-        // Đọc token từ cookie (Razor Pages dùng cookie thay vì header)
         options.Events = new JwtBearerEvents
         {
+            // ✅ Chỉ đọc từ cookie, KHÔNG đọc session
+            // (session chưa load tại thời điểm này)
             OnMessageReceived = ctx =>
             {
-                var token = ctx.HttpContext.Request.Cookies["auth_token"]
-                         ?? ctx.HttpContext.Session.GetString("auth_token");
+                var token = ctx.HttpContext.Request.Cookies["auth_token"];
                 if (!string.IsNullOrEmpty(token))
                     ctx.Token = token;
                 return System.Threading.Tasks.Task.CompletedTask;
             },
+
             // Redirect về Login thay vì trả 401 JSON
             OnChallenge = ctx =>
             {
@@ -86,16 +88,16 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AnyStaff", p => p.RequireRole(
         "Admin", "Organizer",
         "Staff(Security)", "Staff(MKT)", "Staff(Logistics)"));
+    options.AddPolicy("ParticipantOnly", p => p.RequireRole("Participant"));
 });
 
 // ── Services ───────────────────────────────────────────────────────────
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IAuditLogService, AuditLogService>();   
-builder.Services.AddScoped<IUserService, UserService>();      
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
-
 builder.Services.AddScoped<IRevenueReportService, RevenueReportService>();
 builder.Services.AddScoped<IDepartmentKpiService, DepartmentKpiService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
@@ -105,7 +107,8 @@ builder.Services.AddScoped<IEquipmentService, EquipmentService>();
 builder.Services.AddScoped<IParticipantService, ParticipantService>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<IFieldReportService, FieldReportService>();
-// ================================================================
+
+// ── Build app ──────────────────────────────────────────────────────────
 var app = builder.Build();
 
 // ── Middleware pipeline ────────────────────────────────────────────────
@@ -118,15 +121,13 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseSession();           // ← Session trước Authentication
+app.UseSession();           // ← Session TRƯỚC Authentication
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
 
-// ── Seed data khi khởi động (chỉ chạy nếu DB trống) ──────────────────
+// ── Seed data ──────────────────────────────────────────────────────────
 await SeedData.InitializeAsync(app.Services);
-
-// ── Thêm dữ liệu demo dồi dào (một lần; xóa audit SEED_EXTRA_DEMO_V1 để chạy lại) ──
 await ExtraDemoDataSeeder.EnsureAsync(app.Services);
 
 app.Run();

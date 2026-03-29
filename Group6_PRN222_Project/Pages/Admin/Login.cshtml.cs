@@ -4,7 +4,6 @@ using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Project_PRN222.Helpers;
 using System.ComponentModel.DataAnnotations;
 using AppTask = System.Threading.Tasks.Task;
 
@@ -54,23 +53,22 @@ namespace Group6_PRN222_Project.Pages.Admin
                 return Page();
             }
 
-            // ── Chuẩn hóa role DB → role app (JWT / AuthorizeRole) ────
-            var dbRoleName = user.Role?.RoleName ?? "";
-            if (!InternalRoleResolver.TryResolveAppRole(dbRoleName, out var appRole))
+            // ── Dùng InternalRoleResolver map tên role từ DB ───────────
+            if (!InternalRoleResolver.TryResolveAppRole(user.Role?.RoleName, out var appRole))
             {
-                ErrorMessage = "Tài khoản của bạn không có quyền truy cập hệ thống nội bộ. Role trong DB \"" + dbRoleName + "\" chưa được map (cần Admin, Organizer, Staff, Staff(Security), Marketing, Logistics…).";
+                ErrorMessage = "Tài khoản của bạn không có quyền truy cập hệ thống nội bộ. Vui lòng sử dụng trang đăng nhập thường.";
                 return Page();
             }
 
             // ── Tạo JWT + lưu cookie & session ────────────────────────
-            var token = _jwt.GenerateToken(user, appRole);
+            var token = _jwt.GenerateToken(user);
             SetAuthCookieAndSession(token, user, appRole, RememberMe);
 
             // ── Ghi audit log ──────────────────────────────────────────
             _db.SystemAuditLogs.Add(new SystemAuditLog
             {
                 UserId = user.UserId,
-                Action = $"LOGIN_STAFF_{appRole.ToUpper().Replace("(", "").Replace(")", "").Replace(" ", "_")}",
+                Action = $"LOGIN_{appRole.ToUpper().Replace("(", "").Replace(")", "").Replace(" ", "_")}",
                 TableName = "Users",
                 ActionTime = DateTime.Now
             });
@@ -78,17 +76,17 @@ namespace Group6_PRN222_Project.Pages.Admin
 
             TempData["Success"] = $"Chào mừng {user.FullName ?? user.Username}!";
 
-            // ── Redirect theo từng role cụ thể ────────────────────────
             if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
                 return LocalRedirect(ReturnUrl);
 
+            // ── Redirect theo appRole đã resolve ──────────────────────
             return appRole switch
             {
-                InternalRoleResolver.Admin => RedirectToPage("/Admin/Reports/RevenueReport"),
-                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/Dashboard"),
-                InternalRoleResolver.StaffSecurity => RedirectToPage("/StaffSecurity/Index"),
-                InternalRoleResolver.StaffMkt => RedirectToPage("/StaffMKT/Index"),
-                InternalRoleResolver.StaffLogistics => RedirectToPage("/StaffLogistics/Index"),
+                InternalRoleResolver.Admin => RedirectToPage("/Admin/AdminDashboard"),
+                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/OrganizerDashboard"),
+                InternalRoleResolver.StaffSecurity => RedirectToPage("/Staff/StaffDashboard"),
+                InternalRoleResolver.StaffMkt => RedirectToPage("/Staff/StaffDashboard"),
+                InternalRoleResolver.StaffLogistics => RedirectToPage("/Staff/StaffDashboard"),
                 _ => RedirectToPage("/Index")
             };
         }
@@ -105,9 +103,12 @@ namespace Group6_PRN222_Project.Pages.Admin
                               : DateTimeOffset.UtcNow.AddHours(8)
             });
             HttpContext.Session.SetString("auth_token", token);
-            // Dùng SessionHelper để ghi đúng PascalCase keys mà toàn bộ app đọc
-            SessionHelper.SetUser(HttpContext.Session, user.UserId, user.Username, user.FullName ?? user.Username, appRole);
+            HttpContext.Session.SetString("username", user.Username);
+            HttpContext.Session.SetString("fullname", user.FullName ?? user.Username);
+            HttpContext.Session.SetString("email", user.Email ?? "");
+            HttpContext.Session.SetInt32("userid", user.UserId);
+            // Lưu appRole (đã chuẩn hoá) thay vì role raw từ DB
+            HttpContext.Session.SetString("role", appRole);
         }
-
     }
 }

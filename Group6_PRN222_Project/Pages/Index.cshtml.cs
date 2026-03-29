@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Group6_PRN222_Project.Auth;
+using Group6_PRN222_Project.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Group6_PRN222_Project.Models;
-
 // Alias bắt buộc: Models có Task.cs nên "Task" bị ambiguous với System.Threading.Tasks.Task
 using AppTask = System.Threading.Tasks.Task;
 
 namespace Group6_PRN222_Project.Pages
 {
+   
     public class IndexModel : PageModel
     {
         private readonly ProjectPrn222Context _db;

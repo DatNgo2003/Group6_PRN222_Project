@@ -575,10 +575,22 @@
             </ul>
 
             <div class="navbar__actions">
-                @if (User.Identity?.IsAuthenticated == true)
+                @if (Context.Session.GetInt32("userid").HasValue)
                 {
-                    <span style="font-size:13px;color:var(--c-ink-60)">Xin chào, <strong>@User.Identity.Name</strong></span>
-                    <a asp-page="/Dashboard/Index" class="btn btn-ghost btn-sm">Dashboard</a>
+                    var sessionRole = Context.Session.GetString("role") ?? "";
+                    <span style="font-size:13px;color:var(--c-ink-60)">
+                        Xin chào, <strong>@Context.Session.GetString("fullname")</strong>
+                    </span>
+
+                    @if (sessionRole == "Participant")
+                    {
+                        <a asp-page="/Account/MyTickets" class="btn btn-ghost btn-sm">🎟 Vé của tôi</a>
+                    }
+                    else
+                    {
+                        <a asp-page="/Admin/AdminDashboard" class="btn btn-ghost btn-sm">Dashboard</a>
+                    }
+
                     <form asp-page="/Account/Logout" method="post" style="display:inline">
                         <button type="submit" class="btn btn-primary btn-sm">Đăng xuất</button>
                     </form>

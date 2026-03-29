@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Group6_PRN222_Project.Auth
 {
     /// <summary>
-    /// Attribute kiểm tra JWT từ Cookie/Session và phân quyền theo Role.
+    /// Attribute kiểm tra JWT từ Cookie và phân quyền theo Role.
     /// Dùng: [AuthorizeRole("Admin")] hoặc [AuthorizeRole("Admin","Organizer")]
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
@@ -26,9 +27,8 @@ namespace Group6_PRN222_Project.Auth
         {
             var httpCtx = ctx.HttpContext;
 
-            // ── Lấy token từ cookie hoặc session ──────────────────────
-            var token = httpCtx.Request.Cookies["auth_token"]
-                     ?? httpCtx.Session.GetString("auth_token");
+            // ── Lấy token CHỈ từ cookie ───────────────────────────────
+            var token = httpCtx.Request.Cookies["auth_token"];
 
             if (string.IsNullOrEmpty(token))
             {
@@ -36,7 +36,6 @@ namespace Group6_PRN222_Project.Auth
                 return;
             }
 
-            // ── Decode token (không validate lại — Program.cs đã lo) ──
             try
             {
                 var handler = new JwtSecurityTokenHandler();
@@ -51,10 +50,11 @@ namespace Group6_PRN222_Project.Auth
                     return;
                 }
 
-                // Lấy role từ claim
-                var roleClaim = jwt.Claims
-                    .FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                                      || c.Type == "role")?.Value ?? "";
+                // Lấy role từ claim — thử cả 3 kiểu type
+                var roleClaim = jwt.Claims.FirstOrDefault(c =>
+                    c.Type == ClaimTypes.Role ||
+                    c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" ||
+                    c.Type == "role")?.Value ?? "";
 
                 // Kiểm tra role có trong danh sách được phép không
                 if (_roles.Length > 0 && !_roles.Contains(roleClaim))

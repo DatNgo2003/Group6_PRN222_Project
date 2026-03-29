@@ -10,6 +10,7 @@ public static class InternalRoleResolver
     public const string StaffSecurity = "Staff(Security)";
     public const string StaffMkt = "Staff(MKT)";
     public const string StaffLogistics = "Staff(Logistics)";
+    public const string Participant = "Participant";
 
     /// <summary>
     /// Trả về true nếu có thể đăng nhập nội bộ; <paramref name="appRole"/> là giá trị ghi vào JWT / session.
@@ -23,7 +24,7 @@ public static class InternalRoleResolver
         var raw = roleNameFromDb.Trim();
 
         // Đã đúng chuẩn app
-        if (raw is Admin or Organizer or StaffSecurity or StaffMkt or StaffLogistics)
+        if (raw is Admin or Organizer or StaffSecurity or StaffMkt or StaffLogistics or Participant)  // ← THÊM or Participant
         {
             appRole = raw;
             return true;
@@ -77,6 +78,16 @@ public static class InternalRoleResolver
             return true;
         }
 
-        return false;
-    }
+        if (string.Equals(raw, "Participant", StringComparison.OrdinalIgnoreCase)
+             || string.Equals(raw, "Attendee", StringComparison.OrdinalIgnoreCase)
+             || string.Equals(raw, "Guest", StringComparison.OrdinalIgnoreCase)
+             || string.Equals(raw, "Người tham dự", StringComparison.OrdinalIgnoreCase))
+        {
+            appRole = Participant;
+            return true;
+        }
+
+        return false;  // dòng này đã có sẵn
+    
+}
 }
