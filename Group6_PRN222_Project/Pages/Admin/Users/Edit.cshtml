@@ -4,6 +4,10 @@
     ViewData["Title"] = "Sửa người dùng";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
     var isOtherAdmin = Model.IsOtherAdmin;
+
+    // Kiểm tra user đang sửa có phải Admin không (để lock Status)
+    var editingRole = Model.InputUser.Role?.RoleName ?? "";
+    var isAdminRole = editingRole == "Admin" || Model.InputUser.RoleId == 1;
 }
 
 <div class="page-header">
@@ -20,79 +24,169 @@
 }
 
 <div class="form-card">
-    <form method="post">
+    <form method="post" id="editForm">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="InputUser.UserId" />
         <input type="hidden" asp-for="InputUser.CreatedAt" />
+        <input type="hidden" asp-for="InputUser.Email" />
+        @* Giữ nguyên Status/Role/Department nếu là Admin *@
+        @if (isAdminRole)
+        {
+            <input type="hidden" asp-for="InputUser.Status" />
+            <input type="hidden" asp-for="InputUser.RoleId" />
+            <input type="hidden" asp-for="InputUser.DepartmentId" />
+        }
 
+        <!-- ── Thông tin tài khoản ─────────────────────── -->
         <div class="form-section">
             <h3 class="section-title">Thông tin tài khoản</h3>
             <div class="form-grid">
 
                 <div class="form-group">
-                    <label asp-for="InputUser.Username">Username <span class="required">*</span></label>
+                    <label>Username <span class="required">*</span></label>
                     <input asp-for="InputUser.Username" class="form-control" />
                     <span asp-validation-for="InputUser.Username" class="field-error"></span>
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="InputUser.FullName">Họ và tên</label>
+                    <label>Họ và tên</label>
                     <input asp-for="InputUser.FullName" class="form-control" />
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="InputUser.Email">Email</label>
-                    <input asp-for="InputUser.Email" type="email" class="form-control" />
+                    <label>
+                        Email
+                        @if (isAdminRole)
+                        {
+                            <span class="lock-note">Không thể thay đổi</span>
+                        }
+                    </label>
+                    @if (isAdminRole)
+                    {
+                        <div class="status-locked">
+                            <span class="lock-hint">@Model.InputUser.Email</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <input asp-for="InputUser.Email" type="email" class="form-control" />
+                    }
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="InputUser.RoleId">Vai trò <span class="required">*</span></label>
-                    <select asp-for="InputUser.RoleId" asp-items="Model.RoleList" class="form-control">
-                        <option value="">-- Chọn vai trò --</option>
-                    </select>
+                    <label>
+                        Vai trò <span class="required">*</span>
+                        @if (isAdminRole)
+                        {
+                            <span class="lock-note">Không thể thay đổi</span>
+                        }
+                    </label>
+                    @if (isAdminRole)
+                    {
+                        <div class="status-locked">
+                            <span class="status-pill status-role">Admin</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <select asp-for="InputUser.RoleId" asp-items="Model.RoleList" class="form-control">
+                            <option value="">-- Chọn vai trò --</option>
+                        </select>
+                    }
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="InputUser.DepartmentId">Phòng ban</label>
-                    <select asp-for="InputUser.DepartmentId" asp-items="Model.DepartmentList" class="form-control">
-                        <option value="">-- Chọn phòng ban --</option>
-                    </select>
+                    <label>
+                        Phòng ban
+                        @if (isAdminRole)
+                        {
+                            <span class="lock-note">Không thể thay đổi</span>
+                        }
+                    </label>
+                    @if (isAdminRole)
+                    {
+                        <div class="status-locked">
+                            <span class="lock-hint">@(Model.InputUser.Department?.DepartmentName ?? "—")</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <select asp-for="InputUser.DepartmentId" asp-items="Model.DepartmentList" class="form-control">
+                            <option value="">-- Chọn phòng ban --</option>
+                        </select>
+                    }
                 </div>
 
                 <div class="form-group">
-                    <label asp-for="InputUser.Status">Trạng thái <span class="required">*</span></label>
-                    <select asp-for="InputUser.Status" class="form-control">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
+                    <label>
+                        Trạng thái <span class="required">*</span>
+                        @if (isAdminRole)
+                        {
+                            <span class="lock-note">Không thể thay đổi</span>
+                        }
+                    </label>
+                    @if (isAdminRole)
+                    {
+                        <div class="status-locked">
+                            <span class="status-pill status-active">@Model.InputUser.Status</span>
+                            <span class="lock-hint">Tài khoản Admin luôn ở trạng thái Active</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <select asp-for="InputUser.Status" class="form-control">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    }
                 </div>
 
             </div>
         </div>
 
-        <div class="form-section">
-            <h3 class="section-title">Đổi mật khẩu</h3>
-            <p class="section-hint">Để trống nếu không muốn thay đổi mật khẩu</p>
-            <div class="form-grid">
-
-                <div class="form-group">
-                    <label asp-for="NewPassword">Mật khẩu mới</label>
-                    <div class="password-input-wrap">
-                        <input asp-for="NewPassword" type="password" class="form-control" placeholder="Để trống = giữ nguyên" id="pwd" />
-                        <button type="button" class="toggle-pwd" onclick="togglePwd('pwd', this)">Hiện</button>
-                    </div>
-                    <span asp-validation-for="NewPassword" class="field-error"></span>
+        <!-- ── Mật khẩu (collapse) ────────────────────── -->
+        <div class="form-section pwd-section" id="pwdSection">
+            <div class="pwd-header" onclick="togglePwdSection()">
+                <div>
+                    <h3 class="section-title" style="margin:0">Đổi mật khẩu</h3>
+                    <p class="section-hint" style="margin:4px 0 0" id="pwdHint">
+                        Nhấn để mở rộng — để trống nếu không muốn thay đổi
+                    </p>
                 </div>
+                <span class="pwd-chevron" id="pwdChevron">▶</span>
+            </div>
 
-                <div class="form-group">
-                    <label asp-for="ConfirmPassword">Xác nhận mật khẩu mới</label>
-                    <div class="password-input-wrap">
-                        <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Nhập lại mật khẩu mới" id="pwd2" />
-                        <button type="button" class="toggle-pwd" onclick="togglePwd('pwd2', this)">Hiện</button>
+            <div id="pwdFields" style="display:none; margin-top:18px">
+                @* Báo lỗi nếu có *@
+                @if (!string.IsNullOrEmpty(ViewData.ModelState["NewPassword"]?.Errors.FirstOrDefault()?.ErrorMessage)
+                                || !string.IsNullOrEmpty(ViewData.ModelState["ConfirmPassword"]?.Errors.FirstOrDefault()?.ErrorMessage))
+                {
+                    <div class="alert alert-danger" style="margin-bottom:14px">
+                        Vui lòng kiểm tra lại mật khẩu bên dưới.
                     </div>
-                    <span asp-validation-for="ConfirmPassword" class="field-error"></span>
-                </div>
+                }
 
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Mật khẩu mới</label>
+                        <div class="password-input-wrap">
+                            <input asp-for="NewPassword" type="password" class="form-control"
+                                   placeholder="Tối thiểu 6 ký tự" id="pwd" autocomplete="new-password" />
+                            <button type="button" class="toggle-pwd" onclick="togglePwd('pwd', this)">Hiện</button>
+                        </div>
+                        <span asp-validation-for="NewPassword" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Xác nhận mật khẩu mới</label>
+                        <div class="password-input-wrap">
+                            <input asp-for="ConfirmPassword" type="password" class="form-control"
+                                   placeholder="Nhập lại mật khẩu mới" id="pwd2" autocomplete="new-password" />
+                            <button type="button" class="toggle-pwd" onclick="togglePwd('pwd2', this)">Hiện</button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -108,39 +202,51 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+        // ── Toggle show/hide password input ──────────────
         function togglePwd(id, btn) {
             const input = document.getElementById(id);
             const show = input.type === 'password';
             input.type = show ? 'text' : 'password';
             btn.textContent = show ? 'Ẩn' : 'Hiện';
         }
+
+        // ── Toggle password section collapse ─────────────
+        let pwdOpen = false;
+
+        function togglePwdSection() {
+            pwdOpen = !pwdOpen;
+            document.getElementById('pwdFields').style.display = pwdOpen ? 'block' : 'none';
+            document.getElementById('pwdChevron').textContent = pwdOpen ? '▼' : '▶';
+            document.getElementById('pwdHint').textContent = pwdOpen
+                ? 'Để trống cả hai ô nếu không muốn thay đổi mật khẩu'
+                : 'Nhấn để mở rộng — để trống nếu không muốn thay đổi';
+        }
+
+        // Nếu có lỗi validation từ server → tự mở section
+        (function () {
+            const hasErr = document.querySelector('#pwdFields .field-error')?.textContent?.trim();
+            if (hasErr) {
+                pwdOpen = true;
+                document.getElementById('pwdFields').style.display = 'block';
+                document.getElementById('pwdChevron').textContent = '▼';
+            }
+        })();
     </script>
 }
 
 @section Styles {
     <style>
-        .back-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: .9rem;
-        }
-
-            .back-link:hover {
-                text-decoration: underline;
-            }
-
         .form-card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0;
+            border: 1px solid var(--card-bdr, var(--border));
+            border-radius: var(--r-lg, 12px);
             overflow: hidden;
             max-width: 860px;
         }
 
         .form-section {
             padding: 28px 32px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--card-bdr, var(--border));
         }
 
             .form-section:last-of-type {
@@ -148,18 +254,18 @@
             }
 
         .section-title {
-            font-size: .85rem;
+            font-size: .75rem;
             font-weight: 700;
-            letter-spacing: .08em;
+            letter-spacing: .1em;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin: 0 0 6px;
+            color: rgba(184,151,90,.55);
+            margin: 0 0 16px;
         }
 
         .section-hint {
             font-size: .82rem;
-            color: var(--text-muted);
-            margin: 0 0 16px;
+            color: var(--text-3, var(--text-muted));
+            margin: -10px 0 14px;
         }
 
         .form-grid {
@@ -183,40 +289,120 @@
             .form-group label {
                 font-size: .85rem;
                 font-weight: 600;
-                color: var(--text-primary);
+                color: var(--text-2, var(--text-primary));
             }
 
         .required {
-            color: #e53e3e;
+            color: #f87171;
         }
 
+        /* Lock note next to label */
+        .lock-note {
+            font-size: .72rem;
+            font-weight: 500;
+            color: var(--text-3, #aaa);
+            margin-left: 6px;
+            letter-spacing: 0;
+            text-transform: none;
+            vertical-align: middle;
+        }
+
+        /* Locked status display */
+        .status-locked {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 13px;
+            background: rgba(250,248,244,.03);
+            border: 1px solid rgba(250,248,244,.07);
+            border-radius: var(--r-sm, 6px);
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .status-active {
+            background: rgba(74,154,122,.12);
+            color: #6ee7b7;
+            border: 1px solid rgba(74,154,122,.22);
+        }
+
+        .status-role {
+            background: rgba(184,151,90,.15);
+            color: var(--c-gold, #B8975A);
+            border: 1px solid rgba(184,151,90,.25);
+        }
+
+        .lock-hint {
+            font-size: .78rem;
+            color: var(--text-3, #aaa);
+            font-style: italic;
+        }
+
+        /* Password section collapse */
+        .pwd-section {
+            cursor: default;
+        }
+
+        .pwd-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            padding: 4px 0;
+            border-radius: 6px;
+            transition: opacity .15s;
+        }
+
+            .pwd-header:hover {
+                opacity: .8;
+            }
+
+        .pwd-chevron {
+            font-size: .75rem;
+            color: var(--c-gold, #B8975A);
+            transition: transform .2s;
+            padding: 4px 8px;
+        }
+
+        /* Password inputs */
         .password-input-wrap {
             display: flex;
         }
 
             .password-input-wrap .form-control {
-                border-radius: 8px 0 0 8px;
+                border-radius: var(--r-sm, 6px) 0 0 var(--r-sm, 6px);
                 flex: 1;
             }
 
         .toggle-pwd {
-            padding: 0 12px;
-            background: var(--bg-muted);
-            border: 1px solid var(--border);
+            padding: 0 13px;
+            background: rgba(250,248,244,.05);
+            border: 1px solid rgba(250,248,244,.11);
             border-left: none;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0 var(--r-sm, 6px) var(--r-sm, 6px) 0;
             cursor: pointer;
-            font-size: .8rem;
-            color: var(--text-muted);
+            font-size: .77rem;
+            color: var(--text-3, #aaa);
             white-space: nowrap;
+            font-family: inherit;
+            transition: background .15s;
         }
 
             .toggle-pwd:hover {
-                background: var(--border);
+                background: rgba(250,248,244,.09);
+                color: var(--text-2, #ccc);
             }
 
         .field-error {
-            color: #e53e3e;
+            color: #f87171;
             font-size: .8rem;
         }
 
@@ -224,19 +410,21 @@
             padding: 20px 32px;
             display: flex;
             gap: 12px;
+            background: rgba(0,0,0,.12);
+            border-top: 1px solid var(--card-bdr, var(--border));
         }
 
         .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
+            padding: 11px 16px;
+            border-radius: 6px;
             margin-bottom: 16px;
-            font-size: .9rem;
+            font-size: .875rem;
         }
 
         .alert-danger {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(220,60,60,.09);
+            color: #f87171;
+            border: 1px solid rgba(220,60,60,.18);
         }
     </style>
 }
