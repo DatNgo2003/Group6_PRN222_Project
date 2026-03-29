@@ -59,7 +59,7 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
             }
 
             // Only allow values permitted by CHK_Events_Scale constraint
-            var allowedScales = new[] { "Nhỏ", "Vừa", "Lớn" };
+            var allowedScales = new[] { "Nho", "Vua", "Lon" };
             if (string.IsNullOrWhiteSpace(Event.Scale) || !allowedScales.Contains(Event.Scale))
                 Event.Scale = null;
 
