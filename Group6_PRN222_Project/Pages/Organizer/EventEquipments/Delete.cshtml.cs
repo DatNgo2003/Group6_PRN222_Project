@@ -33,10 +33,14 @@ namespace Group6_PRN222_Project.Pages.Organizer.EventEquipments
             {
                 return NotFound();
             }
-            else 
+
+            if (eventequipment.Status != "Pending")
             {
-                EventEquipment = eventequipment;
+                // Can't delete if not pending
+                return RedirectToPage("./Index");
             }
+
+            EventEquipment = eventequipment;
             return Page();
         }
 

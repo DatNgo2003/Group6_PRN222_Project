@@ -87,7 +87,7 @@ namespace Project_PRN222.Services
     // ══════════════════════════════════════════════════════════════
     public interface IEquipmentService
     {
-        Task<List<Equipment>> GetAllAsync(string? statusFilter = null);
+        Task<List<Equipment>> GetAllAsync();
         Task<Equipment?>      GetByIdAsync(int id);
         Task<Equipment>       CreateAsync(Equipment equipment);
         Task                  UpdateAsync(Equipment equipment);
@@ -99,11 +99,9 @@ namespace Project_PRN222.Services
         private readonly ProjectPrn222Context _db;
         public EquipmentService(ProjectPrn222Context db) => _db = db;
 
-        public Task<List<Equipment>> GetAllAsync(string? statusFilter = null)
+        public Task<List<Equipment>> GetAllAsync()
         {
             var q = _db.Equipments.AsQueryable();
-            if (!string.IsNullOrWhiteSpace(statusFilter) && statusFilter != "All")
-                q = q.Where(e => e.Status == statusFilter);
             return q.OrderBy(e => e.EquipmentId).ToListAsync();
         }
 

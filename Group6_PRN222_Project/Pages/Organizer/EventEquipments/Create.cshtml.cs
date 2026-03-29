@@ -54,6 +54,10 @@ namespace Group6_PRN222_Project.Pages.Organizer.EventEquipments
                 return Page();
             }
 
+            EventEquipment.ApprovedQuantity = 0;
+            EventEquipment.ExportedQuantity = 0;
+            EventEquipment.Status = "Pending";
+
             _context.EventEquipments.Add(EventEquipment);
             await _context.SaveChangesAsync();
 

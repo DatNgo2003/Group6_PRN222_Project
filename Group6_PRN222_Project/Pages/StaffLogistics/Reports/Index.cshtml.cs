@@ -1,3 +1,4 @@
+using Task = System.Threading.Tasks.Task;
 using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

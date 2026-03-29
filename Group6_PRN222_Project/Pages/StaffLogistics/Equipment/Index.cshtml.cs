@@ -1,3 +1,4 @@
+using Task = System.Threading.Tasks.Task;
 using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -13,7 +14,9 @@ namespace Project_PRN222.Pages.StaffLogistics.Equipment
         public IndexModel(ProjectPrn222Context db) => _db = db;
 
         public List<Group6_PRN222_Project.Models.Equipment> Equipments { get; set; } = new();
-        [BindProperty(SupportsGet = true)] public string? FilterStatus { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string? FilterStatus { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -48,4 +51,5 @@ namespace Project_PRN222.Pages.StaffLogistics.Equipment
         }
     }
 }
+
 

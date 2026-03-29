@@ -26,7 +26,7 @@ namespace Project_PRN222.Pages.Admin.Notifications
         // ── Send form ─────────────────────────────────────
         [BindProperty] public int?   TargetUserID { get; set; }   // null = broadcast to all organizers
         [BindProperty] public string Title        { get; set; } = string.Empty;
-        [BindProperty] public string Content      { get; set; } = string.Empty;
+        [BindProperty] public string NotificationContent { get; set; } = string.Empty;
 
         public string? SuccessMessage { get; set; }
         public string? ErrorMessage   { get; set; }
@@ -49,7 +49,7 @@ namespace Project_PRN222.Pages.Admin.Notifications
             if (!SessionHelper.IsAdmin(HttpContext.Session))
                 return RedirectToPage("/Admin/Login");
 
-            if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(Content))
+            if (string.IsNullOrWhiteSpace(Title) || string.IsNullOrWhiteSpace(NotificationContent))
             {
                 ErrorMessage = "Tiêu đề và nội dung không được để trống.";
                 await LoadPageDataAsync();
@@ -65,7 +65,7 @@ namespace Project_PRN222.Pages.Admin.Notifications
                 {
                     UserId    = TargetUserID.Value,
                     Title     = Title.Trim(),
-                    Content   = Content.Trim(),
+                    Content   = NotificationContent.Trim(),
                     CreatedAt = now,
                     IsRead    = false
                 });
@@ -84,7 +84,7 @@ namespace Project_PRN222.Pages.Admin.Notifications
                     {
                         UserId    = uid,
                         Title     = Title.Trim(),
-                        Content   = Content.Trim(),
+                        Content   = NotificationContent.Trim(),
                         CreatedAt = now,
                         IsRead    = false
                     });
@@ -98,7 +98,7 @@ namespace Project_PRN222.Pages.Admin.Notifications
 
             // Clear form
             Title   = string.Empty;
-            Content = string.Empty;
+            NotificationContent = string.Empty;
             TargetUserID = null;
 
             await LoadPageDataAsync();

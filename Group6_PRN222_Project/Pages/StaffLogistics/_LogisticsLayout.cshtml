@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] — EventPro Organizer</title>
+    <title>@ViewData["Title"] — EventPro Logistics</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     @await RenderSectionAsync("Styles", required: false)
@@ -787,42 +787,19 @@
     <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-gem"><div class="brand-gem-inner" style="border-color: #6ee7b7"></div></div>
+            <div class="brand-gem"><div class="brand-gem-inner" style="border-color: #c4b5fd"></div></div>
             <div>
                 <div class="brand-name">EventPro</div>
-                <div class="brand-sub">Organizer Panel</div>
+                <div class="brand-sub">Logistics Panel</div>
             </div>
         </div>
 
-        <!-- Event Filter Dropdown -->
-        @using Group6_PRN222_Project.Models
-        @using Microsoft.AspNetCore.Http
-        @inject ProjectPrn222Context DbContext
-        @inject IHttpContextAccessor HttpContextAccessor
-        @{
-            var orgId = HttpContextAccessor.HttpContext?.Session.GetInt32("UserID");
-            var allEvents = DbContext.Events.Where(e => e.OrganizerId == orgId || orgId == 1).OrderByDescending(e => e.StartDate).ToList();
-            var selectedId = HttpContextAccessor.HttpContext?.Session.GetInt32("SelectedEventId");
-        }
-        <div style="padding: 12px 20px 0;">
-            <form asp-page="/Organizer/SetEventContext" method="post" id="eventFilterForm">
-                <select name="eventId" class="form-control" style="background: rgba(0,0,0,0.5); font-size: 0.8rem; padding: 6px 10px;" onchange="document.getElementById('eventFilterForm').submit()">
-                    <option value="">-- All Events --</option>
-                    @foreach(var ev in allEvents) {
-                        if (selectedId == ev.EventId) {
-                            <option value="@ev.EventId" selected>@ev.EventName</option>
-                        } else {
-                            <option value="@ev.EventId">@ev.EventName</option>
-                        }
-                    }
-                </select>
-            </form>
-        </div>
+
 
         <nav class="nav-section">
             <div class="nav-label">Quản lý</div>
-            <a asp-page="/Organizer/Dashboard"
-               class="nav-item @(currentPage == "/Organizer/Dashboard" ? "active" : "")">
+            <a asp-page="/StaffLogistics/Index"
+               class="nav-item @(currentPage == "/StaffLogistics/Index" ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="7" height="7" />
                     <rect x="14" y="3" width="7" height="7" />
@@ -831,83 +808,61 @@
                 </svg>
                 Dashboard
             </a>
-            <a asp-page="/Organizer/Events/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/Events") ? "active" : "")">
+            <a asp-page="/StaffLogistics/Equipment/Index"
+               class="nav-item @(currentPage.StartsWith("/StaffLogistics/Equipment") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                     <line x1="16" y1="2" x2="16" y2="6" />
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                Sự kiện
+                Kho thiết bị
             </a>
-            <a asp-page="/Organizer/Tasks/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/Tasks") ? "active" : "")">
+            <a asp-page="/StaffLogistics/Requests/Index"
+               class="nav-item @(currentPage.StartsWith("/StaffLogistics/Requests") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="9 11 12 14 22 4" />
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
-                Công việc
+                Yêu cầu cấp phát
             </a>
-            <a asp-page="/Organizer/Budgets/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/Budgets") ? "active" : "")">
+            <a asp-page="/StaffLogistics/OutsourceRentals/Index"
+               class="nav-item @(currentPage.StartsWith("/StaffLogistics/OutsourceRentals") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="3" width="20" height="14" rx="2" />
                     <line x1="8" y1="21" x2="16" y2="21" />
                     <line x1="12" y1="17" x2="12" y2="21" />
                 </svg>
-                Kế hoạch ngân sách
+                Thuê thiết bị
             </a>
         </nav>
 
         <nav class="nav-section">
             <div class="nav-label">Tài nguyên & Khác</div>
-            <a asp-page="/Organizer/DiscountPolicies/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/DiscountPolicies") ? "active" : "")">
+            <a asp-page="/StaffLogistics/Returns/Index"
+               class="nav-item @(currentPage.StartsWith("/StaffLogistics/Returns") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
                     <line x1="7" y1="7" x2="7.01" y2="7" />
                 </svg>
-                Khuyến mãi
+                Thu hồi thiết bị
             </a>
-            <a asp-page="/Organizer/Contracts/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/Contracts") ? "active" : "")">
+            <a asp-page="/StaffLogistics/Tasks/Index"
+               class="nav-item @(currentPage.StartsWith("/StaffLogistics/Tasks") ? "active" : "")">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                </svg>
+                Nhiệm vụ
+            </a>
+            <a asp-page="/StaffLogistics/Reports/Index"
+               class="nav-item @(currentPage.StartsWith("/StaffLogistics/Reports") ? "active" : "")">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
                     <line x1="16" y1="13" x2="8" y2="13" />
                     <line x1="16" y1="17" x2="8" y2="17" />
                 </svg>
-                Hợp đồng
-            </a>
-            <a asp-page="/Organizer/Tickets/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/Tickets") ? "active" : "")">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-                    <path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" />
-                </svg>
-                Vé
-            </a>
-            <a asp-page="/Organizer/FieldReports/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/FieldReports") ? "active" : "")">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
-                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
-                    <line x1="6" y1="1" x2="6" y2="4" />
-                    <line x1="10" y1="1" x2="10" y2="4" />
-                    <line x1="14" y1="1" x2="14" y2="4" />
-                </svg>
-                Notification Reports
-            </a>
-            <a asp-page="/Organizer/EventEquipments/Index"
-               class="nav-item @(currentPage.StartsWith("/Organizer/EventEquipments") ? "active" : "")">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                    <line x1="12" y1="12" x2="12" y2="16" />
-                    <line x1="10" y1="14" x2="14" y2="14" />
-                </svg>
-                Yêu cầu thiết bị
+                Báo cáo sự cố
             </a>
         </nav>
 
@@ -950,7 +905,7 @@
             <nav class="breadcrumb">
                 <span class="breadcrumb-root">EventPro</span>
                 <span class="breadcrumb-sep">›</span>
-                <span class="breadcrumb-root">Organizer</span>
+                <span class="breadcrumb-root">Logistics</span>
                 <span class="breadcrumb-sep">›</span>
                 <span class="breadcrumb-current">@ViewData["Title"]</span>
             </nav>

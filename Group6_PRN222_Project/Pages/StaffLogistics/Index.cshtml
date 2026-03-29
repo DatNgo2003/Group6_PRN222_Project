@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Staff (Logistics) — Dashboard";
-    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+    
 }
 
 <div class="page-header">
@@ -20,53 +20,53 @@
 @section Styles {
 <style>
     .page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; gap:16px; flex-wrap:wrap; }
-    .page-title h1 { font-size:1.6rem; font-weight:700; margin:0 0 4px; color:var(--text-primary); }
-    .subtitle { color:var(--text-muted); font-size:.9rem; margin:0; }
+    .page-title h1 { font-family:var(--ff-display); font-size:1.85rem; font-weight:700; margin:0 0 4px; color:var(--text-1); letter-spacing:-.02em; line-height:1.1; }
+    .subtitle { color:var(--text-3); font-size:.845rem; margin:0; }
     .header-actions { display:flex; gap:10px; flex-wrap:wrap; }
 
     .btn {
         display:inline-flex; align-items:center; gap:8px;
-        padding:10px 16px; border-radius:10px; font-weight:700; font-size:.9rem;
-        text-decoration:none; border:1px solid var(--border);
+        padding:10px 16px; border-radius:var(--r-sm); font-weight:600; font-size:.845rem;
+        text-decoration:none; border:1px solid transparent; font-family:var(--ff-body);
     }
-    .btn-primary { background: #1f6e43; border-color: #1f6e43; color: #fff; }
-    .btn-primary:hover { background: #2f855a; border-color: #2f855a; }
-    .btn-secondary { background: var(--card-bg); color: var(--text-primary); border-color: var(--border); }
-    .btn-secondary:hover { background: #fff; }
+    .btn-primary { background: var(--c-gold); color: var(--c-ink); }
+    .btn-primary:hover { background: var(--c-gold-dim); }
+    .btn-secondary { background: rgba(250,248,244,.07); color: var(--text-2); border-color: var(--card-bdr); }
+    .btn-secondary:hover { background: rgba(250,248,244,.11); }
 
     .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:16px; }
     @@media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
 
     .stat-card {
         background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 18px 18px;
-        box-shadow: 0 1px 4px rgba(0,0,0,.03);
+        border: 1px solid var(--card-bdr);
+        border-radius: var(--r-md);
+        padding: 18px 24px;
     }
-    .stat-label { color: var(--text-muted); font-weight:700; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; }
-    .stat-value { font-size: 2rem; font-weight: 800; margin-top: 10px; color: var(--text-primary); }
+    .stat-label { color: var(--text-3); font-weight:600; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; }
+    .stat-value { font-size: 2.2rem; font-weight: 700; margin-top: 10px; color: var(--c-gold); font-family:var(--ff-display); }
 
     .card {
         background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: 14px;
+        border: 1px solid var(--card-bdr);
+        border-radius: var(--r-lg);
         overflow: hidden;
-        margin-top: 16px;
+        margin-top: 24px;
     }
-    .card-head { padding: 16px 18px; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
-    .card-head h2 { font-size:1.05rem; font-weight:800; }
-    .card-body { padding: 12px 18px 18px; }
+    .card-head { padding: 18px 24px; border-bottom: 1px solid var(--card-bdr); display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; background:rgba(0,0,0,.12); }
+    .card-head h2 { font-size:1.05rem; font-weight:600; font-family:var(--ff-display); margin:0; }
+    .card-body { overflow-x:auto; }
 
-    table { width:100%; border-collapse:collapse; font-size:.9rem; }
-    th { text-align:left; padding: 12px 10px; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-    td { padding: 12px 10px; border-bottom: 1px solid var(--border-light); }
+    table { width:100%; border-collapse:collapse; font-size:.855rem; }
+    th { text-align:left; padding: 11px 18px; font-size:.71rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color: var(--text-3); background:var(--table-head); border-bottom: 1px solid var(--card-bdr); }
+    td { padding: 12px 18px; border-bottom: 1px solid rgba(250,248,244,.055); vertical-align:middle; }
     tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background: rgba(184,151,90,.04); }
 
     .badge {
-        display:inline-flex; align-items:center; padding:4px 10px; border-radius:999px;
-        font-weight:800; font-size:.8rem;
-        background: #eef2ff; color: #3730a3;
+        display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px;
+        font-weight:600; font-size:.72rem;
+        background: rgba(184,151,90,.15); color: var(--c-gold);
     }
 </style>
 }
@@ -89,10 +89,10 @@
 <div class="card">
     <div class="card-head">
         <h2>Gần đây nhất</h2>
-        <div style="color:var(--text-muted); font-weight:700; font-size:.9rem;">
-            Logistics reports: <strong>@Model.LogisticsReportsCount</strong> |
-            Equipment reports: <strong>@Model.EquipmentReportsCount</strong> |
-            Issue reports: <strong>@Model.IssueReportsCount</strong>
+        <div style="color:var(--text-3); font-weight:500; font-size:.8rem; font-family:var(--ff-mono);">
+            Logistics: <strong style="color:var(--text-1)">@Model.LogisticsReportsCount</strong> |
+            Equipment: <strong style="color:var(--text-1)">@Model.EquipmentReportsCount</strong> |
+            Issues: <strong style="color:var(--text-1)">@Model.IssueReportsCount</strong>
         </div>
     </div>
     <div class="card-body">

@@ -17,7 +17,7 @@ namespace Project_PRN222.Pages.Admin.Config
         { _svc = svc; _audit = audit; }
 
         public List<Equipment> Equipments { get; set; } = new();
-        [BindProperty(SupportsGet = true)] public string StatusFilter { get; set; } = "All";
+
         [BindProperty] public Equipment Input { get; set; } = new();
         [TempData] public string? SuccessMessage { get; set; }
 
@@ -31,7 +31,7 @@ namespace Project_PRN222.Pages.Admin.Config
                 HttpContext.Session.SetString("UserName", "admin");
             }
             if (!SessionHelper.IsAdmin(HttpContext.Session)) return RedirectToPage("/Account/Login");
-            Equipments = await _svc.GetAllAsync(StatusFilter);
+            Equipments = await _svc.GetAllAsync();
             return Page();
         }
 
@@ -49,7 +49,7 @@ namespace Project_PRN222.Pages.Admin.Config
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
             _audit.Log(actorId, $"CREATE Equipment '{created.EquipmentName}' (ID={created.EquipmentId})", "Equipments");
             SuccessMessage = $"Đã thêm thiết bị '{created.EquipmentName}'.";
-            return RedirectToPage(new { StatusFilter });
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostEditAsync()
@@ -66,7 +66,7 @@ namespace Project_PRN222.Pages.Admin.Config
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
             _audit.Log(actorId, $"UPDATE Equipment '{Input.EquipmentName}' (ID={Input.EquipmentId})", "Equipments");
             SuccessMessage = $"Đã cập nhật thiết bị '{Input.EquipmentName}'.";
-            return RedirectToPage(new { StatusFilter });
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
@@ -83,7 +83,7 @@ namespace Project_PRN222.Pages.Admin.Config
             var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
             _audit.Log(actorId, $"DELETE Equipment ID={id}", "Equipments");
             SuccessMessage = "Đã xoá thiết bị.";
-            return RedirectToPage(new { StatusFilter });
+            return RedirectToPage();
         }
     }
 }

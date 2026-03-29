@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Group6_PRN222_Project.Models;
 
@@ -15,7 +16,8 @@ public partial class EventEquipment
 
     public int ExportedQuantity { get; set; }
 
-    public int Quantity { get; set; }
+    [NotMapped]
+    public int Quantity => RequestedQuantity;
 
     public string? Status { get; set; }
 

@@ -1,0 +1,76 @@
+@page
+@model Group6_PRN222_Project.Pages.StaffLogistics.OutsourceRentals.IndexModel
+@{
+    ViewData["Title"] = "Thuê ngoài thiết bị";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Thuê ngoài thiết bị</h1>
+        <p class="subtitle">Quản lý các phiếu thuê thiết bị từ đối tác (Vendor)</p>
+    </div>
+    <div class="header-actions">
+        <a asp-page="./Create" class="btn btn-primary">+ Tạo phiếu thuê ngoài</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nhà cung cấp</th>
+                    <th>Thiết bị</th>
+                    <th>SL Thuê</th>
+                    <th>Dùng cho sự kiện</th>
+                    <th>Ngày trả dự kiến</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Rentals)
+                {
+                    <tr>
+                        <td><strong>@item.Vendor.VendorName</strong></td>
+                        <td>@item.Equipment.EquipmentName</td>
+                        <td style="color:var(--text-1); font-weight:700;">@item.RentQuantity</td>
+                        <td>@(item.Event?.EventName ?? "Khác")</td>
+                        <td>@item.ExpectedReturnDate.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @{
+                                var bc = item.Status == "Received" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :
+                                         item.Status == "Pending" ? "background:rgba(184,151,90,.15);color:var(--c-gold)" :
+                                         "background:rgba(250,248,244,.07);color:var(--text-3)";
+                            }
+                            <span class="role-badge" style="@bc">@(item.Status ?? "Pending")</span>
+                        </td>
+                        <td class="action-cell">
+                            @if (item.Status == "Pending" || string.IsNullOrEmpty(item.Status))
+                            {
+                                <form method="post" asp-page-handler="Receive" asp-route-id="@item.RentalId" style="display:inline;">
+                                    <button type="submit" class="btn-action btn-edit" style="color:#6ee7b7; border-color:rgba(110,231,183,0.3); background:rgba(110,231,183,0.08);">Nhận hàng</button>
+                                </form>
+                            }
+                            else if (item.Status == "Received")
+                            {
+                                <form method="post" asp-page-handler="Return" asp-route-id="@item.RentalId" style="display:inline;">
+                                    <button type="submit" class="btn-action btn-edit">Trả Vendor</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Rentals.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div class="empty-icon">🔌</div>
+                            <div>Chưa có dữ liệu thuê ngoài.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

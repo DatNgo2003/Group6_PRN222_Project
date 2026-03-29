@@ -1,0 +1,58 @@
+@page "{eventId:int}/{equipmentId:int}"
+@model Group6_PRN222_Project.Pages.StaffLogistics.Requests.ExportModel
+@{
+    ViewData["Title"] = "Xuất kho thiết bị";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Xuất kho cho sự kiện</h1>
+        <p class="subtitle">Xác nhận mang thiết bị đi hiện trường</p>
+    </div>
+    <a asp-page="./Index" class="back-link">← Quay lại danh sách</a>
+</div>
+
+<div class="form-card">
+    <div class="form-section">
+        <h3 class="section-title">Thông tin yêu cầu</h3>
+        <dl class="row mb-0 mt-3" style="font-size:.875rem;">
+            <dt class="col-sm-3" style="color:var(--text-2);">Sự kiện:</dt>
+            <dd class="col-sm-9" style="font-weight:600;">@Model.RequestDetails.Event.EventName</dd>
+
+            <dt class="col-sm-3" style="color:var(--text-2);">Thiết bị:</dt>
+            <dd class="col-sm-9" style="font-weight:600;">@Model.RequestDetails.Equipment.EquipmentName</dd>
+            
+            <dt class="col-sm-3" style="color:var(--text-2);">Yêu cầu (SL):</dt>
+            <dd class="col-sm-9" style="color:var(--text-1); font-weight:700;">@Model.RequestDetails.RequestedQuantity</dd>
+            
+            <dt class="col-sm-3" style="color:var(--text-2);">Đã duyệt (Approved):</dt>
+            <dd class="col-sm-9" style="color:#6ee7b7; font-weight:700;">@Model.RequestDetails.ApprovedQuantity</dd>
+        </dl>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="RequestDetails.EventId" />
+        <input type="hidden" asp-for="RequestDetails.EquipmentId" />
+
+        <div class="form-section">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="form-group mb-3" style="max-width:300px;">
+                <label asp-for="ExportQty">Số thực tế xuất đi</label>
+                <input asp-for="ExportQty" class="form-control" type="number" min="1" max="@Model.RequestDetails.ApprovedQuantity" />
+                <span class="field-error" asp-validation-for="ExportQty"></span>
+            </div>
+
+            <div style="font-size:.8rem; color:var(--text-3); margin-top:10px;">
+                * Trạng thái thiết bị cho sự kiện này sẽ chuyển thành <span style="background:rgba(184,151,90,.15); color:var(--c-gold); padding:2px 6px; border-radius:10px;">Exported</span>.
+                Khung hiển thị này sẽ được chuyển sang danh sách chờ Thu Hồi.
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" style="background:#6ee7b7; color:#064e3b; margin-left:auto;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+                Xác nhận xuất kho
+            </button>
+        </div>
+    </form>
+</div>

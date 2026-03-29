@@ -19,16 +19,16 @@
             @Html.DisplayFor(model => model.EventEquipment.Equipment.EquipmentName)
         </dd>
         <dt class="col-sm-2">
-            Required Quantity
+            Requested Quantity
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EventEquipment.Quantity)
+            @Html.DisplayFor(model => model.EventEquipment.RequestedQuantity)
         </dd>
         <dt class="col-sm-2">
-            Warehouse Stock
+            Available Stock
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.EventEquipment.Equipment.TotalStock)
+            @Html.DisplayFor(model => model.EventEquipment.Equipment.AvailableQuantity)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.EventEquipment.Note)

@@ -47,7 +47,22 @@ namespace Group6_PRN222_Project.Pages.Organizer.EventEquipments
                 return Page();
             }
 
-            _context.Attach(EventEquipment).State = EntityState.Modified;
+            var existing = await _context.EventEquipments
+                .FirstOrDefaultAsync(m => m.EventId == EventEquipment.EventId && m.EquipmentId == EventEquipment.EquipmentId);
+
+            if (existing == null)
+            {
+                return NotFound();
+            }
+
+            if (existing.Status != "Pending")
+            {
+                ModelState.AddModelError(string.Empty, "Cannot edit requirement because it is already being processed.");
+                return Page();
+            }
+
+            existing.RequestedQuantity = EventEquipment.RequestedQuantity;
+            existing.Note = EventEquipment.Note;
 
             try
             {
