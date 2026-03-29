@@ -61,7 +61,7 @@ namespace Group6_PRN222_Project.Pages.Admin
             }
 
             // ── Tạo JWT + lưu cookie & session ────────────────────────
-            var token = _jwt.GenerateToken(user);
+            var token = _jwt.GenerateToken(user, appRole);
             SetAuthCookieAndSession(token, user, appRole, RememberMe);
 
             // ── Ghi audit log ──────────────────────────────────────────
@@ -83,7 +83,7 @@ namespace Group6_PRN222_Project.Pages.Admin
             return appRole switch
             {
                 InternalRoleResolver.Admin => RedirectToPage("/Admin/Reports/RevenueReport"),
-                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/OrganizerDashboard"),
+                InternalRoleResolver.Organizer => RedirectToPage("/Organizer/Dashboard"),
                 InternalRoleResolver.StaffSecurity => RedirectToPage("/Staff/StaffDashboard"),
                 InternalRoleResolver.StaffMkt => RedirectToPage("/Staff/StaffDashboard"),
                 InternalRoleResolver.StaffLogistics => RedirectToPage("/Staff/StaffDashboard"),
@@ -102,13 +102,26 @@ namespace Group6_PRN222_Project.Pages.Admin
                               ? DateTimeOffset.UtcNow.AddDays(7)
                               : DateTimeOffset.UtcNow.AddHours(8)
             });
+            // ── Lưu token ──────────────────────────────────────────────
             HttpContext.Session.SetString("auth_token", token);
-            HttpContext.Session.SetString("username", user.Username);
-            HttpContext.Session.SetString("fullname", user.FullName ?? user.Username);
-            HttpContext.Session.SetString("email", user.Email ?? "");
-            HttpContext.Session.SetInt32("userid", user.UserId);
+
+            // ── Lưu cả lowercase (dùng nguyên bản) và PascalCase ──────
+            // PascalCase: SessionHelper.cs dùng "UserID","UserName","FullName","Role"
+            // Lowercase:  các trang khác dùng "userid","username","fullname","role"
+            HttpContext.Session.SetInt32("userid",  user.UserId);
+            HttpContext.Session.SetInt32("UserID",  user.UserId);
+
+            HttpContext.Session.SetString("username",  user.Username);
+            HttpContext.Session.SetString("UserName",  user.Username);
+
+            HttpContext.Session.SetString("fullname",  user.FullName ?? user.Username);
+            HttpContext.Session.SetString("FullName",  user.FullName ?? user.Username);
+
+            HttpContext.Session.SetString("email",    user.Email ?? "");
+
             // Lưu appRole (đã chuẩn hoá) thay vì role raw từ DB
             HttpContext.Session.SetString("role", appRole);
+            HttpContext.Session.SetString("Role", appRole);
         }
     }
 }
