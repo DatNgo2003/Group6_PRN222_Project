@@ -20,15 +20,37 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
         public async Task<IActionResult> OnGetAsync()
         {
             ViewData["EventId"] = new SelectList(await _context.Events.ToListAsync(), "EventId", "EventName");
-            // Optionally, only show users with Staff roles
-            var staffRoles = new[] { "Security", "MKT", "Marketing", "Logistics", "Staff" };
-            var staffUsers = await _context.Users.Include(u => u.Role)
-                .Where(u => u.Role != null && staffRoles.Contains(u.Role.RoleName)).ToListAsync();
-            
-            ViewData["AssignedTo"] = new SelectList(staffUsers, "UserId", "FullName");
+
+            // Only show departments that have staff users
+            var staffDeptIds = await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.DepartmentId != null && u.Role != null && u.Role.RoleName.StartsWith("Staff"))
+                .Select(u => u.DepartmentId!.Value)
+                .Distinct()
+                .ToListAsync();
+            var departments = await _context.Departments
+                .Where(d => staffDeptIds.Contains(d.DepartmentId))
+                .OrderBy(d => d.DepartmentName)
+                .ToListAsync();
+            ViewData["DepartmentList"] = new SelectList(departments, "DepartmentId", "DepartmentName");
+
             var statuses = new[] { "To Do", "In Progress", "Done", "Completed" };
             ViewData["StatusList"] = new SelectList(statuses);
             return Page();
+        }
+
+        // AJAX: GET ?handler=StaffByDept&deptId=X
+        public async Task<IActionResult> OnGetStaffByDeptAsync(int deptId)
+        {
+            var staffRolePrefix = new[] { "Staff" };
+            var staff = await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.DepartmentId == deptId
+                         && u.Role != null
+                         && u.Role.RoleName.StartsWith("Staff"))
+                .Select(u => new { u.UserId, u.FullName })
+                .ToListAsync();
+            return new JsonResult(staff);
         }
 
         [BindProperty]

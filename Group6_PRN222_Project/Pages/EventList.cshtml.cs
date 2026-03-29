@@ -16,7 +16,7 @@ namespace Group6_PRN222_Project.Pages.Events
         [BindProperty(SupportsGet = true)] public string? Search { get; set; }
         [BindProperty(SupportsGet = true)] public string? Status { get; set; }
         [BindProperty(SupportsGet = true)] public string? Location { get; set; }
-        [BindProperty(SupportsGet = true)] public int Page { get; set; } = 1;
+        [BindProperty(SupportsGet = true)] public int CurrentPage { get; set; } = 1;
 
         public const int PageSize = 9;
         public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
@@ -42,7 +42,7 @@ namespace Group6_PRN222_Project.Pages.Events
 
             Events = await query
                 .OrderByDescending(e => e.StartDate)
-                .Skip((Page - 1) * PageSize)
+                .Skip((CurrentPage - 1) * PageSize)
                 .Take(PageSize)
                 .ToListAsync();
         }

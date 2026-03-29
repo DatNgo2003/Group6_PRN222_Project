@@ -23,25 +23,69 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null || _context.Tasks == null)
-            {
                 return NotFound();
+
+            var task = await _context.Tasks.FirstOrDefaultAsync(m => m.TaskId == id);
+            if (task == null)
+                return NotFound();
+
+            Task = task;
+
+            ViewData["EventId"] = new SelectList(await _context.Events.ToListAsync(), "EventId", "EventName", task.EventId);
+
+            // Departments — only those with Staff users
+            var staffDeptIds = await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.DepartmentId != null && u.Role != null && u.Role.RoleName.StartsWith("Staff"))
+                .Select(u => u.DepartmentId!.Value)
+                .Distinct()
+                .ToListAsync();
+            var departments = await _context.Departments
+                .Where(d => staffDeptIds.Contains(d.DepartmentId))
+                .OrderBy(d => d.DepartmentName)
+                .ToListAsync();
+
+            // Determine current department of the assigned staff (if any)
+            int? currentDeptId = null;
+            if (task.AssignedTo.HasValue)
+            {
+                var assignedUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.UserId == task.AssignedTo.Value);
+                currentDeptId = assignedUser?.DepartmentId;
             }
 
-            var task =  await _context.Tasks.FirstOrDefaultAsync(m => m.TaskId == id);
-            if (task == null)
+            ViewData["DepartmentList"] = new SelectList(departments, "DepartmentId", "DepartmentName", currentDeptId);
+            ViewData["CurrentDeptId"] = currentDeptId;
+
+            // Pre-load staff of current department
+            List<User> staffUsers = new();
+            if (currentDeptId.HasValue)
             {
-                return NotFound();
+                staffUsers = await _context.Users
+                    .Include(u => u.Role)
+                    .Where(u => u.DepartmentId == currentDeptId.Value
+                             && u.Role != null
+                             && u.Role.RoleName.StartsWith("Staff"))
+                    .ToListAsync();
             }
-            Task = task;
-            ViewData["EventId"] = new SelectList(await _context.Events.ToListAsync(), "EventId", "EventName");
-            var staffRoles = new[] { "Security", "MKT", "Marketing", "Logistics", "Staff" };
-            var staffUsers = await _context.Users.Include(u => u.Role)
-                .Where(u => u.Role != null && staffRoles.Contains(u.Role.RoleName)).ToListAsync();
-            
-            ViewData["AssignedTo"] = new SelectList(staffUsers, "UserId", "FullName");
+            ViewData["AssignedTo"] = new SelectList(staffUsers, "UserId", "FullName", task.AssignedTo);
+
             var statuses = new[] { "To Do", "In Progress", "Done", "Completed" };
-            ViewData["StatusList"] = new SelectList(statuses);
+            ViewData["StatusList"] = new SelectList(statuses, task.Status);
             return Page();
+        }
+
+        // AJAX: GET ?handler=StaffByDept&deptId=X
+        public async Task<IActionResult> OnGetStaffByDeptAsync(int deptId)
+        {
+            var staff = await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.DepartmentId == deptId
+                         && u.Role != null
+                         && u.Role.RoleName.StartsWith("Staff"))
+                .Select(u => new { u.UserId, u.FullName })
+                .ToListAsync();
+            return new JsonResult(staff);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -55,13 +99,9 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
             catch (DbUpdateConcurrencyException)
             {
                 if (!TaskExists(Task.TaskId))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
 
             return RedirectToPage("./Index");
@@ -69,7 +109,7 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
 
         private bool TaskExists(int id)
         {
-          return (_context.Tasks?.Any(e => e.TaskId == id)).GetValueOrDefault();
+            return (_context.Tasks?.Any(e => e.TaskId == id)).GetValueOrDefault();
         }
     }
 }

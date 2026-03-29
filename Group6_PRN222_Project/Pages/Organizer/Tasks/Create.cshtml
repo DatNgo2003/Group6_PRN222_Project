@@ -7,7 +7,7 @@
 <div class="page-header">
     <div class="page-title">
         <h1>Assign New Task</h1>
-        <p class="subtitle">Task Assignment & Deadlines</p>
+        <p class="subtitle">Task Assignment &amp; Deadlines</p>
     </div>
     <a asp-page="./Index" class="btn btn-ghost">
         &larr; Back to List
@@ -17,39 +17,50 @@
 <div class="card" style="max-width: 600px; padding: 24px;">
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-        
+
         <div class="form-group mb-3">
             <label asp-for="Task.TaskName" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Task Name</label>
             <input asp-for="Task.TaskName" class="form-control" required />
             <span asp-validation-for="Task.TaskName" style="color:#f87171; font-size:13px"></span>
         </div>
-        
+
         <div class="form-group mb-3">
             <label asp-for="Task.EventId" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Event</label>
             <select asp-for="Task.EventId" class="form-control" asp-items="ViewBag.EventId">
                 <option value="">-- Select Event --</option>
             </select>
         </div>
-        
+
+        <div class="form-group mb-3">
+            <label class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Department</label>
+            <select id="departmentSelect" class="form-control">
+                <option value="">-- Select Department --</option>
+                @foreach (var item in (IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewData["DepartmentList"]!)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+            <small style="color:var(--text-3); font-size:12px; display:block; margin-top:4px;">Chọn phòng ban để lọc nhân viên.</small>
+        </div>
+
         <div class="form-group mb-3">
             <label asp-for="Task.AssignedTo" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Assign To</label>
-            <select asp-for="Task.AssignedTo" class="form-control" asp-items="ViewBag.AssignedTo">
-                <option value="">-- Select Staff --</option>
+            <select id="staffSelect" asp-for="Task.AssignedTo" class="form-control">
+                <option value="">-- Select Department first --</option>
             </select>
-            <small style="color:var(--text-3); font-size:12px; display:block; margin-top:4px;">Only staff with recognized roles are shown here.</small>
         </div>
-        
+
         <div class="form-group mb-3">
             <label asp-for="Task.Deadline" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Deadline</label>
             <input asp-for="Task.Deadline" class="form-control" type="datetime-local" />
             <span asp-validation-for="Task.Deadline" style="color:#f87171; font-size:13px"></span>
         </div>
-        
+
         <div class="form-group mb-4">
             <label asp-for="Task.Status" class="control-label" style="color:var(--text-2); margin-bottom:6px; display:block;">Status</label>
             <select asp-for="Task.Status" class="form-control" asp-items="ViewBag.StatusList"></select>
         </div>
-        
+
         <div class="form-group mt-4 pt-4" style="border-top: 1px solid var(--card-bdr);">
             <div style="display: flex; gap: 12px">
                 <input type="submit" value="Assign Task" class="btn btn-primary" style="flex: 1;" />
@@ -60,4 +71,35 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.getElementById('departmentSelect').addEventListener('change', function () {
+            var deptId = this.value;
+            var staffSelect = document.getElementById('staffSelect');
+            staffSelect.innerHTML = '<option value="">-- Loading... --</option>';
+
+            if (!deptId) {
+                staffSelect.innerHTML = '<option value="">-- Select Department first --</option>';
+                return;
+            }
+
+            fetch('?handler=StaffByDept&deptId=' + deptId)
+                .then(r => r.json())
+                .then(data => {
+                    staffSelect.innerHTML = '<option value="">-- Select Staff --</option>';
+                    if (data.length === 0) {
+                        staffSelect.innerHTML = '<option value="">-- No staff in this department --</option>';
+                        return;
+                    }
+                    data.forEach(function (s) {
+                        var opt = document.createElement('option');
+                        opt.value = s.userId;
+                        opt.textContent = s.fullName;
+                        staffSelect.appendChild(opt);
+                    });
+                })
+                .catch(() => {
+                    staffSelect.innerHTML = '<option value="">-- Error loading staff --</option>';
+                });
+        });
+    </script>
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Group6_PRN222_Project.Models;
@@ -14,6 +14,8 @@ public partial class EventEquipment
     public int ApprovedQuantity { get; set; }
 
     public int ExportedQuantity { get; set; }
+
+    public int Quantity { get; set; }
 
     public string? Status { get; set; }
 

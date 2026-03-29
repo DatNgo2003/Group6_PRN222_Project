@@ -33,10 +33,6 @@ public partial class Event
 
     public int? OrganizerId { get; set; }
 
-    public string? Scale { get; set; }
-
-    public int? Capacity { get; set; }
-
     public virtual ICollection<Budget> Budgets { get; set; } = new List<Budget>();
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
