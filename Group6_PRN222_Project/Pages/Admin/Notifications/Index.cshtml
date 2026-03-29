@@ -1,0 +1,182 @@
+@page
+@model Project_PRN222.Pages.Admin.Notifications.IndexModel
+@{
+    ViewData["Title"] = "Thông báo";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Thông báo</h1>
+        <p class="subtitle">Gửi thông báo từ Admin tới Organizer</p>
+    </div>
+</div>
+
+@* ── Alert messages ─────────────────────────────────── *@
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success">✓ @Model.SuccessMessage</div>
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">✕ @Model.ErrorMessage</div>
+}
+
+@* ── Compose form ────────────────────────────────────── *@
+<div class="form-card" style="margin-bottom:28px; max-width:100%">
+    <div class="form-section" style="border-bottom:1px solid var(--card-bdr); padding:18px 24px 4px">
+        <div class="section-title">✉ Soạn thông báo mới</div>
+    </div>
+
+    <form method="post" asp-page-handler="Send">
+        @Html.AntiForgeryToken()
+        <div class="form-section" style="padding:20px 24px">
+            <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px">
+
+                @* Recipient *@
+                <div class="form-group">
+                    <label>Người nhận <span style="color:var(--text-3);font-weight:400">(để trống = gửi tất cả Organizer)</span></label>
+                    <select name="TargetUserID" class="form-control">
+                        <option value="">— Gửi tất cả Organizer —</option>
+                        @foreach (var org in Model.Organizers)
+                        {
+                            <option value="@org.UserId"
+                                    selected="@(Model.TargetUserID == org.UserId)">
+                                @org.FullName (@org.Username)
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                @* Title *@
+                <div class="form-group">
+                    <label>Tiêu đề <span class="required">*</span></label>
+                    <input type="text" name="Title" value="@Model.Title"
+                           class="form-control" placeholder="VD: Nhắc nhở deadline sự kiện..." maxlength="200" />
+                </div>
+            </div>
+
+            @* Content *@
+            <div class="form-group">
+                <label>Nội dung <span class="required">*</span></label>
+                <textarea name="Content" class="form-control" rows="4"
+                          placeholder="Nhập nội dung thông báo..."
+                          style="resize:vertical">@Model.Content</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+                Gửi thông báo
+            </button>
+            <a asp-page="Index" class="btn btn-ghost">Huỷ</a>
+        </div>
+    </form>
+</div>
+
+@* ── Sent list ───────────────────────────────────────── *@
+<div class="card">
+    <div class="card-toolbar">
+        <span style="font-size:.82rem; color:var(--text-3); font-family:var(--ff-mono)">
+            @Model.TotalCount thông báo đã gửi
+        </span>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width:55px">ID</th>
+                    <th style="width:160px">Thời gian</th>
+                    <th style="width:180px">Người nhận</th>
+                    <th style="width:220px">Tiêu đề</th>
+                    <th>Nội dung</th>
+                    <th style="width:80px">Đọc</th>
+                    <th style="width:70px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.SentNotifications.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <div class="empty-icon">🔔</div>
+                            <div>Chưa có thông báo nào</div>
+                        </td>
+                    </tr>
+                }
+                @foreach (var n in Model.SentNotifications)
+                {
+                    <tr>
+                        <td class="id-cell">@n.NotificationId</td>
+                        <td class="date-cell">@n.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            @if (n.User != null)
+                            {
+                                <div style="display:flex;align-items:center;gap:8px">
+                                    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--c-gold-dim),var(--c-gold));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--c-ink);flex-shrink:0">
+                                        @(n.User.Username?[0].ToString().ToUpper() ?? "?")
+                                    </div>
+                                    <div>
+                                        <div style="font-size:.84rem;font-weight:600">@n.User.FullName</div>
+                                        <div style="font-size:.74rem;color:var(--text-3)">@n.User.Username</div>
+                                    </div>
+                                </div>
+                            }
+                            else { <span style="color:var(--text-3)">—</span> }
+                        </td>
+                        <td style="font-weight:500;font-size:.855rem">@n.Title</td>
+                        <td style="color:var(--text-2);font-size:.84rem;max-width:300px">
+                            <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                                @n.Content
+                            </span>
+                        </td>
+                        <td style="text-align:center">
+                            @if (n.IsRead == true)
+                            {
+                                <span style="color:#6ee7b7;font-size:.8rem;font-weight:600">✓ Đã đọc</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--text-3);font-size:.8rem">Chưa đọc</span>
+                            }
+                        </td>
+                        <td>
+                            <form method="post" asp-page-handler="Delete"
+                                  onsubmit="return confirm('Xoá thông báo này?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.NotificationId" />
+                                <button type="submit" class="btn-action btn-delete">Xoá</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @* Pagination *@
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination">
+            @if (Model.PageIndex > 1)
+            {
+                <a asp-page="Index" asp-route-PageIndex="@(Model.PageIndex - 1)" class="page-btn">← Trước</a>
+            }
+            @for (int i = Math.Max(1, Model.PageIndex - 2);
+                      i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+            {
+                <a asp-page="Index" asp-route-PageIndex="@i"
+                   class="page-btn @(i == Model.PageIndex ? "active" : "")">@i</a>
+            }
+            @if (Model.PageIndex < Model.TotalPages)
+            {
+                <a asp-page="Index" asp-route-PageIndex="@(Model.PageIndex + 1)" class="page-btn">Sau →</a>
+            }
+            <span class="page-info">Trang @Model.PageIndex / @Model.TotalPages (@Model.TotalCount bản ghi)</span>
+        </div>
+    }
+</div>

@@ -47,7 +47,7 @@ namespace Group6_PRN222_Project.Pages
                 .Include(e => e.Organizer)
                 .Where(e => e.StartDate >= now)
                 .OrderBy(e => e.StartDate)
-                .Take(6)
+                .Take(5)
                 .ToListAsync();
         }
 
