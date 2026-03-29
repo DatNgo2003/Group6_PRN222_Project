@@ -1,224 +1,250 @@
 @page
 @model Project_PRN222.Pages.Admin.Reports.RevenueReportModel
 @{
-    ViewData["Title"] = "Báo cáo doanh thu";
+    ViewData["Title"] = "Báo cáo tài chính";
     Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+    string Vnd(decimal v) => v == 0 ? "—" : v.ToString("N0") + " ₫";
+    string VndShort(decimal v)
+    {
+        if (v == 0) return "—";
+        if (v >= 1_000_000_000) return (v / 1_000_000_000m).ToString("F1") + " tỷ";
+        if (v >= 1_000_000)     return (v / 1_000_000m).ToString("F0") + " tr";
+        return v.ToString("N0");
+    }
+    int maxAllocated = Model.Report.EventFinances.Any()
+        ? (int)Model.Report.EventFinances.Max(e => e.Allocated) : 1;
 }
 
 @section Styles {
 <style>
-    .stat-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
+    .filter-bar {
+        background:var(--card-bg); border:1px solid var(--card-bdr);
+        border-radius:var(--r-lg); padding:16px 20px; margin-bottom:24px;
+        display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end;
     }
-    @@media (max-width: 900px) { .stat-grid { grid-template-columns: repeat(2,1fr); } }
-    @@media (max-width: 500px)  { .stat-grid { grid-template-columns: 1fr; } }
+    .fg { display:flex; flex-direction:column; gap:5px; }
+    .fg label { font-size:.7rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--text-3); }
+    .fg select { min-width:220px; }
+    .fg input  { min-width:155px; }
 
-    .stat-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-bdr);
-        border-radius: var(--r-lg);
-        padding: 20px 22px;
-    }
-    .stat-label {
-        font-size: .72rem;
-        font-weight: 600;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: var(--text-3);
-        margin-bottom: 8px;
-    }
-    .stat-value {
-        font-family: var(--ff-display);
-        font-size: 2rem;
-        font-weight: 700;
-        line-height: 1;
-        color: var(--text-1);
-    }
-    .stat-value.gold  { color: var(--c-gold); }
-    .stat-value.green { color: #6ee7b7; }
-    .stat-value.red   { color: #f87171; }
+    /* ── KPI grid ── */
+    .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    @@media(max-width:1100px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+    @@media(max-width:600px) { .kpi-grid{ grid-template-columns:1fr; } }
 
-    .two-col {
-        display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 20px;
-        align-items: start;
+    .kpi {
+        background:var(--card-bg); border:1px solid var(--card-bdr);
+        border-radius:var(--r-lg); padding:20px 22px; position:relative; overflow:hidden;
     }
-    @@media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } }
+    .kpi::before {
+        content:''; position:absolute; top:0; left:0; right:0;
+        height:2px; background:var(--kc,var(--c-gold)); opacity:.6;
+    }
+    .kpi-label { font-size:.68rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--text-3); margin-bottom:10px; }
+    .kpi-value { font-family:var(--ff-display); font-size:1.9rem; font-weight:700; line-height:1; color:var(--kc,var(--text-1)); }
+    .kpi-sub   { font-size:.74rem; color:var(--text-3); margin-top:6px; }
 
-    .filter-row {
-        display: flex;
-        gap: 12px;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        margin-bottom: 24px;
+    /* ── Budget status pills ── */
+    .budget-status {
+        display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;
     }
-    .filter-group { display: flex; flex-direction: column; gap: 5px; }
-    .filter-group label {
-        font-size: .75rem;
-        font-weight: 600;
-        color: var(--text-3);
+    .bs-pill {
+        display:flex; align-items:center; gap:6px;
+        padding:5px 12px; border-radius:20px; font-size:.78rem; font-weight:600;
+        border:1px solid transparent;
     }
-    .filter-group input { width: 170px; }
+    .bs-approved { background:rgba(74,154,122,.10); color:#6ee7b7; border-color:rgba(74,154,122,.20); }
+    .bs-pending  { background:rgba(184,151,90,.10);  color:var(--c-gold); border-color:rgba(184,151,90,.20); }
+    .bs-rejected { background:rgba(220,60,60,.08);   color:#f87171; border-color:rgba(220,60,60,.16); }
 
-    .rpt-card {
-        background: var(--card-bg);
-        border: 1px solid var(--card-bdr);
-        border-radius: var(--r-lg);
-        overflow: hidden;
-    }
-    .rpt-card-header {
-        padding: 14px 20px;
-        border-bottom: 1px solid var(--card-bdr);
-        font-size: .72rem;
-        font-weight: 600;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: rgba(184,151,90,.55);
-        background: rgba(0,0,0,.12);
-    }
-    .rpt-card-body { padding: 20px; }
+    /* ── Chart full-width ── */
+    .chart-full { margin-bottom:24px; }
 
-    .top-table { width: 100%; border-collapse: collapse; font-size: .845rem; }
-    .top-table th {
-        padding: 9px 14px;
-        font-size: .68rem;
-        font-weight: 600;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: var(--text-3);
-        border-bottom: 1px solid var(--card-bdr);
-        background: rgba(0,0,0,.12);
-        text-align: left;
-    }
-    .top-table td {
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--row-bdr);
-        vertical-align: middle;
-    }
-    .top-table tbody tr:last-child td { border-bottom: none; }
-    .top-table tbody tr:hover { background: var(--row-hover); }
+    .rpt-card { background:var(--card-bg); border:1px solid var(--card-bdr); border-radius:var(--r-lg); overflow:hidden; }
+    .rpt-hdr  { padding:13px 20px; border-bottom:1px solid var(--card-bdr); font-size:.7rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:rgba(184,151,90,.55); background:rgba(0,0,0,.12); display:flex; justify-content:space-between; align-items:center; }
+    .rpt-body { padding:20px; }
 
-    .rank-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px; height: 20px;
-        border-radius: 50%;
-        font-size: .68rem;
-        font-weight: 700;
-        background: var(--c-gold-pale);
-        color: var(--c-gold);
-        border: 1px solid rgba(184,151,90,.22);
-        margin-right: 6px;
-        flex-shrink: 0;
+    /* ── Event finance table ── */
+    .fin-table { width:100%; border-collapse:collapse; font-size:.845rem; }
+    .fin-table th {
+        padding:10px 16px; font-size:.68rem; font-weight:600; letter-spacing:.08em;
+        text-transform:uppercase; color:var(--text-3);
+        background:rgba(0,0,0,.12); border-bottom:1px solid var(--card-bdr); text-align:left;
     }
-    .rank-badge.dim {
-        background: rgba(250,248,244,.05);
-        color: var(--text-3);
-        border-color: rgba(250,248,244,.09);
+    .fin-table td { padding:12px 16px; border-bottom:1px solid var(--row-bdr); vertical-align:middle; }
+    .fin-table tbody tr:last-child td { border-bottom:none; }
+    .fin-table tbody tr:hover { background:var(--row-hover); }
+    .fin-table th.r, .fin-table td.r { text-align:right; }
+
+    .ev-name { font-size:.855rem; font-weight:600; color:var(--text-1); }
+    .ev-status { font-size:.74rem; color:var(--text-3); margin-top:2px; display:flex; align-items:center; gap:4px; }
+    .sdot { display:inline-block; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+    .spent-wrap { display:flex; align-items:center; gap:8px; }
+    .spent-bar  { width:64px; height:5px; background:rgba(250,248,244,.07); border-radius:3px; overflow:hidden; flex-shrink:0; }
+    .spent-fill { height:100%; border-radius:3px; }
+    .spent-pct  { font-size:.76rem; font-family:var(--ff-mono); color:var(--text-3); }
+
+    .money { font-family:var(--ff-mono); font-size:.82rem; }
+    .money-gold  { color:var(--c-gold); font-weight:600; }
+    .money-green { color:#6ee7b7; }
+    .money-red   { color:#f87171; }
+    .money-dim   { color:var(--text-3); }
+
+    .approval-badge {
+        display:inline-block; padding:2px 9px; border-radius:20px;
+        font-size:.7rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
     }
-    .num-right {
-        font-family: var(--ff-mono);
-        font-size: .82rem;
-        color: var(--c-gold);
-        font-weight: 600;
-        text-align: right;
-    }
-    .empty-box {
-        text-align: center;
-        padding: 48px 0;
-        color: var(--text-3);
-        font-size: .875rem;
-    }
+    .ap-approved { background:rgba(74,154,122,.10); color:#6ee7b7; }
+    .ap-pending  { background:rgba(184,151,90,.10); color:var(--c-gold); }
+    .ap-rejected { background:rgba(220,60,60,.08);  color:#f87171; }
+    .ap-none     { background:rgba(250,248,244,.05); color:var(--text-3); }
+
+    .empty-box { text-align:center; padding:48px 0; color:var(--text-3); font-size:.875rem; }
 </style>
 }
 
 <div class="page-header">
     <div class="page-title">
-        <h1>Báo cáo doanh thu</h1>
-        <p class="subtitle">Thống kê vé theo thời gian và sự kiện</p>
+        <h1>Báo cáo tài chính</h1>
+        <p class="subtitle">Ngân sách · Doanh thu · Hợp đồng · Marketing</p>
     </div>
 </div>
 
-<form method="get" class="filter-row">
-    <div class="filter-group">
-        <label>Từ ngày</label>
-        <input type="date" name="DateFrom" class="form-control"
-               value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))" />
+<form method="get" class="filter-bar">
+    <div class="fg">
+        <label>Sự kiện</label>
+        <select name="EventId" class="form-control">
+            <option value="">— Tất cả sự kiện —</option>
+            @foreach (SelectListItem item in Model.EventList)
+            {
+                <option value="@item.Value" selected="@(item.Selected)">
+                    @item.Text
+                </option>
+            }
+        </select>
     </div>
-    <div class="filter-group">
+    <div class="fg">
+        <label>Từ ngày (StartDate)</label>
+        <input type="date" name="DateFrom" class="form-control" value="@Model.DateFrom?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="fg">
         <label>Đến ngày</label>
-        <input type="date" name="DateTo" class="form-control"
-               value="@(Model.DateTo?.ToString("yyyy-MM-dd"))" />
+        <input type="date" name="DateTo" class="form-control" value="@Model.DateTo?.ToString("yyyy-MM-dd")" />
     </div>
     <button type="submit" class="btn btn-primary">Lọc</button>
-    <a href="./RevenueReport" class="btn btn-secondary">Reset</a>
+    <a asp-page="RevenueReport" class="btn btn-secondary">Reset</a>
 </form>
 
-<div class="stat-grid">
-    <div class="stat-card">
-        <div class="stat-label">Tổng vé</div>
-        <div class="stat-value">@Model.Report.TotalTickets</div>
+<div class="kpi-grid">
+    <div class="kpi" style="--kc:var(--text-1)">
+        <div class="kpi-label">Tổng ngân sách</div>
+        <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalAllocated)</div>
+        <div class="kpi-sub">@Model.Report.TotalEvents sự kiện</div>
+        <div class="budget-status">
+            <span class="bs-pill bs-approved">✓ @Model.Report.BudgetApproved Approved</span>
+            <span class="bs-pill bs-pending">⏳ @Model.Report.BudgetPending Pending</span>
+            @if (Model.Report.BudgetRejected > 0)
+            {
+                <span class="bs-pill bs-rejected">✕ @Model.Report.BudgetRejected Rejected</span>
+            }
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Vé đã thanh toán</div>
-        <div class="stat-value green">@Model.Report.PaidTickets</div>
+    <div class="kpi" style="--kc:#f87171">
+        <div class="kpi-label">Đã chi tiêu</div>
+        <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalSpent)</div>
+        <div class="kpi-sub">
+            @(Model.Report.TotalAllocated == 0 ? "0.0"
+              : Math.Round((double)(Model.Report.TotalSpent / Model.Report.TotalAllocated) * 100, 1).ToString("F1"))% ngân sách
+        </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Chưa thanh toán</div>
-        <div class="stat-value red">@Model.Report.UnpaidTickets</div>
+    <div class="kpi" style="--kc:#6ee7b7">
+        <div class="kpi-label">Lợi nhuận</div>
+        <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalProfit)</div>
+        <div class="kpi-sub">từ Budgets được duyệt</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Tỷ lệ paid</div>
-        <div class="stat-value gold">
-            @(Model.Report.TotalTickets == 0 ? "0.0" :
-              Math.Round((double)Model.Report.PaidTickets / Model.Report.TotalTickets * 100, 1).ToString("F1"))%
+    <div class="kpi" style="--kc:#93c5fd">
+        <div class="kpi-label">Hợp đồng · Vé · Mktg</div>
+        <div class="kpi-value" style="font-size:1.3rem">@VndShort(Model.Report.TotalContractValue)</div>
+        <div class="kpi-sub">
+            Vé: @VndShort(Model.Report.TotalTicketRevenue) ·
+            Mktg: @VndShort(Model.Report.TotalAdSpend)
         </div>
     </div>
 </div>
 
-<div class="two-col">
+<div class="chart-full">
     <div class="rpt-card">
-        <div class="rpt-card-header">Vé paid theo tháng</div>
-        <div class="rpt-card-body">
-            @if (Model.Report.MonthlyBreakdown.Any())
+        <div class="rpt-hdr"><span>Tổng quan tài chính theo sự kiện</span></div>
+        <div class="rpt-body">
+            @if (Model.Report.EventFinances.Any())
             {
-                <canvas id="revenueChart" height="260"></canvas>
+                <canvas id="overviewChart" height="100"></canvas>
             }
-            else
-            {
-                <div class="empty-box">Không có dữ liệu trong khoảng thời gian này</div>
-            }
+            else { <div class="empty-box">Không có dữ liệu</div> }
         </div>
     </div>
+</div>
 
-    <div class="rpt-card">
-        <div class="rpt-card-header">Top sự kiện</div>
-        <table class="top-table">
+<div class="rpt-card">
+    <div class="rpt-hdr"><span>Chi tiết tài chính theo sự kiện</span></div>
+    <div style="overflow-x:auto">
+        <table class="fin-table">
             <thead>
                 <tr>
                     <th>Sự kiện</th>
-                    <th style="text-align:right">Vé paid</th>
+                    <th class="r">Ngân sách</th>
+                    <th style="min-width:140px">Đã chi</th>
+                    <th class="r">Lợi nhuận</th>
+                    <th class="r">Hợp đồng</th>
+                    <th class="r">Doanh thu vé</th>
+                    <th class="r">Chi mktg</th>
+                    <th>Duyệt NS</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var (ev, i) in Model.Report.TopEvents.Select((e, idx) => (e, idx)))
+                @if (!Model.Report.EventFinances.Any())
                 {
-                    <tr>
-                        <td style="display:flex;align-items:center">
-                            <span class="rank-badge @(i >= 3 ? "dim" : "")">@(i+1)</span>
-                            <span style="font-size:.84rem;color:var(--text-2)">@ev.EventName</span>
-                        </td>
-                        <td class="num-right">@ev.PaidCount</td>
-                    </tr>
+                    <tr><td colspan="8" class="empty-box">Không có dữ liệu</td></tr>
                 }
-                @if (!Model.Report.TopEvents.Any())
+                @foreach (var ev in Model.Report.EventFinances)
                 {
-                    <tr><td colspan="2" class="empty-box">Không có dữ liệu</td></tr>
+                    var dotColor = ev.Status == "Completed" ? "#6ee7b7"
+                                 : ev.Status == "Planning"  ? "var(--c-gold)"
+                                 : "var(--text-3)";
+                    var barColor = ev.SpentRate > 100 ? "#f87171"
+                                 : ev.SpentRate >  80 ? "var(--c-gold)"
+                                 : "#6ee7b7";
+                    var apClass  = ev.ApprovalStatus == "Approved" ? "ap-approved"
+                                 : ev.ApprovalStatus == "Pending"  ? "ap-pending"
+                                 : ev.ApprovalStatus == "Rejected" ? "ap-rejected"
+                                 : "ap-none";
+                    var profitClass = ev.Profit > 0 ? "money-green"
+                                   : ev.Profit < 0 ? "money-red"
+                                   : "money-dim";
+                    <tr>
+                        <td>
+                            <div class="ev-name">@ev.EventName</div>
+                            <div class="ev-status">
+                                <span class="sdot" style="background:@dotColor"></span>@ev.Status
+                            </div>
+                        </td>
+                        <td class="r money money-gold">@Vnd(ev.Allocated)</td>
+                        <td>
+                            <div class="spent-wrap">
+                                <div class="spent-bar">
+                                    <div class="spent-fill" style="width:@(Math.Min((int)ev.SpentRate,100))%;background:@barColor"></div>
+                                </div>
+                                <span class="spent-pct">@ev.SpentRate.ToString("F0")%</span>
+                                <span class="money money-dim" style="font-size:.78rem">@Vnd(ev.Spent)</span>
+                            </div>
+                        </td>
+                        <td class="r money @profitClass">@Vnd(ev.Profit)</td>
+                        <td class="r money money-dim">@Vnd(ev.ContractValue)</td>
+                        <td class="r money money-dim">@Vnd(ev.TicketRevenue)</td>
+                        <td class="r money money-dim">@Vnd(ev.AdSpend)</td>
+                        <td><span class="approval-badge @apClass">@ev.ApprovalStatus</span></td>
+                    </tr>
                 }
             </tbody>
         </table>
@@ -229,37 +255,96 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 (function () {
-    var canvas = document.getElementById('revenueChart');
-    if (!canvas) return;
-    var labels  = [@Html.Raw(string.Join(",", Model.Report.MonthlyBreakdown.Select(m => $"\"{m.Label}\"")))];
-    var tickets = [@string.Join(",", Model.Report.MonthlyBreakdown.Select(m => m.Tickets))];
-    new Chart(canvas, {
+    const gridColor = 'rgba(250,248,244,.05)';
+    const tickColor = 'rgba(250,248,244,.35)';
+
+    // ── Overview grouped bar: Ngân sách / Đã chi / Lợi nhuận / Hợp đồng / Doanh thu vé / Chi marketing ──
+    var oCanvas = document.getElementById('overviewChart');
+    if (!oCanvas) return;
+
+    var labels    = [@Html.Raw(string.Join(",", Model.Report.EventFinances.Select(e => $"\"{e.EventName}\"")))];
+    var allocated = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Allocated))];
+    var spent     = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Spent))];
+    var profit    = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Profit))];
+    var contract  = [@string.Join(",", Model.Report.EventFinances.Select(e => e.ContractValue))];
+    var ticket    = [@string.Join(",", Model.Report.EventFinances.Select(e => e.TicketRevenue))];
+    var adspend   = [@string.Join(",", Model.Report.EventFinances.Select(e => e.AdSpend))];
+
+    new Chart(oCanvas, {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: [{
-                label: 'Vé paid',
-                data: tickets,
-                backgroundColor: 'rgba(184,151,90,0.22)',
-                borderColor: 'rgba(184,151,90,0.75)',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
+            labels,
+            datasets: [
+                {
+                    label: 'Ngân sách',
+                    data: allocated,
+                    backgroundColor: 'rgba(184,151,90,0.20)',
+                    borderColor: 'rgba(184,151,90,0.70)',
+                    borderWidth: 1, borderRadius: 4
+                },
+                {
+                    label: 'Đã chi',
+                    data: spent,
+                    backgroundColor: 'rgba(248,113,113,0.20)',
+                    borderColor: 'rgba(248,113,113,0.65)',
+                    borderWidth: 1, borderRadius: 4
+                },
+                {
+                    label: 'Lợi nhuận',
+                    data: profit,
+                    backgroundColor: 'rgba(110,231,183,0.20)',
+                    borderColor: 'rgba(110,231,183,0.65)',
+                    borderWidth: 1, borderRadius: 4
+                },
+                {
+                    label: 'Hợp đồng',
+                    data: contract,
+                    backgroundColor: 'rgba(147,197,253,0.20)',
+                    borderColor: 'rgba(147,197,253,0.65)',
+                    borderWidth: 1, borderRadius: 4
+                },
+                {
+                    label: 'Doanh thu vé',
+                    data: ticket,
+                    backgroundColor: 'rgba(196,181,253,0.20)',
+                    borderColor: 'rgba(196,181,253,0.65)',
+                    borderWidth: 1, borderRadius: 4
+                },
+                {
+                    label: 'Chi marketing',
+                    data: adspend,
+                    backgroundColor: 'rgba(253,186,116,0.20)',
+                    borderColor: 'rgba(253,186,116,0.65)',
+                    borderWidth: 1, borderRadius: 4
+                }
+            ]
         },
         options: {
             responsive: true,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { labels: { color: 'rgba(250,248,244,.5)', font: { size: 12 } } }
+                legend: {
+                    position: 'top',
+                    labels: { color: 'rgba(250,248,244,.55)', font: { size: 11 }, padding: 16 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' ' + ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' ₫'
+                    }
+                }
             },
             scales: {
                 x: {
-                    ticks: { color: 'rgba(250,248,244,.38)', font: { size: 11 } },
-                    grid:  { color: 'rgba(250,248,244,.04)' }
+                    ticks: { color: tickColor, font: { size: 11 } },
+                    grid:  { color: gridColor }
                 },
                 y: {
                     beginAtZero: true,
-                    ticks: { color: 'rgba(250,248,244,.38)', font: { size: 11 } },
-                    grid:  { color: 'rgba(250,248,244,.06)' }
+                    ticks: {
+                        color: tickColor, font: { size: 11 },
+                        callback: v => v === 0 ? '0' : (v / 1_000_000).toFixed(0) + 'M'
+                    },
+                    grid: { color: gridColor }
                 }
             }
         }

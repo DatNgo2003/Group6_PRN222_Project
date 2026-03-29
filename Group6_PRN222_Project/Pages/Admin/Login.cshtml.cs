@@ -82,7 +82,7 @@ namespace Group6_PRN222_Project.Pages.Admin
             // ── Redirect theo appRole đã resolve ──────────────────────
             return appRole switch
             {
-                InternalRoleResolver.Admin => RedirectToPage("/Admin/AdminDashboard"),
+                InternalRoleResolver.Admin => RedirectToPage("/Admin/Reports/RevenueReport"),
                 InternalRoleResolver.Organizer => RedirectToPage("/Organizer/OrganizerDashboard"),
                 InternalRoleResolver.StaffSecurity => RedirectToPage("/Staff/StaffDashboard"),
                 InternalRoleResolver.StaffMkt => RedirectToPage("/Staff/StaffDashboard"),
