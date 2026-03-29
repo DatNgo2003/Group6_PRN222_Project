@@ -10,6 +10,12 @@ using Project_PRN222.Helpers;
 
 namespace Group6_PRN222_Project.Pages.Organizer.FieldReports
 {
+    public class MarketingReportDetailVm
+    {
+        public MarketingFieldReportPayload Payload { get; set; } = new();
+        public Dictionary<int, string> TaskNames { get; set; } = new();
+    }
+
     public class IndexModel : PageModel
     {
         private readonly ProjectPrn222Context _context;
@@ -21,6 +27,8 @@ namespace Group6_PRN222_Project.Pages.Organizer.FieldReports
 
         public IList<FieldReport> Reports { get; set; } = new List<FieldReport>();
 
+        public Dictionary<int, MarketingReportDetailVm> MarketingDetails { get; set; } = new();
+
         public async System.Threading.Tasks.Task<IActionResult> OnGetAsync()
         {
             if (!SessionHelper.IsOrganizer(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -31,12 +39,42 @@ namespace Group6_PRN222_Project.Pages.Organizer.FieldReports
             var query = _context.FieldReports
                 .Include(r => r.Event)
                 .Include(r => r.Staff)
+                .Where(r => r.Status != "Draft")
                 .AsQueryable();
 
             if (selectedId.HasValue)
                 query = query.Where(r => r.EventId == selectedId);
 
             Reports = await query.OrderByDescending(r => r.ReportTime).ToListAsync();
+
+            var marketing = Reports.Where(r => r.ReportType == "Marketing").ToList();
+            var allTaskIds = marketing
+                .SelectMany(r => MarketingFieldReportContent.Parse(r.Content).TaskEstimates.Select(t => t.TaskId))
+                .Distinct()
+                .ToList();
+
+            var taskNameById = allTaskIds.Count == 0
+                ? new Dictionary<int, string>()
+                : await _context.Tasks.AsNoTracking()
+                    .Where(t => allTaskIds.Contains(t.TaskId))
+                    .ToDictionaryAsync(t => t.TaskId, t => t.TaskName ?? $"Task #{t.TaskId}");
+
+            MarketingDetails = new Dictionary<int, MarketingReportDetailVm>();
+            foreach (var r in marketing)
+            {
+                var payload = MarketingFieldReportContent.Parse(r.Content);
+                MarketingDetails[r.ReportId] = new MarketingReportDetailVm
+                {
+                    Payload = payload,
+                    TaskNames = payload.TaskEstimates
+                        .Select(e => e.TaskId)
+                        .Distinct()
+                        .ToDictionary(
+                            id => id,
+                            id => taskNameById.GetValueOrDefault(id, $"Task #{id}"))
+                };
+            }
+
             return Page();
         }
 

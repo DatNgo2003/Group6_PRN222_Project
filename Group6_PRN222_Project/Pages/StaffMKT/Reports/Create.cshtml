@@ -1,0 +1,105 @@
+@page
+@model Project_PRN222.Pages.StaffMKT.Reports.CreateModel
+
+@{
+    ViewData["Title"] = "Tạo báo cáo Marketing";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+<div class="page-header" style="margin-bottom:20px;">
+    <div>
+        <h1 style="font-size:1.35rem;margin-bottom:6px;">Báo cáo hiện trường (Marketing)</h1>
+        <p style="color:var(--text-muted);font-size:.9rem;margin:0;">Chọn sự kiện, ghi nhận thay đổi &amp; nội dung; estimate <strong>theo từng task</strong>. Tổng tiền hiển thị ở danh sách &amp; phía Organizer (tính từ các dòng).</p>
+    </div>
+    <a asp-page="Index" class="btn btn-secondary" style="display:inline-flex;align-items:center;padding:10px 16px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:var(--text-primary);font-weight:600;">← Danh sách</a>
+</div>
+
+@if (!Model.Events.Any())
+{
+    <div style="padding:24px;background:var(--card-bg);border:1px solid var(--border);border-radius:14px;font-weight:600;color:var(--text-muted);">
+        Bạn chưa có task nào được gán — Organizer cần gán task trước khi lập báo cáo theo sự kiện.
+    </div>
+}
+else
+{
+
+<form method="post" class="card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:20px;">
+    <div asp-validation-summary="ModelOnly" style="color:#b71c1c;font-weight:600;margin-bottom:12px;"></div>
+
+    <div style="margin-bottom:18px;">
+        <label style="display:block;font-weight:700;font-size:.8rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Sự kiện</label>
+        <select asp-for="EventId" class="form-control" style="max-width:420px;padding:10px 12px;border-radius:10px;border:1px solid var(--border);"
+                onchange="window.location='?eventId='+this.value">
+            @foreach (var e in Model.Events)
+            {
+                <option value="@e.EventId">@e.EventName</option>
+            }
+        </select>
+    </div>
+
+    <div style="margin-bottom:18px;">
+        <label asp-for="Changes" style="display:block;font-weight:700;font-size:.8rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Thay đổi / cập nhật</label>
+        <textarea asp-for="Changes" rows="3" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);font-family:inherit;" placeholder="So với báo cáo trước hoặc kế hoạch…"></textarea>
+    </div>
+
+    <div style="margin-bottom:22px;">
+        <label asp-for="ReportBody" style="display:block;font-weight:700;font-size:.8rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Nội dung báo cáo</label>
+        <textarea asp-for="ReportBody" rows="6" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);font-family:inherit;" placeholder="Tóm tắt công việc, kết quả…"></textarea>
+        <span asp-validation-for="ReportBody" style="color:#b71c1c;font-size:.85rem;"></span>
+    </div>
+
+    <h2 style="font-size:1rem;font-weight:800;margin-bottom:10px;">Estimate theo task (VNĐ)</h2>
+    <p style="color:var(--text-muted);font-size:.88rem;margin:0 0 14px;">Chỉ các task được Organizer gán cho bạn trong sự kiện này.</p>
+
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:12px;">
+        <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+            <thead>
+                <tr style="background:#f8fafc;">
+                    <th style="text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);">Task</th>
+                    <th style="width:140px;text-align:right;padding:10px 12px;border-bottom:1px solid var(--border);">Estimate</th>
+                    <th style="width:220px;text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < Model.TaskSnapshots.Count; i++)
+                {
+                    var s = Model.TaskSnapshots[i];
+                    <tr>
+                        <td style="padding:10px 12px;border-bottom:1px solid var(--border-light);vertical-align:top;">
+                            <div style="font-weight:700;">@s.TaskName</div>
+                            <div style="font-size:.82rem;color:var(--text-muted);">@(s.Deadline?.ToString("dd/MM/yyyy HH:mm") ?? "—")</div>
+                            <input type="hidden" asp-for="Lines[i].TaskId" />
+                        </td>
+                        <td style="padding:10px 12px;border-bottom:1px solid var(--border-light);vertical-align:top;">
+                            <input type="number" asp-for="Lines[i].Amount" step="0.01" min="0" placeholder="0"
+                                   style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);text-align:right;" />
+                        </td>
+                        <td style="padding:10px 12px;border-bottom:1px solid var(--border-light);vertical-align:top;">
+                            <input type="text" asp-for="Lines[i].Note" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);" placeholder="Tuỳ chọn" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @{
+        decimal sum = 0;
+        for (var j = 0; j < Model.Lines.Count; j++)
+            sum += Model.Lines[j].Amount ?? 0;
+    }
+    <p style="margin-top:14px;font-weight:800;font-size:1rem;">
+        Tổng (hiển thị): <span style="color:#1f6e43;">@sum.ToString("N0")</span> VNĐ
+    </p>
+
+    <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+        <button type="submit" name="action" value="draft" style="padding:12px 20px;border-radius:10px;border:1px solid var(--border);background:var(--card-bg);font-weight:700;cursor:pointer;">Lưu nháp</button>
+        <button type="submit" name="action" value="submit" style="padding:12px 20px;border-radius:10px;border:1px solid #1f6e43;background:#1f6e43;color:#fff;font-weight:700;cursor:pointer;">Gửi báo cáo</button>
+    </div>
+</form>
+
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

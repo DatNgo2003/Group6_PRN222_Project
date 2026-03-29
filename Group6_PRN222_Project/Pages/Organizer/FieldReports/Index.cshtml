@@ -1,4 +1,5 @@
 @page
+@using Project_PRN222.Helpers
 @model Group6_PRN222_Project.Pages.Organizer.FieldReports.IndexModel
 @{
     ViewData["Title"] = "Notification Reports";
@@ -46,8 +47,42 @@
                         <td>
                             <span class="role-badge role-default">@(r.ReportType ?? "—")</span>
                         </td>
-                        <td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-2)">
-                            @(r.Content ?? "—")
+                        <td style="max-width:280px; color:var(--text-2); vertical-align:top;">
+                            @if (r.ReportType == "Marketing" && Model.MarketingDetails.ContainsKey(r.ReportId))
+                            {
+                                var d = Model.MarketingDetails[r.ReportId];
+                                <div style="white-space:normal; font-size:.88rem;">@(MarketingFieldReportContent.PreviewPlainText(r.Content) ?? "—")</div>
+                                @if (d.Payload.TaskEstimates.Any())
+                                {
+                                    <details style="margin-top:8px;">
+                                        <summary style="cursor:pointer; font-weight:700; color:var(--text-1);">Chi tiết estimate theo task</summary>
+                                        <table style="width:100%; margin-top:8px; font-size:.82rem; border-collapse:collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align:left; padding:4px 6px; border-bottom:1px solid var(--border);">Task</th>
+                                                    <th style="text-align:right; padding:4px 6px; border-bottom:1px solid var(--border);">Estimate</th>
+                                                    <th style="text-align:left; padding:4px 6px; border-bottom:1px solid var(--border);">Ghi chú</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var te in d.Payload.TaskEstimates)
+                                                {
+                                                    <tr>
+                                                        <td style="padding:4px 6px; border-bottom:1px solid rgba(255,255,255,.06);">@(d.TaskNames.GetValueOrDefault(te.TaskId, $"Task #{te.TaskId}"))</td>
+                                                        <td style="padding:4px 6px; text-align:right;">@((te.Amount ?? 0).ToString("N0"))</td>
+                                                        <td style="padding:4px 6px; color:var(--text-3);">@(te.Note ?? "—")</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                        <p style="margin:8px 0 0; font-size:.82rem; color:var(--text-3);">Tổng hiển thị: <strong style="color:var(--c-gold);">@(r.EstimatePrice.HasValue ? r.EstimatePrice.Value.ToString("N0") : "—")</strong> VNĐ</p>
+                                    </details>
+                                }
+                            }
+                            else
+                            {
+                                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;">@(r.Content ?? "—")</span>
+                            }
                         </td>
                         <td style="color:var(--c-gold); font-weight:600; text-align:right;">
                             @(r.EstimatePrice.HasValue ? r.EstimatePrice.Value.ToString("N0") : "—")

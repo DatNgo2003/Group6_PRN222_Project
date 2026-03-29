@@ -176,6 +176,9 @@
             @if (isMkt)
             {
                 <div class="nav-label">Marketing</div>
+                <a asp-page="/StaffMKT/Tasks/Index" class="nav-item @(currentPage.StartsWith("/StaffMKT/Tasks") ? "active" : "")">
+                    <span class="nav-icon">&#9632;</span> Tasks
+                </a>
                 <a asp-page="/StaffMKT/Campaigns/Index" class="nav-item @(currentPage.StartsWith("/StaffMKT/Campaigns") ? "active" : "")">
                     <span class="nav-icon">&#9632;</span> Campaigns
                 </a>

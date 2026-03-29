@@ -1,26 +1,19 @@
+using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project_PRN222.Helpers;
-using Group6_PRN222_Project.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Project_PRN222.Pages.StaffMKT.Reports
 {
     public class IndexModel : PageModel
     {
         private readonly ProjectPrn222Context _db;
+
         public IndexModel(ProjectPrn222Context db) => _db = db;
 
-        public List<EngagementReportRow> Rows { get; set; } = new();
-
-        public class EngagementReportRow
-        {
-            public string EventName { get; set; } = "";
-            public int CampaignCount { get; set; }
-            public decimal TotalAdSpend { get; set; }
-            public decimal AvgEngagement { get; set; }
-            public string OverallStatus { get; set; } = "Running";
-        }
+        public List<FieldReport> Reports { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -39,21 +32,13 @@ namespace Project_PRN222.Pages.StaffMKT.Reports
                 return RedirectToPage("/Auth/Login");
 #endif
 
-            Rows = await _db.MarketingCampaigns
+            var actorId = SessionHelper.GetUserID(HttpContext.Session)!.Value;
+
+            Reports = await _db.FieldReports
                 .AsNoTracking()
-                .Include(c => c.Event)
-                .GroupBy(c => c.Event != null ? c.Event.EventName : "N/A")
-                .Select(g => new EngagementReportRow
-                {
-                    EventName = g.Key,
-                    CampaignCount = g.Count(),
-                    TotalAdSpend = g.Sum(x => x.AdSpend ?? 0m),
-                    AvgEngagement = g.Average(x => x.EngagementRate ?? 0m),
-                    OverallStatus = g.Any(x => x.Status == "Running")
-                        ? "Running"
-                        : g.All(x => x.Status == "Completed") ? "Completed" : "Paused"
-                })
-                .OrderByDescending(x => x.TotalAdSpend)
+                .Include(r => r.Event)
+                .Where(r => r.StaffId == actorId && r.ReportType == "Marketing")
+                .OrderByDescending(r => r.ReportTime)
                 .ToListAsync();
 
             return Page();

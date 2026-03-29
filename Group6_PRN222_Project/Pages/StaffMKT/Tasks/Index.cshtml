@@ -1,0 +1,69 @@
+@page
+@model Project_PRN222.Pages.StaffMKT.Tasks.IndexModel
+
+@{
+    ViewData["Title"] = "Staff (MKT) — Tasks";
+    Layout = "~/Pages/Shared/_StaffLayout.cshtml";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Danh sách Tasks</h1>
+        <p class="subtitle">Xem mô tả công việc; chỉnh <strong>Status</strong> theo tiến độ (báo cáo lưu ở mục Reports).</p>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success" style="margin-bottom:16px;padding:12px 14px;border-radius:10px;background:#e8f5e9;color:#1b5e20;font-weight:600;">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger" style="margin-bottom:16px;padding:12px 14px;border-radius:10px;background:#ffebee;color:#b71c1c;font-weight:600;">@TempData["Error"]</div>
+}
+
+<div class="card" style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+    <div class="table-wrapper" style="overflow-x:auto;">
+        <table class="data-table" style="width:100%;border-collapse:collapse;font-size:.9rem;">
+            <thead>
+                <tr>
+                    <th style="text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);">Task</th>
+                    <th style="text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);">Sự kiện</th>
+                    <th style="width:160px;text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);">Deadline</th>
+                    <th style="width:280px;text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);">Cập nhật trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model.Tasks)
+                {
+                    <tr>
+                        <td style="padding:12px 10px;border-bottom:1px solid var(--border-light);">
+                            <div style="font-weight:700;">@(t.TaskName ?? "—")</div>
+                            <div style="color:var(--text-muted);font-size:.85rem;margin-top:4px;">@(t.Description ?? "")</div>
+                        </td>
+                        <td style="padding:12px 10px;border-bottom:1px solid var(--border-light);"><strong>@(t.Event?.EventName ?? "—")</strong></td>
+                        <td style="padding:12px 10px;border-bottom:1px solid var(--border-light);color:var(--text-muted);">@(t.Deadline?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                        <td style="padding:12px 10px;border-bottom:1px solid var(--border-light);">
+                            <form method="post" asp-page-handler="UpdateStatus" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                                <input type="hidden" name="taskId" value="@t.TaskId" />
+                                <select name="status" style="padding:8px 10px;border-radius:8px;border:1px solid var(--border);min-width:140px;">
+                                    @if ((t.Status ?? "To Do") == "To Do") { <option value="To Do" selected>To Do</option> } else { <option value="To Do">To Do</option> }
+                                    @if (t.Status == "In Progress") { <option value="In Progress" selected>In Progress</option> } else { <option value="In Progress">In Progress</option> }
+                                    @if (t.Status == "Done") { <option value="Done" selected>Done</option> } else { <option value="Done">Done</option> }
+                                    @if (t.Status == "Completed") { <option value="Completed" selected>Completed</option> } else { <option value="Completed">Completed</option> }
+                                </select>
+                                <button type="submit" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);font-weight:700;cursor:pointer;">Lưu</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Tasks.Any())
+                {
+                    <tr>
+                        <td colspan="4" style="padding:28px;text-align:center;color:var(--text-muted);font-weight:600;">Không có task nào được gán cho bạn.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
