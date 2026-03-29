@@ -32,6 +32,11 @@
                 <span asp-validation-for="Event.Location" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
+                <label asp-for="Event.Amount" class="control-label">Giá tiền (Amount)</label>
+                <input asp-for="Event.Amount" class="form-control" type="number" step="0.01" min="0" placeholder="VNĐ" />
+                <span asp-validation-for="Event.Amount" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
                 <label asp-for="Event.Scale" class="control-label">Quy mô sự kiện</label>
                 <select asp-for="Event.Scale" class="form-select">
                     <option value="">-- Chọn quy mô --</option>
