@@ -30,6 +30,11 @@ namespace Group6_PRN222_Project.Pages.Organizer
         public List<decimal> BudgetAllocatedData { get; set; } = new();
         public List<decimal> RevenueData { get; set; } = new();
 
+        // Profit summary
+        public decimal TotalRevenue { get; set; }
+        public decimal TotalFieldReportCost { get; set; }
+        public decimal NetProfit => TotalRevenue - TotalFieldReportCost;
+
         public async System.Threading.Tasks.Task OnGetAsync()
         {
             var selectedId = HttpContext.Session.GetInt32("SelectedEventId");
@@ -73,6 +78,20 @@ namespace Group6_PRN222_Project.Pages.Organizer
             RevenueData = topBudgets.Select(b =>
                 (b.Event!.Amount ?? 0) * b.Event.Tickets.Count
             ).ToList();
+
+            // Profit calculation
+            var allEvents = await _context.Events
+                .Include(e => e.Tickets)
+                .ToListAsync();
+            TotalRevenue = allEvents.Sum(e => (decimal)(e.Amount ?? 0) * e.Tickets.Count);
+
+            var fieldReportList = await _context.FieldReports
+                .Where(r => r.Status == "Approved" && r.EstimatePrice != null)
+                .Select(r => new { r.EventId, r.EstimatePrice })
+                .ToListAsync();
+            if (selectedId.HasValue)
+                fieldReportList = fieldReportList.Where(r => r.EventId == selectedId).ToList();
+            TotalFieldReportCost = fieldReportList.Sum(r => (decimal)(r.EstimatePrice ?? 0));
         }
     }
 }

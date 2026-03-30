@@ -21,6 +21,36 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
+@{
+    var approvedCost = Model.Reports.Where(r => r.Status == "Approved" && r.EstimatePrice.HasValue).Sum(r => r.EstimatePrice!.Value);
+    var pendingCost  = Model.Reports.Where(r => (r.Status == "Submitted" || r.Status == null) && r.EstimatePrice.HasValue).Sum(r => r.EstimatePrice!.Value);
+}
+
+<!-- Cost Summary Card -->
+<div class="card" style="margin-bottom:20px; padding:20px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+        <span style="font-size:18px;">💰</span>
+        <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--text-1);">Tổng Chi Phí Báo Cáo</h3>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+        <div style="background:rgba(184,151,90,.08); border:1px solid rgba(184,151,90,.2); border-radius:10px; padding:16px;">
+            <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">Tổng Chi Phí</div>
+            <div style="font-size:22px; font-weight:700; color:var(--c-gold);">@Model.TotalCost.ToString("N0") <span style="font-size:13px; font-weight:400; color:var(--text-3);">VNĐ</span></div>
+            <div style="font-size:12px; color:var(--text-3); margin-top:4px;">@Model.Reports.Count(r => r.EstimatePrice.HasValue) / @Model.Reports.Count báo cáo có giá</div>
+        </div>
+        <div style="background:rgba(74,154,122,.08); border:1px solid rgba(74,154,122,.2); border-radius:10px; padding:16px;">
+            <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">Đã Duyệt</div>
+            <div style="font-size:22px; font-weight:700; color:#6ee7b7;">@approvedCost.ToString("N0") <span style="font-size:13px; font-weight:400; color:var(--text-3);">VNĐ</span></div>
+            <div style="font-size:12px; color:var(--text-3); margin-top:4px;">@Model.Reports.Count(r => r.Status == "Approved") báo cáo được duyệt</div>
+        </div>
+        <div style="background:rgba(250,200,80,.08); border:1px solid rgba(250,200,80,.2); border-radius:10px; padding:16px;">
+            <div style="font-size:11px; color:var(--text-3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">Chờ Duyệt</div>
+            <div style="font-size:22px; font-weight:700; color:#fbbf24;">@pendingCost.ToString("N0") <span style="font-size:13px; font-weight:400; color:var(--text-3);">VNĐ</span></div>
+            <div style="font-size:12px; color:var(--text-3); margin-top:4px;">@Model.Reports.Count(r => r.Status == "Submitted" || r.Status == null) báo cáo đang chờ</div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="table-wrapper">
         <table class="data-table">
