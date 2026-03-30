@@ -33,12 +33,14 @@
 }
 else
 {
-    <div class="form-card" style="padding: 0;">
-        <table class="data-table">
+    <div class="card">
+        <div class="table-wrapper">
+            <table class="data-table">
             <thead>
                 <tr>
                     <th style="width:80px;">ID</th>
                     <th>Equipment Name</th>
+                    <th>Unit Price</th>
                     <th>Total Owned</th>
                     <th>Available</th>
                     <th>Defective</th>
@@ -52,6 +54,7 @@ else
                     <tr>
                         <td class="id-cell">#@e.EquipmentId</td>
                         <td><strong>@(e.EquipmentName ?? "—")</strong></td>
+                        <td style="color:var(--text-1); font-weight:600;">@(e.UnitPrice?.ToString("N0") ?? "0") ₫</td>
                         <td style="font-weight:600;">@e.TotalOwned</td>
                         <td style="color:#6ee7b7; font-weight:600;">@e.AvailableQuantity</td>
                         <td style="color:#f87171; font-weight:600;">@e.DefectiveQuantity</td>
@@ -62,6 +65,7 @@ else
                     </tr>
                 }
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 }

@@ -206,7 +206,7 @@ public partial class ProjectPrn222Context : DbContext
             entity.Property(e => e.ReportType).HasMaxLength(50);
             entity.Property(e => e.EstimatePrice)
                 .HasColumnName("EstimatePrice")
-                .HasColumnType("decimal(18,2)");
+                .HasConversion<double>();
             entity.Property(e => e.StaffId).HasColumnName("StaffID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)

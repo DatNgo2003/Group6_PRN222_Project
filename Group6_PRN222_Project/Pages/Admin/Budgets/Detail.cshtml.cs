@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project_PRN222.Helpers;
 using Project_PRN222.Services;
+using Group6_PRN222_Project.Models;
 
 namespace Project_PRN222.Pages.Admin.Budgets
 {
@@ -11,15 +12,18 @@ namespace Project_PRN222.Pages.Admin.Budgets
     {
         private readonly IBudgetService   _budgetSvc;
         private readonly IAuditLogService _audit;
+        private readonly ProjectPrn222Context _db;
 
-        public DetailModel(IBudgetService budgetSvc, IAuditLogService audit)
+        public DetailModel(IBudgetService budgetSvc, IAuditLogService audit, ProjectPrn222Context db)
         {
             _budgetSvc = budgetSvc;
             _audit     = audit;
+            _db        = db;
         }
 
         public BudgetListItemDto  Budget      { get; set; } = default!;
         public List<BudgetListItemDto> EventBudgets { get; set; } = new();
+        public Event EventDetails { get; set; } = default!;
 
         [TempData] public string? SuccessMessage { get; set; }
         [TempData] public string? ErrorMessage   { get; set; }
@@ -41,6 +45,7 @@ namespace Project_PRN222.Pages.Admin.Budgets
 
             Budget       = budget;
             EventBudgets = await _budgetSvc.GetByEventIdAsync(budget.EventId);
+            EventDetails = await _db.Events.FindAsync(budget.EventId);
 
             return Page();
         }

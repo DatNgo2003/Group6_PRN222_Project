@@ -43,6 +43,7 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
 
             RentalRequest.EventId = eventId;
             RequestedQuantity = gap;
+            RentalRequest.EstimatePrice = (EquipmentInfo.UnitPrice ?? 0m) * gap;
 
             return Page();
         }
@@ -62,9 +63,10 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
             string equipName = equip?.EquipmentName ?? "Unknown";
 
             RentalRequest.StaffId = staffId;
+            RentalRequest.EventId = eventId;
             RentalRequest.ReportType = "EquipmentRentalRequest";
             RentalRequest.ReportTime = DateTime.Now;
-            RentalRequest.Status = "Pending";
+            RentalRequest.Status = "Submitted";
             
             // Format content to include equipment details
             RentalRequest.Content = $"Thiết bị: {equipName} (ID:{equipmentId})\nSố lượng cần thuê: {RequestedQuantity}\nLý do/Ghi chú: {RentalRequest.Content}";

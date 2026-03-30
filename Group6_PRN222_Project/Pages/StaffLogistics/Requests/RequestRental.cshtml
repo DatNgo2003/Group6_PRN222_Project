@@ -1,4 +1,4 @@
-@page "{eventId:int}/{equipmentId:int}"
+@page
 @model Group6_PRN222_Project.Pages.StaffLogistics.Requests.RequestRentalModel
 @{
     ViewData["Title"] = "Yêu cầu thuê ngoài";
@@ -22,6 +22,9 @@
             <dt class="col-sm-4" style="color:var(--text-2);">Thiết bị cần thuê:</dt>
             <dd class="col-sm-8" style="font-weight:600;">@Model.EquipmentInfo?.EquipmentName</dd>
             
+            <dt class="col-sm-4" style="color:var(--text-2);">Đơn giá kho:</dt>
+            <dd class="col-sm-8" style="color:var(--c-gold); font-weight:600;">@(Model.EquipmentInfo?.UnitPrice?.ToString("N0") ?? "0") ₫ / thiết bị</dd>
+            
             <dt class="col-sm-4" style="color:var(--text-2);">Số lượng cần thuê:</dt>
             <dd class="col-sm-8" style="color:#f87171; font-weight:700;">@Model.RequestedQuantity</dd>
         </dl>
@@ -29,7 +32,8 @@
 
     <form method="post">
         <input type="hidden" asp-for="RequestedQuantity" />
-
+        <input type="hidden" asp-for="RentalRequest.EventId" />
+        <input type="hidden" name="equipmentId" value="@Model.EquipmentInfo?.EquipmentId" />
         <div class="form-section">
             <h3 class="section-title">Chi tiết yêu cầu</h3>
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>

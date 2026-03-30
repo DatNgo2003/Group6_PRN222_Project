@@ -83,12 +83,69 @@ namespace Group6_PRN222_Project.Pages.Organizer.FieldReports
             if (!SessionHelper.IsOrganizer(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
                 return RedirectToPage("/Admin/Login");
 
-            var report = await _context.FieldReports.FindAsync(reportId);
+            var report = await _context.FieldReports
+                .Include(r => r.Event)
+                .FirstOrDefaultAsync(r => r.ReportId == reportId);
+
             if (report != null)
             {
                 report.Status = "Approved";
+
+                // Automation for Equipment Rental Request
+                if (report.ReportType == "EquipmentRentalRequest" && !string.IsNullOrEmpty(report.Content))
+                {
+                    try 
+                    {
+                        // Regex to parse EquipmentId and Quantity
+                        var idMatch = System.Text.RegularExpressions.Regex.Match(report.Content, @"\(ID:(\d+)\)");
+                        var qtyMatch = System.Text.RegularExpressions.Regex.Match(report.Content, @"Số lượng cần thuê: (\d+)");
+
+                        if (idMatch.Success && qtyMatch.Success)
+                        {
+                            int equipId = int.Parse(idMatch.Groups[1].Value);
+                            int qty = int.Parse(qtyMatch.Groups[1].Value);
+
+                            // 1. Ensure a default Vendor exists
+                            var vendor = await _context.Vendors.FirstOrDefaultAsync() 
+                                         ?? new Vendor { VendorName = "Default Partner", Phone = "0123456789", Address = "Hà Nội", IsActive = true };
+                            if (vendor.VendorId == 0) {
+                                _context.Vendors.Add(vendor);
+                                await _context.SaveChangesAsync();
+                            }
+
+                            // 2. Create Outsource Rental record
+                            var outsource = new OutsourceRental
+                            {
+                                EventId = report.EventId,
+                                EquipmentId = equipId,
+                                VendorId = vendor.VendorId,
+                                RentQuantity = qty,
+                                ExpectedReturnDate = report.Event?.EndDate?.AddDays(1) ?? DateTime.Now.AddDays(7),
+                                Status = "Pending"
+                            };
+                            _context.OutsourceRentals.Add(outsource);
+
+                            // 3. Update EventEquipment status
+                            var evtEquip = await _context.EventEquipments
+                                .FirstOrDefaultAsync(ee => ee.EventId == report.EventId && ee.EquipmentId == equipId);
+                            
+                            if (evtEquip != null)
+                            {
+                                evtEquip.Status = "Approved";
+                                evtEquip.ApprovedQuantity = evtEquip.RequestedQuantity; 
+                                // Add to note
+                                evtEquip.Note = (evtEquip.Note ?? "") + $" [Approved via Report #{reportId}]";
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["Error"] = "Lỗi xử lý tự động: " + ex.Message;
+                    }
+                }
+
                 await _context.SaveChangesAsync();
-                TempData["Success"] = $"Báo cáo #{reportId} đã được duyệt.";
+                TempData["Success"] = $"Báo cáo #{reportId} đã được duyệt và hệ thống đã tự động tạo phiếu thuê ngoài.";
             }
             else
             {
