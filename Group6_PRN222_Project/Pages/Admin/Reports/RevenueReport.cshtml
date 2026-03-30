@@ -11,8 +11,6 @@
         if (v >= 1_000_000)     return (v / 1_000_000m).ToString("F0") + " tr";
         return v.ToString("N0");
     }
-    int maxAllocated = Model.Report.EventFinances.Any()
-        ? (int)Model.Report.EventFinances.Max(e => e.Allocated) : 1;
 }
 
 @section Styles {
@@ -45,9 +43,7 @@
     .kpi-sub   { font-size:.74rem; color:var(--text-3); margin-top:6px; }
 
     /* ── Budget status pills ── */
-    .budget-status {
-        display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;
-    }
+    .budget-status { display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
     .bs-pill {
         display:flex; align-items:center; gap:6px;
         padding:5px 12px; border-radius:20px; font-size:.78rem; font-weight:600;
@@ -76,16 +72,11 @@
     .fin-table tbody tr:hover { background:var(--row-hover); }
     .fin-table th.r, .fin-table td.r { text-align:right; }
 
-    .ev-name { font-size:.855rem; font-weight:600; color:var(--text-1); }
+    .ev-name   { font-size:.855rem; font-weight:600; color:var(--text-1); }
     .ev-status { font-size:.74rem; color:var(--text-3); margin-top:2px; display:flex; align-items:center; gap:4px; }
     .sdot { display:inline-block; width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 
-    .spent-wrap { display:flex; align-items:center; gap:8px; }
-    .spent-bar  { width:64px; height:5px; background:rgba(250,248,244,.07); border-radius:3px; overflow:hidden; flex-shrink:0; }
-    .spent-fill { height:100%; border-radius:3px; }
-    .spent-pct  { font-size:.76rem; font-family:var(--ff-mono); color:var(--text-3); }
-
-    .money { font-family:var(--ff-mono); font-size:.82rem; }
+    .money       { font-family:var(--ff-mono); font-size:.82rem; }
     .money-gold  { color:var(--c-gold); font-weight:600; }
     .money-green { color:#6ee7b7; }
     .money-red   { color:#f87171; }
@@ -107,7 +98,7 @@
 <div class="page-header">
     <div class="page-title">
         <h1>Báo cáo tài chính</h1>
-        <p class="subtitle">Ngân sách · Doanh thu · Hợp đồng · Marketing</p>
+        <p class="subtitle">Ngân sách · Doanh thu · Hợp đồng · Chi phí</p>
     </div>
 </div>
 
@@ -150,25 +141,22 @@
             }
         </div>
     </div>
-    <div class="kpi" style="--kc:#f87171">
-        <div class="kpi-label">Đã chi tiêu</div>
-        <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalSpent)</div>
-        <div class="kpi-sub">
-            @(Model.Report.TotalAllocated == 0 ? "0.0"
-              : Math.Round((double)(Model.Report.TotalSpent / Model.Report.TotalAllocated) * 100, 1).ToString("F1"))% ngân sách
-        </div>
-    </div>
     <div class="kpi" style="--kc:#6ee7b7">
         <div class="kpi-label">Lợi nhuận</div>
         <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalProfit)</div>
-        <div class="kpi-sub">từ Budgets được duyệt</div>
+        <div class="kpi-sub">Vé − Marketing − Logistics</div>
     </div>
     <div class="kpi" style="--kc:#93c5fd">
-        <div class="kpi-label">Hợp đồng · Vé · Mktg</div>
-        <div class="kpi-value" style="font-size:1.3rem">@VndShort(Model.Report.TotalContractValue)</div>
+        <div class="kpi-label">Doanh thu vé</div>
+        <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalTicketRevenue)</div>
+        <div class="kpi-sub">Vé đã thanh toán (Paid)</div>
+    </div>
+    <div class="kpi" style="--kc:#f87171">
+        <div class="kpi-label">Chi phí</div>
+        <div class="kpi-value" style="font-size:1.5rem">@VndShort(Model.Report.TotalMarketing + Model.Report.TotalLogistics)</div>
         <div class="kpi-sub">
-            Vé: @VndShort(Model.Report.TotalTicketRevenue) ·
-            Mktg: @VndShort(Model.Report.TotalAdSpend)
+            Marketing: @VndShort(Model.Report.TotalMarketing) ·
+            Logistics: @VndShort(Model.Report.TotalLogistics)
         </div>
     </div>
 </div>
@@ -194,11 +182,11 @@
                 <tr>
                     <th>Sự kiện</th>
                     <th class="r">Ngân sách</th>
-                    <th style="min-width:140px">Đã chi</th>
+                    <th class="r">Doanh thu vé</th>
+                    <th class="r">Chi marketing</th>
+                    <th class="r">Chi logistics</th>
                     <th class="r">Lợi nhuận</th>
                     <th class="r">Hợp đồng</th>
-                    <th class="r">Doanh thu vé</th>
-                    <th class="r">Chi mktg</th>
                     <th>Duyệt NS</th>
                 </tr>
             </thead>
@@ -212,9 +200,6 @@
                     var dotColor = ev.Status == "Completed" ? "#6ee7b7"
                                  : ev.Status == "Planning"  ? "var(--c-gold)"
                                  : "var(--text-3)";
-                    var barColor = ev.SpentRate > 100 ? "#f87171"
-                                 : ev.SpentRate >  80 ? "var(--c-gold)"
-                                 : "#6ee7b7";
                     var apClass  = ev.ApprovalStatus == "Approved" ? "ap-approved"
                                  : ev.ApprovalStatus == "Pending"  ? "ap-pending"
                                  : ev.ApprovalStatus == "Rejected" ? "ap-rejected"
@@ -230,19 +215,11 @@
                             </div>
                         </td>
                         <td class="r money money-gold">@Vnd(ev.Allocated)</td>
-                        <td>
-                            <div class="spent-wrap">
-                                <div class="spent-bar">
-                                    <div class="spent-fill" style="width:@(Math.Min((int)ev.SpentRate,100))%;background:@barColor"></div>
-                                </div>
-                                <span class="spent-pct">@ev.SpentRate.ToString("F0")%</span>
-                                <span class="money money-dim" style="font-size:.78rem">@Vnd(ev.Spent)</span>
-                            </div>
-                        </td>
+                        <td class="r money money-dim">@Vnd(ev.TicketRevenue)</td>
+                        <td class="r money money-dim">@Vnd(ev.Marketing)</td>
+                        <td class="r money money-dim">@Vnd(ev.Logistics)</td>
                         <td class="r money @profitClass">@Vnd(ev.Profit)</td>
                         <td class="r money money-dim">@Vnd(ev.ContractValue)</td>
-                        <td class="r money money-dim">@Vnd(ev.TicketRevenue)</td>
-                        <td class="r money money-dim">@Vnd(ev.AdSpend)</td>
                         <td><span class="approval-badge @apClass">@ev.ApprovalStatus</span></td>
                     </tr>
                 }
@@ -258,92 +235,42 @@
     const gridColor = 'rgba(250,248,244,.05)';
     const tickColor = 'rgba(250,248,244,.35)';
 
-    // ── Overview grouped bar: Ngân sách / Đã chi / Lợi nhuận / Hợp đồng / Doanh thu vé / Chi marketing ──
     var oCanvas = document.getElementById('overviewChart');
     if (!oCanvas) return;
 
     var labels    = [@Html.Raw(string.Join(",", Model.Report.EventFinances.Select(e => $"\"{e.EventName}\"")))];
     var allocated = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Allocated))];
-    var spent     = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Spent))];
+    var ticket    = [@string.Join(",", Model.Report.EventFinances.Select(e => e.TicketRevenue))];
+    var marketing = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Marketing))];
+    var logistics = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Logistics))];
     var profit    = [@string.Join(",", Model.Report.EventFinances.Select(e => e.Profit))];
     var contract  = [@string.Join(",", Model.Report.EventFinances.Select(e => e.ContractValue))];
-    var ticket    = [@string.Join(",", Model.Report.EventFinances.Select(e => e.TicketRevenue))];
-    var adspend   = [@string.Join(",", Model.Report.EventFinances.Select(e => e.AdSpend))];
 
     new Chart(oCanvas, {
         type: 'bar',
         data: {
             labels,
             datasets: [
-                {
-                    label: 'Ngân sách',
-                    data: allocated,
-                    backgroundColor: 'rgba(184,151,90,0.20)',
-                    borderColor: 'rgba(184,151,90,0.70)',
-                    borderWidth: 1, borderRadius: 4
-                },
-                {
-                    label: 'Đã chi',
-                    data: spent,
-                    backgroundColor: 'rgba(248,113,113,0.20)',
-                    borderColor: 'rgba(248,113,113,0.65)',
-                    borderWidth: 1, borderRadius: 4
-                },
-                {
-                    label: 'Lợi nhuận',
-                    data: profit,
-                    backgroundColor: 'rgba(110,231,183,0.20)',
-                    borderColor: 'rgba(110,231,183,0.65)',
-                    borderWidth: 1, borderRadius: 4
-                },
-                {
-                    label: 'Hợp đồng',
-                    data: contract,
-                    backgroundColor: 'rgba(147,197,253,0.20)',
-                    borderColor: 'rgba(147,197,253,0.65)',
-                    borderWidth: 1, borderRadius: 4
-                },
-                {
-                    label: 'Doanh thu vé',
-                    data: ticket,
-                    backgroundColor: 'rgba(196,181,253,0.20)',
-                    borderColor: 'rgba(196,181,253,0.65)',
-                    borderWidth: 1, borderRadius: 4
-                },
-                {
-                    label: 'Chi marketing',
-                    data: adspend,
-                    backgroundColor: 'rgba(253,186,116,0.20)',
-                    borderColor: 'rgba(253,186,116,0.65)',
-                    borderWidth: 1, borderRadius: 4
-                }
+                { label: 'Ngân sách',      data: allocated, backgroundColor: 'rgba(184,151,90,0.20)',  borderColor: 'rgba(184,151,90,0.70)',  borderWidth:1, borderRadius:4 },
+                { label: 'Doanh thu vé',   data: ticket,    backgroundColor: 'rgba(147,197,253,0.20)', borderColor: 'rgba(147,197,253,0.65)', borderWidth:1, borderRadius:4 },
+                { label: 'Chi marketing',  data: marketing, backgroundColor: 'rgba(253,186,116,0.20)', borderColor: 'rgba(253,186,116,0.65)', borderWidth:1, borderRadius:4 },
+                { label: 'Chi logistics',  data: logistics, backgroundColor: 'rgba(248,113,113,0.20)', borderColor: 'rgba(248,113,113,0.65)', borderWidth:1, borderRadius:4 },
+                { label: 'Lợi nhuận',     data: profit,    backgroundColor: 'rgba(110,231,183,0.20)', borderColor: 'rgba(110,231,183,0.65)', borderWidth:1, borderRadius:4 },
+                { label: 'Hợp đồng',      data: contract,  backgroundColor: 'rgba(196,181,253,0.20)', borderColor: 'rgba(196,181,253,0.65)', borderWidth:1, borderRadius:4 },
             ]
         },
         options: {
             responsive: true,
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    position: 'top',
-                    labels: { color: 'rgba(250,248,244,.55)', font: { size: 11 }, padding: 16 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => ' ' + ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' ₫'
-                    }
-                }
+                legend: { position: 'top', labels: { color: 'rgba(250,248,244,.55)', font: { size: 11 }, padding: 16 } },
+                tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' ₫' } }
             },
             scales: {
-                x: {
-                    ticks: { color: tickColor, font: { size: 11 } },
-                    grid:  { color: gridColor }
-                },
+                x: { ticks: { color: tickColor, font: { size: 11 } }, grid: { color: gridColor } },
                 y: {
                     beginAtZero: true,
-                    ticks: {
-                        color: tickColor, font: { size: 11 },
-                        callback: v => v === 0 ? '0' : (v / 1_000_000).toFixed(0) + 'M'
-                    },
+                    ticks: { color: tickColor, font: { size: 11 }, callback: v => v === 0 ? '0' : (v / 1_000_000).toFixed(0) + 'M' },
                     grid: { color: gridColor }
                 }
             }

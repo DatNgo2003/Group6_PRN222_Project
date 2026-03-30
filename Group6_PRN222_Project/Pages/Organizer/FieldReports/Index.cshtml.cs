@@ -29,6 +29,8 @@ namespace Group6_PRN222_Project.Pages.Organizer.FieldReports
 
         public Dictionary<int, MarketingReportDetailVm> MarketingDetails { get; set; } = new();
 
+        public decimal TotalCost { get; set; }
+
         public async System.Threading.Tasks.Task<IActionResult> OnGetAsync()
         {
             if (!SessionHelper.IsOrganizer(HttpContext.Session) && !SessionHelper.IsAdmin(HttpContext.Session))
@@ -46,6 +48,8 @@ namespace Group6_PRN222_Project.Pages.Organizer.FieldReports
                 query = query.Where(r => r.EventId == selectedId);
 
             Reports = await query.OrderByDescending(r => r.ReportTime).ToListAsync();
+
+            TotalCost = Reports.Where(r => r.EstimatePrice.HasValue).Sum(r => (decimal)r.EstimatePrice!.Value);
 
             var marketing = Reports.Where(r => r.ReportType == "Marketing").ToList();
             var allTaskIds = marketing
