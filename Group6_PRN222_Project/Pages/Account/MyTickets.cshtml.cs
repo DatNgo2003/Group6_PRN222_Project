@@ -1,4 +1,4 @@
-using Group6_PRN222_Project.Models;
+ï»¿using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -24,25 +24,25 @@ namespace Group6_PRN222_Project.Pages.Account
                 return RedirectToPage("/Account/Login",
                     new { returnUrl = "/Account/MyTickets" });
 
-            // Ph?i là Participant
+            // Ph?i lÃ  Participant
             var role = HttpContext.Session.GetString("role") ?? "";
             if (role != "Participant")
             {
-                TempData["Error"] = "Trang này ch? dành cho tài kho?n Participant.";
+                TempData["Error"] = "Trang nÃ y ch? dÃ nh cho tÃ i kho?n Participant.";
                 return RedirectToPage("/Index");
             }
 
-            // Tìm Participant theo email session
+            // TÃ¬m Participant theo email session
             CurrentParticipant = await _db.Participants
     .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (CurrentParticipant == null)
             {
-                TempData["Error"] = "Không tìm th?y thông tin ng??i tham d?.";
+                TempData["Error"] = "KhÃ´ng tÃ¬m th?y thÃ´ng tin ng??i tham d?.";
                 return RedirectToPage("/Index");
             }
 
-            // Query vé
+            // Query vÃ©
             var query = _db.Tickets
                 .Include(t => t.Event)
                     .ThenInclude(e => e!.Organizer)
@@ -58,46 +58,39 @@ namespace Group6_PRN222_Project.Pages.Account
             return Page();
         }
 
-        // POST: H?y vé
+        // POST: H?y vÃ©
+        // POST: Há»§y vÃ©
         public async Task<IActionResult> OnPostCancelAsync(int ticketId)
         {
             var userId = HttpContext.Session.GetInt32("userid");
             if (!userId.HasValue)
                 return RedirectToPage("/Account/Login");
 
-            // Tìm Participant c?a user hi?n t?i
+            // TÃ¬m Participant cá»§a user hiá»‡n táº¡i
             var participant = await _db.Participants
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (participant == null)
             {
-                TempData["Error"] = "Không tìm th?y thông tin ng??i tham d?.";
+                TempData["Error"] = "KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin ngÆ°á»i tham dá»±.";
                 return RedirectToPage();
             }
 
-            // Tìm vé — ph?i thu?c v? Participant này
+            // TÃ¬m vÃ© â€” pháº£i thuá»™c vá» Participant nÃ y
             var ticket = await _db.Tickets
-                .Include(t => t.Event)
                 .FirstOrDefaultAsync(t => t.TicketId == ticketId
                                         && t.ParticipantId == participant.ParticipantId);
 
             if (ticket == null)
             {
-                TempData["Error"] = "Không tìm th?y vé.";
+                TempData["Error"] = "KhÃ´ng tÃ¬m tháº¥y vÃ©.";
                 return RedirectToPage();
             }
 
-            // Ch? h?y ???c vé Valid và s? ki?n ch?a di?n ra
-            if (ticket.Status != "Valid")
+            // Chá»‰ há»§y Ä‘Æ°á»£c vÃ© chÆ°a thanh toÃ¡n
+            if (ticket.PaymentStatus == "Paid")
             {
-                TempData["Error"] = "Ch? có th? h?y vé ?ang ? tr?ng thái Valid.";
-                return RedirectToPage();
-            }
-
-            if (ticket.Event?.StartDate.HasValue == true
-                && ticket.Event.StartDate.Value <= DateTime.Now)
-            {
-                TempData["Error"] = "Không th? h?y vé c?a s? ki?n ?ã b?t ??u ho?c k?t thúc.";
+                TempData["Error"] = "KhÃ´ng thá»ƒ há»§y vÃ© Ä‘Ã£ thanh toÃ¡n.";
                 return RedirectToPage();
             }
 
@@ -114,7 +107,7 @@ namespace Group6_PRN222_Project.Pages.Account
 
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = "H?y vé thành công.";
+            TempData["Success"] = "Há»§y vÃ© thÃ nh cÃ´ng.";
             return RedirectToPage();
         }
     }

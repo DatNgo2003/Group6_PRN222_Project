@@ -238,29 +238,6 @@
 .tickets-empty__icon  { font-size: 56px; margin-bottom: 16px; }
 .tickets-empty__title { font-family: var(--ff-display); font-size: 26px; font-weight: 600; color: var(--c-ink); margin-bottom: 8px; }
 
-/* Confirm modal */
-.confirm-overlay {
-    position: fixed; inset: 0;
-    background: rgba(26,23,20,.5);
-    backdrop-filter: blur(4px);
-    z-index: 500;
-    display: flex; align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none; transition: opacity .2s;
-}
-.confirm-overlay.open { opacity: 1; pointer-events: all; }
-.confirm-box {
-    background: #fff; border-radius: var(--radius-xl);
-    padding: 36px; max-width: 400px; width: 90%;
-    box-shadow: var(--shadow-lg);
-    transform: scale(.97); transition: transform .2s;
-    text-align: center;
-}
-.confirm-overlay.open .confirm-box { transform: scale(1); }
-.confirm-box__icon  { font-size: 44px; margin-bottom: 12px; }
-.confirm-box__title { font-family: var(--ff-display); font-size: 22px; font-weight: 600; margin-bottom: 8px; }
-.confirm-box__desc  { font-size: 14px; color: var(--c-ink-60); margin-bottom: 24px; line-height: 1.7; }
-.confirm-box__btns  { display: flex; gap: 10px; justify-content: center; }
-
 @@media (max-width: 700px) {
     .tickets-grid { grid-template-columns: 1fr; }
     .ticket-card { grid-template-columns: 1fr; }
@@ -417,14 +394,14 @@
                                     Xem chi tiết ▾
                                 </button>
 
-                                @if (isValid && ev?.StartDate > DateTime.Now)
+                                @if (ticket.PaymentStatus != "Paid" && ticket.Status != "Cancelled")
                                 {
-                                    <button class="btn-cancel"
-        data-id="@ticket.TicketId"
-        data-name="@ev?.EventName"
-        onclick="confirmCancel(this)">
-    Hủy vé
-</button>
+                                    <form method="post" asp-page-handler="Cancel"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Bạn có chắc muốn hủy vé này không?')">
+                                        <input type="hidden" name="ticketId" value="@ticket.TicketId" />
+                                        <button type="submit" class="btn-cancel">Hủy vé</button>
+                                    </form>
                                 }
                             </div>
                         </div>
@@ -509,27 +486,6 @@
     </div>
 </div>
 
-<!-- Confirm Cancel Modal -->
-<div class="confirm-overlay" id="confirmOverlay">
-    <div class="confirm-box">
-        <div class="confirm-box__icon">⚠️</div>
-        <div class="confirm-box__title">Xác nhận hủy vé</div>
-        <div class="confirm-box__desc" id="confirmDesc">
-            Bạn có chắc muốn hủy vé này không? Hành động này không thể hoàn tác.
-        </div>
-        <div class="confirm-box__btns">
-            <button class="btn btn-ghost" onclick="closeConfirm()">Giữ lại</button>
-            <form method="post" asp-page-handler="Cancel" id="cancelForm" style="display:inline">
-                <input type="hidden" name="ticketId" id="cancelTicketId" />
-                <button type="submit" class="btn btn-primary"
-                        style="background:var(--c-danger)!important;border-color:var(--c-danger)!important">
-                    Hủy vé
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
@@ -572,28 +528,6 @@ function toggleDetail(id) {
     var isOpen = panel.classList.toggle('open');
     btn.textContent = isOpen ? 'Ẩn chi tiết ▴' : 'Xem chi tiết ▾';
 }
-
-// ── Xác nhận hủy vé ─────────────────────────────────────
-function confirmCancel(ticketId, eventName) {
-    document.getElementById('cancelTicketId').value = ticketId;
-    document.getElementById('confirmDesc').textContent =
-        'Bạn có chắc muốn hủy vé sự kiện "' + eventName + '"? Hành động này không thể hoàn tác.';
-    document.getElementById('confirmOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeConfirm() {
-    document.getElementById('confirmOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-document.getElementById('confirmOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeConfirm();
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeConfirm();
-});
 
 // ── Tải QR ───────────────────────────────────────────────
 function downloadQR(ticketId) {
