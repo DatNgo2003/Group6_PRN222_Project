@@ -90,7 +90,7 @@ namespace Project_PRN222.Services
             // Chỉ lấy FieldReports có ReportType là Marketing hoặc Logistics
             var fieldReports = await _db.FieldReports
                 .Where(f => f.EventId != null && eventIds.Contains(f.EventId.Value)
-                         && (f.ReportType == "Marketing" || f.ReportType == "Logistics"))
+                         && (f.ReportType == "Marketing" || f.ReportType == "EquipmentRentalRequest"))
                 .AsNoTracking().ToListAsync();
 
             // ── Tính tổng ─────────────────────────────────
@@ -100,7 +100,7 @@ namespace Project_PRN222.Services
                 .Where(f => f.ReportType == "Marketing")
                 .Sum(f => (decimal)(f.EstimatePrice ?? 0));
             var totalLogistics = fieldReports
-                .Where(f => f.ReportType == "Logistics")
+                .Where(f => f.ReportType == "EquipmentRentalRequest")
                 .Sum(f => (decimal)(f.EstimatePrice ?? 0));
 
             // ── Summary ───────────────────────────────────
@@ -129,7 +129,7 @@ namespace Project_PRN222.Services
                     .Where(f => f.EventId == ev.EventId && f.ReportType == "Marketing")
                     .Sum(f => (decimal)(f.EstimatePrice ?? 0));
                 var evLogistics = fieldReports
-                    .Where(f => f.EventId == ev.EventId && f.ReportType == "Logistics")
+                    .Where(f => f.EventId == ev.EventId && f.ReportType == "EquipmentRentalRequest")
                     .Sum(f => (decimal)(f.EstimatePrice ?? 0));
 
                 return new EventFinanceDto

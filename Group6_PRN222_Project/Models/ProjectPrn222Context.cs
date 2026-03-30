@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -206,7 +206,7 @@ public partial class ProjectPrn222Context : DbContext
             entity.Property(e => e.ReportType).HasMaxLength(50);
             entity.Property(e => e.EstimatePrice)
                 .HasColumnName("EstimatePrice")
-                .HasConversion<double>();
+                .HasColumnType("decimal(18, 2)"); // ✅ Xóa .HasConversion<double>() và thêm dòng này
             entity.Property(e => e.StaffId).HasColumnName("StaffID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
