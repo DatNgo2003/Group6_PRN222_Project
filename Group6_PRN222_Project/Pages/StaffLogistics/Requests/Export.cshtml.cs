@@ -47,6 +47,7 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
         {
             var req = await _context.EventEquipments
                 .Include(e => e.Equipment)
+                .Include(e => e.Event)
                 .FirstOrDefaultAsync(e => e.EventId == RequestDetails.EventId && e.EquipmentId == RequestDetails.EquipmentId);
 
             if (req == null || req.Status != "Approved") return NotFound();
@@ -58,6 +59,14 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
                 return Page();
             }
 
+            if (ExportQty > req.Equipment.AvailableQuantity)
+            {
+                ModelState.AddModelError(string.Empty, $"Tồn kho vật lý không đủ. Hiện chỉ còn {req.Equipment.AvailableQuantity} trong kho.");
+                RequestDetails = req;
+                return Page();
+            }
+
+            req.Equipment.AvailableQuantity -= ExportQty;
             req.ExportedQuantity = ExportQty;
             req.Status = "Exported";
 

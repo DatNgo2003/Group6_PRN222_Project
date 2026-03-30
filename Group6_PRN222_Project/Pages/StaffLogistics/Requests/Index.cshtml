@@ -19,6 +19,8 @@
                     <th>Sự kiện</th>
                     <th>Thiết bị</th>
                     <th>SL Yêu cầu</th>
+                    <th>Thời gian bắt đầu</th>
+                    <th>Thời gian kết thúc</th>
                     <th>Tồn kho khả dụng</th>
                     <th>SL Đã Duyệt</th>
                     <th>Trạng thái</th>
@@ -32,13 +34,16 @@
                         <td><strong>@item.Event.EventName</strong></td>
                         <td>@item.Equipment.EquipmentName</td>
                         <td style="color:var(--text-3)">@item.RequestedQuantity</td>
+                        <td style="font-size: 0.8rem; color: var(--text-2);">@(item.Event.StartDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</td>
+                        <td style="font-size: 0.8rem; color: var(--text-2);">@(item.Event.EndDate?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</td>
                         <td>
                             @{ 
-                                var avaiStock = item.Equipment.AvailableQuantity;
+                                var key = $"{item.EventId}-{item.EquipmentId}";
+                                var avaiStock = Model.DynamicAvailabilities.ContainsKey(key) ? Model.DynamicAvailabilities[key] : item.Equipment.AvailableQuantity;
                                 var isSufficient = avaiStock >= item.RequestedQuantity;
                                 var colorClass = isSufficient ? "color:#6ee7b7" : "color:#f87171";
                             }
-                            <span style="@colorClass; font-weight:600">@avaiStock</span>
+                            <span style="@colorClass; font-weight:600" title="Tồn kho khả dụng trong thời gian diễn ra sự kiện">@avaiStock</span>
                         </td>
                         <td style="color:var(--c-gold)">@item.ApprovedQuantity</td>
                         <td>

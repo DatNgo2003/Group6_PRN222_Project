@@ -4,16 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project_PRN222.Helpers;
+using Project_PRN222.Services;
 
 namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
 {
     public class ProcessModel : PageModel
     {
         private readonly ProjectPrn222Context _context;
+        private readonly IEquipmentService _equipmentService;
 
-        public ProcessModel(ProjectPrn222Context context)
+        public ProcessModel(ProjectPrn222Context context, IEquipmentService equipmentService)
         {
             _context = context;
+            _equipmentService = equipmentService;
         }
 
         [BindProperty]
@@ -21,6 +24,8 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
 
         [BindProperty]
         public int ApproveQty { get; set; }
+
+        public int DynamicAvailableQuantity { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int eventId, int equipmentId)
         {
@@ -39,6 +44,13 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
 
             RequestDetails = req;
             ApproveQty = req.RequestedQuantity; // Default propose to approve all
+
+            DynamicAvailableQuantity = await _equipmentService.GetAvailableQuantityAsync(
+                req.EquipmentId, 
+                req.Event.StartDate ?? DateTime.Now, 
+                req.Event.EndDate ?? DateTime.Now.AddHours(1)
+            );
+
             return Page();
         }
 
@@ -46,6 +58,7 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
         {
             var req = await _context.EventEquipments
                 .Include(e => e.Equipment)
+                .Include(e => e.Event)
                 .FirstOrDefaultAsync(e => e.EventId == RequestDetails.EventId && e.EquipmentId == RequestDetails.EquipmentId);
 
             if (req == null || req.Status != "Pending") return NotFound();
@@ -57,15 +70,21 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Requests
                 return Page();
             }
 
-            if (ApproveQty > req.Equipment.AvailableQuantity)
+            var dynamicAvailable = await _equipmentService.GetAvailableQuantityAsync(
+                req.EquipmentId, 
+                req.Event.StartDate ?? DateTime.Now, 
+                req.Event.EndDate ?? DateTime.Now.AddHours(1)
+            );
+
+            if (ApproveQty > dynamicAvailable)
             {
-                ModelState.AddModelError(string.Empty, "Tồn kho khả dụng không đủ. Hãy tạo phiếu thuê ngoài.");
+                ModelState.AddModelError(string.Empty, $"Tồn kho khả dụng cho thời gian này không đủ (Chỉ còn {dynamicAvailable}). Hãy tạo phiếu thuê ngoài.");
                 RequestDetails = req;
                 return Page();
             }
 
-            // Deduct AvailableQuantity
-            req.Equipment.AvailableQuantity -= ApproveQty;
+            // Physical AvailableQuantity is NOT deducted on approval, only on Export (Xuất kho).
+            // Approval only confirms the 'Reserved' quantity for the schedule.
             req.ApprovedQuantity = ApproveQty;
             
             if (ApproveQty == req.RequestedQuantity)

@@ -50,6 +50,7 @@ namespace Group6_PRN222_Project.Pages.StaffLogistics.Returns
         {
             var req = await _context.EventEquipments
                 .Include(e => e.Equipment)
+                .Include(e => e.Event)
                 .FirstOrDefaultAsync(e => e.EventId == RequestDetails.EventId && e.EquipmentId == RequestDetails.EquipmentId);
 
             if (req == null || req.Status != "Exported") return NotFound();

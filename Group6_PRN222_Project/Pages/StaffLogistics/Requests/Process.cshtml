@@ -27,10 +27,10 @@
             
             <dt class="col-sm-3" style="color:var(--text-2);">Tồn kho (Available):</dt>
             @{
-                var gap = Model.RequestDetails.RequestedQuantity - Model.RequestDetails.Equipment.AvailableQuantity;
+                var gap = Model.RequestDetails.RequestedQuantity - Model.DynamicAvailableQuantity;
                 var color = gap > 0 ? "#f87171" : "#6ee7b7";
             }
-            <dd class="col-sm-9" style="color:@color; font-weight:700;">@Model.RequestDetails.Equipment.AvailableQuantity</dd>
+            <dd class="col-sm-9" style="color:@color; font-weight:700;">@Model.DynamicAvailableQuantity</dd>
 
             @if (gap > 0)
             {
@@ -61,8 +61,8 @@
         <div class="form-actions">
             @if (gap > 0)
             {
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='/StaffLogistics/OutsourceRentals/Create?eventId=@Model.RequestDetails.EventId&equipmentId=@Model.RequestDetails.EquipmentId&gap=@gap'">
-                    + Tạo phiếu thuê ngoài
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/StaffLogistics/Requests/RequestRental?eventId=@Model.RequestDetails.EventId&equipmentId=@Model.RequestDetails.EquipmentId&gap=@gap'">
+                    + Yêu cầu thuê ngoài
                 </button>
             }
             <button type="submit" class="btn btn-primary" style="background:#6ee7b7; color:#064e3b; margin-left:auto;">

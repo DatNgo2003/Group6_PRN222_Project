@@ -26,6 +26,8 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
         [BindProperty] public int EventId { get; set; }
         [BindProperty] public string ReportType { get; set; } = "Logistics";
         [BindProperty] public string ReportContent { get; set; } = "";
+        [BindProperty] public int DefectiveCount { get; set; }
+        [BindProperty] public int LostCount { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string? reportType)
         {
@@ -90,12 +92,17 @@ namespace Project_PRN222.Pages.StaffLogistics.Reports
             else
                 ReportType = "Logistics";
 
+            string finalContent = "";
+            if (DefectiveCount > 0) finalContent += $"[Hỏng: {DefectiveCount}] ";
+            if (LostCount > 0) finalContent += $"[Mất: {LostCount}] ";
+            finalContent += ReportContent;
+
             var report = new FieldReport
             {
                 EventId = EventId,
                 StaffId = actorId,
                 ReportType = ReportType,
-                Content = ReportContent,
+                Content = finalContent,
                 Status = "Submitted"
             };
 

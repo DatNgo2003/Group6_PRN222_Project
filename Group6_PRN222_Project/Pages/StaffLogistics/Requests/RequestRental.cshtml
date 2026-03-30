@@ -1,0 +1,60 @@
+@page "{eventId:int}/{equipmentId:int}"
+@model Group6_PRN222_Project.Pages.StaffLogistics.Requests.RequestRentalModel
+@{
+    ViewData["Title"] = "Yêu cầu thuê ngoài";
+}
+
+<div class="page-header">
+    <div class="page-title">
+        <h1>Yêu cầu thuê ngoài thiết bị</h1>
+        <p class="subtitle">Gửi đề xuất thuê thiết bị để Organizer phê duyệt ngân sách</p>
+    </div>
+    <a asp-page="./Process" asp-route-eventId="@Model.EventInfo?.EventId" asp-route-equipmentId="@Model.EquipmentInfo?.EquipmentId" class="back-link">← Quay lại Xết duyệt</a>
+</div>
+
+<div class="form-card">
+    <div class="form-section">
+        <h3 class="section-title">Thông tin thiết bị thiếu hụt</h3>
+        <dl class="row mb-0 mt-3" style="font-size:.875rem;">
+            <dt class="col-sm-4" style="color:var(--text-2);">Sự kiện:</dt>
+            <dd class="col-sm-8" style="font-weight:600;">@Model.EventInfo?.EventName</dd>
+
+            <dt class="col-sm-4" style="color:var(--text-2);">Thiết bị cần thuê:</dt>
+            <dd class="col-sm-8" style="font-weight:600;">@Model.EquipmentInfo?.EquipmentName</dd>
+            
+            <dt class="col-sm-4" style="color:var(--text-2);">Số lượng cần thuê:</dt>
+            <dd class="col-sm-8" style="color:#f87171; font-weight:700;">@Model.RequestedQuantity</dd>
+        </dl>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="RequestedQuantity" />
+
+        <div class="form-section">
+            <h3 class="section-title">Chi tiết yêu cầu</h3>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="RentalRequest.EstimatePrice">Giá thuê dự kiến (VNĐ / Toàn bộ thời gian)</label>
+                <input asp-for="RentalRequest.EstimatePrice" class="form-control" type="number" min="0" step="1000" required placeholder="Nhập tổng chi phí dự kiến" />
+                <span class="field-error" asp-validation-for="RentalRequest.EstimatePrice"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="RentalRequest.Content">Lý do / Ghi chú thêm</label>
+                <textarea asp-for="RentalRequest.Content" class="form-control" rows="3" placeholder="Nhập lý do thuê ngoài, thông tin nhà cung cấp dự kiến (nếu có)..."></textarea>
+                <span class="field-error" asp-validation-for="RentalRequest.Content"></span>
+            </div>
+
+            <div style="font-size:.8rem; color:var(--text-3); margin-top:10px;">
+                * Yêu cầu này sẽ được gửi dưới dạng <strong>Báo cáo hiện trường (Field Report)</strong> đến Organizer của sự kiện để xét duyệt.
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" style="background:#f59e0b; color:#fff; border:none; margin-left:auto;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                Gửi yêu cầu thuê
+            </button>
+        </div>
+    </form>
+</div>

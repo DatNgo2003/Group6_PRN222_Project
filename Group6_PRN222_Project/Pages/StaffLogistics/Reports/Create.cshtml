@@ -77,9 +77,19 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label asp-for="DefectiveCount">Số lượng thiết bị hỏng (nếu có)</label>
+                    <input asp-for="DefectiveCount" class="form-control" type="number" min="0" placeholder="0" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="LostCount">Số lượng thiết bị mất (nếu có)</label>
+                    <input asp-for="LostCount" class="form-control" type="number" min="0" placeholder="0" />
+                </div>
+
                 <div class="form-group" style="grid-column: 1 / -1;">
                     <label asp-for="ReportContent">Nội dung báo cáo <span class="required">*</span></label>
-                    <textarea asp-for="ReportContent" class="form-control" rows="8" placeholder="Ví dụ: tình hình thiết bị, checklist, issue phát sinh..."></textarea>
+                    <textarea asp-for="ReportContent" class="form-control" rows="6" placeholder="Mô tả chi tiết tình hình thực địa..."></textarea>
                     <div style="font-size:.75rem; color:var(--text-3); margin-top:4px;">Ghi rõ thông tin quan trọng để Admin/Organizer theo dõi.</div>
                 </div>
             </div>

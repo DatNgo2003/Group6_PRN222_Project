@@ -92,6 +92,7 @@ namespace Project_PRN222.Services
         Task<Equipment>       CreateAsync(Equipment equipment);
         Task                  UpdateAsync(Equipment equipment);
         Task                  DeleteAsync(int id);
+        Task<int>             GetAvailableQuantityAsync(int equipmentId, DateTime start, DateTime end, int? excludeEventId = null);
     }
 
     public class EquipmentService : IEquipmentService
@@ -125,6 +126,30 @@ namespace Project_PRN222.Services
         {
             var e = await _db.Equipments.FindAsync(id);
             if (e != null) { _db.Equipments.Remove(e); await _db.SaveChangesAsync(); }
+        }
+
+        public async Task<int> GetAvailableQuantityAsync(int equipmentId, DateTime start, DateTime end, int? excludeEventId = null)
+        {
+            var equipment = await _db.Equipments.FindAsync(equipmentId);
+            if (equipment == null) return 0;
+
+            // Capacity = TotalOwned - Defective 
+            int totalCapacity = equipment.TotalOwned - equipment.DefectiveQuantity;
+
+            // Find all approved EventEquipments that overlap with the given time range
+            // Overlap logic: Start1 < End2 AND End1 > Start2
+            var reserved = await _db.EventEquipments
+                .Include(ee => ee.Event)
+                .Where(ee => ee.EquipmentId == equipmentId 
+                             && ee.Status == "Approved"
+                             && ee.Event.StartDate.HasValue 
+                             && ee.Event.EndDate.HasValue
+                             && ee.Event.StartDate < end 
+                             && ee.Event.EndDate > start)
+                .Where(ee => excludeEventId == null || ee.EventId != excludeEventId)
+                .SumAsync(ee => ee.ApprovedQuantity);
+
+            return Math.Max(0, totalCapacity - reserved);
         }
     }
 }
