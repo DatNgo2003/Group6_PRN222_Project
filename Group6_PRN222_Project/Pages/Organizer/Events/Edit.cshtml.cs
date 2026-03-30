@@ -34,7 +34,7 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
             }
             Event = eventToEdit;
             ViewData["OrganizerId"] = new SelectList(_context.Users, "UserId", "FullName");
-            var statuses = new[] { "Planning", "Ongoing", "Completed", "Cancelled" };
+            var statuses = new[] { "Planning", "Open", "Completed", "Cancelled" };
             ViewData["StatusList"] = new SelectList(statuses);
             return Page();
         }
@@ -46,7 +46,7 @@ namespace Group6_PRN222_Project.Pages.Organizer.Events
             {
                 ModelState.AddModelError(string.Empty, "Ngày bắt đầu phải trước ngày kết thúc.");
                 ViewData["OrganizerId"] = new SelectList(_context.Users, "UserId", "FullName");
-                var statuses = new[] { "Planning", "Ongoing", "Completed", "Cancelled" };
+                var statuses = new[] { "Planning", "Open", "Completed", "Cancelled" };
                 ViewData["StatusList"] = new SelectList(statuses);
                 return Page();
             }

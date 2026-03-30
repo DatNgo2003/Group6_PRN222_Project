@@ -172,9 +172,9 @@ namespace Group6_PRN222_Project.Pages.Events
             var paymentStatus = paymentMethod switch
             {
                 "Direct" => "Pending",   // Trực tiếp → chờ tại quầy
-                "Transfer" => "Pending",   // Chuyển khoản → chờ xác nhận
+                "Transfer" => "Paid",   // Chuyển khoản → chờ xác nhận
                 "CreditCard" => "Paid",      // Thẻ → paid ngay
-                "ZaloPay" => "Paid",      // ZaloPay → paid ngay
+                "ZaloPay" => "Paid",      // ZaloPay → paid ngay    
                 _ => "Pending"
             };
 

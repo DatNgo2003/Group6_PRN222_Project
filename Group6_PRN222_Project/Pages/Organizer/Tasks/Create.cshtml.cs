@@ -1,4 +1,4 @@
-using Group6_PRN222_Project.Models;
+﻿using Group6_PRN222_Project.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -21,35 +21,28 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
         {
             ViewData["EventId"] = new SelectList(await _context.Events.ToListAsync(), "EventId", "EventName");
 
-            // Only show departments that have staff users
-            var staffDeptIds = await _context.Users
-                .Include(u => u.Role)
-                .Where(u => u.DepartmentId != null && u.Role != null && u.Role.RoleName.StartsWith("Staff"))
-                .Select(u => u.DepartmentId!.Value)
-                .Distinct()
-                .ToListAsync();
+            // Chỉ lấy department có ID = 2, 3, 4
             var departments = await _context.Departments
-                .Where(d => staffDeptIds.Contains(d.DepartmentId))
+                .Where(d => new[] { 2, 3, 4 }.Contains(d.DepartmentId))
                 .OrderBy(d => d.DepartmentName)
                 .ToListAsync();
+
             ViewData["DepartmentList"] = new SelectList(departments, "DepartmentId", "DepartmentName");
 
             var statuses = new[] { "To Do", "In Progress", "Done", "Completed" };
             ViewData["StatusList"] = new SelectList(statuses);
+
             return Page();
         }
 
         // AJAX: GET ?handler=StaffByDept&deptId=X
         public async Task<IActionResult> OnGetStaffByDeptAsync(int deptId)
         {
-            var staffRolePrefix = new[] { "Staff" };
             var staff = await _context.Users
-                .Include(u => u.Role)
-                .Where(u => u.DepartmentId == deptId
-                         && u.Role != null
-                         && u.Role.RoleName.StartsWith("Staff"))
+                .Where(u => u.DepartmentId == deptId && u.Status == "Active")
                 .Select(u => new { u.UserId, u.FullName })
                 .ToListAsync();
+
             return new JsonResult(staff);
         }
 

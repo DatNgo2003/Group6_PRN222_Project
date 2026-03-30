@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Group6_PRN222_Project.Pages.Organizer.Tasks
 {
@@ -31,21 +29,16 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
 
             Task = task;
 
-            ViewData["EventId"] = new SelectList(await _context.Events.ToListAsync(), "EventId", "EventName", task.EventId);
+            ViewData["EventId"] = new SelectList(
+                await _context.Events.ToListAsync(), "EventId", "EventName", task.EventId);
 
-            // Departments — only those with Staff users
-            var staffDeptIds = await _context.Users
-                .Include(u => u.Role)
-                .Where(u => u.DepartmentId != null && u.Role != null && u.Role.RoleName.StartsWith("Staff"))
-                .Select(u => u.DepartmentId!.Value)
-                .Distinct()
-                .ToListAsync();
+            // Chỉ lấy department có ID = 2, 3, 4
             var departments = await _context.Departments
-                .Where(d => staffDeptIds.Contains(d.DepartmentId))
+                .Where(d => new[] { 2, 3, 4 }.Contains(d.DepartmentId))
                 .OrderBy(d => d.DepartmentName)
                 .ToListAsync();
 
-            // Determine current department of the assigned staff (if any)
+            // Xác định department hiện tại của người được giao
             int? currentDeptId = null;
             if (task.AssignedTo.HasValue)
             {
@@ -54,24 +47,25 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
                 currentDeptId = assignedUser?.DepartmentId;
             }
 
-            ViewData["DepartmentList"] = new SelectList(departments, "DepartmentId", "DepartmentName", currentDeptId);
+            ViewData["DepartmentList"] = new SelectList(
+                departments, "DepartmentId", "DepartmentName", currentDeptId);
             ViewData["CurrentDeptId"] = currentDeptId;
 
-            // Pre-load staff of current department
+            // Pre-load nhân viên của department hiện tại
             List<User> staffUsers = new();
             if (currentDeptId.HasValue)
             {
                 staffUsers = await _context.Users
-                    .Include(u => u.Role)
                     .Where(u => u.DepartmentId == currentDeptId.Value
-                             && u.Role != null
-                             && u.Role.RoleName.StartsWith("Staff"))
+                             && u.Status == "Active")
                     .ToListAsync();
             }
-            ViewData["AssignedTo"] = new SelectList(staffUsers, "UserId", "FullName", task.AssignedTo);
+            ViewData["AssignedTo"] = new SelectList(
+                staffUsers, "UserId", "FullName", task.AssignedTo);
 
             var statuses = new[] { "To Do", "In Progress", "Done", "Completed" };
             ViewData["StatusList"] = new SelectList(statuses, task.Status);
+
             return Page();
         }
 
@@ -79,12 +73,10 @@ namespace Group6_PRN222_Project.Pages.Organizer.Tasks
         public async Task<IActionResult> OnGetStaffByDeptAsync(int deptId)
         {
             var staff = await _context.Users
-                .Include(u => u.Role)
-                .Where(u => u.DepartmentId == deptId
-                         && u.Role != null
-                         && u.Role.RoleName.StartsWith("Staff"))
+                .Where(u => u.DepartmentId == deptId && u.Status == "Active")
                 .Select(u => new { u.UserId, u.FullName })
                 .ToListAsync();
+
             return new JsonResult(staff);
         }
 

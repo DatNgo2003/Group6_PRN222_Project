@@ -84,9 +84,9 @@ namespace Group6_PRN222_Project.Pages.Admin
             {
                 InternalRoleResolver.Admin => RedirectToPage("/Admin/Reports/RevenueReport"),
                 InternalRoleResolver.Organizer => RedirectToPage("/Organizer/Dashboard"),
-                InternalRoleResolver.StaffSecurity => RedirectToPage("/Staff/StaffDashboard"),
-                InternalRoleResolver.StaffMkt => RedirectToPage("/Staff/StaffDashboard"),
-                InternalRoleResolver.StaffLogistics => RedirectToPage("/Staff/StaffDashboard"),
+                InternalRoleResolver.StaffSecurity => RedirectToPage("/StaffSecurity/Index"),
+                InternalRoleResolver.StaffMkt => RedirectToPage("/StaffMKT/Index"),
+                InternalRoleResolver.StaffLogistics => RedirectToPage("/StaffLogistics/Index"),
                 _ => RedirectToPage("/Index")
             };
         }

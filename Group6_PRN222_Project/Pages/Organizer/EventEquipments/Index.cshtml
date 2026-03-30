@@ -20,8 +20,7 @@
             <thead>
                 <tr>
                     <th>Requirement / Equipment</th>
-                    <th>Required Quantity</th>
-                    <th>Warehouse Stock</th>
+                    <th>Required Quantity</th>                    
                     <th>Status</th>
                     <th>Note</th>
                     <th>Actions</th>
@@ -33,14 +32,7 @@
                     <tr>
                         <td><strong>@Html.DisplayFor(modelItem => item.Equipment.EquipmentName)</strong></td>
                         <td style="color:var(--text-3)">@Html.DisplayFor(modelItem => item.Quantity)</td>
-                        <td>
-                            @{ 
-                                var totalStock = item.Equipment.TotalOwned;
-                                var isSufficient = totalStock >= item.Quantity;
-                                var colorClass = isSufficient ? "color:#6ee7b7" : "color:#f87171";
-                            }
-                            <span style="@colorClass; font-weight:600">@totalStock</span>
-                        </td>
+                        
                         <td>
                             @{
                                 var bc = item.Status == "Approved" ? "background:rgba(74,154,122,.12);color:#6ee7b7" :

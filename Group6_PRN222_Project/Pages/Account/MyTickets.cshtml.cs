@@ -65,9 +65,21 @@ namespace Group6_PRN222_Project.Pages.Account
             if (!userId.HasValue)
                 return RedirectToPage("/Account/Login");
 
+            // Tìm Participant c?a user hi?n t?i
+            var participant = await _db.Participants
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (participant == null)
+            {
+                TempData["Error"] = "Không tìm th?y thông tin ng??i tham d?.";
+                return RedirectToPage();
+            }
+
+            // Tìm vé — ph?i thu?c v? Participant này
             var ticket = await _db.Tickets
                 .Include(t => t.Event)
-                .FirstOrDefaultAsync(t => t.TicketId == ticketId);
+                .FirstOrDefaultAsync(t => t.TicketId == ticketId
+                                        && t.ParticipantId == participant.ParticipantId);
 
             if (ticket == null)
             {
