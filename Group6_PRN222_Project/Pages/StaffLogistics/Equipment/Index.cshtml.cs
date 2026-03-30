@@ -37,11 +37,7 @@ namespace Project_PRN222.Pages.StaffLogistics.Equipment
 
             var query = _db.Equipments.AsNoTracking();
 
-            if (!string.IsNullOrWhiteSpace(FilterStatus) &&
-                !string.Equals(FilterStatus, "All", StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.Where(e => e.Status == FilterStatus);
-            }
+
 
             Equipments = await query
                 .OrderBy(e => e.EquipmentId)

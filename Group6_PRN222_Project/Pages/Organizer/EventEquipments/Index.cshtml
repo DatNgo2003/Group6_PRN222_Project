@@ -35,7 +35,7 @@
                         <td style="color:var(--text-3)">@Html.DisplayFor(modelItem => item.Quantity)</td>
                         <td>
                             @{ 
-                                var totalStock = item.Equipment.TotalStock;
+                                var totalStock = item.Equipment.TotalOwned;
                                 var isSufficient = totalStock >= item.Quantity;
                                 var colorClass = isSufficient ? "color:#6ee7b7" : "color:#f87171";
                             }

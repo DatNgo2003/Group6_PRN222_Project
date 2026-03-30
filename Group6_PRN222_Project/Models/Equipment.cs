@@ -19,10 +19,6 @@ public partial class Equipment
 
     public int OutsourcedQuantity { get; set; }
 
-    public int TotalStock { get; set; }
-
-    public string? Status { get; set; }
-
     public virtual ICollection<EventEquipment> EventEquipments { get; set; } = new List<EventEquipment>();
 
     public virtual ICollection<OutsourceRental> OutsourceRentals { get; set; } = new List<OutsourceRental>();
